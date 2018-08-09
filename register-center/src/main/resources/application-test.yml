@@ -1,0 +1,17 @@
+
+logging.config: classpath:log-test.xml
+
+server.port: 8761
+
+spring.application.name: register-center
+
+register.center: http://test1:${server.port}/eureka/,http://test2:${server.port}/eureka/,http://test3:${server.port}/eureka/
+eureka:
+  instance:
+    lease-renewal-interval-in-seconds: 15
+    lease-expiration-duration-in-seconds: 45
+  server:
+    enable-self-preservation: false
+    eviction-interval-timer-in-ms: 4000
+  client:
+    serviceUrl.defaultZone: ${register.center}

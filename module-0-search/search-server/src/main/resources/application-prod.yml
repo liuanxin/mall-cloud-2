@@ -1,0 +1,39 @@
+
+online: true
+
+server.port: 8072
+
+spring.application.name: search
+
+spring:
+  mvc.throw-exception-if-no-handler-found: true
+  resources.add-mappings: false
+
+logging.config: classpath:log-prod.xml
+
+spring.datasource:
+  url: jdbc:mysql://prod_search_db?useSSL=false&useUnicode=true&characterEncoding=utf8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&transformedBitIsBoolean=true
+  username: prod_search_user
+  password: prod_search_pass
+  hikari:
+    minimumIdle: 10
+    maximumPoolSize: 30
+    dataSourceProperties:
+      prepStmtCacheSize: 250
+      prepStmtCacheSqlLimit: 2048
+      cachePrepStmts: true
+      useServerPrepStmts: true
+
+register.center: http://prod1:8761/eureka/,http://prod2:8761/eureka/,http://prod3:8761/eureka/
+eureka:
+  client:
+    healthcheck.enabled: true
+    registry-fetch-interval-seconds: 5
+    serviceUrl.defaultZone: ${register.center}
+  instance:
+    lease-renewal-interval-in-seconds: 5
+    lease-expiration-duration-in-seconds: 15
+
+#spring:
+#  zipkin.base-url: http://127.0.0.1:9411
+#  sleuth.sampler.percentage: 0.1

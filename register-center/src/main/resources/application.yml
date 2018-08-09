@@ -1,0 +1,29 @@
+
+logging.config: classpath:log-dev.xml
+
+server.port: 8761
+
+spring.application.name: register-center
+
+register.center: http://127.0.0.1:${server.port}/eureka/
+eureka:
+  instance:
+    # 注册到服务器的是 ip 地址, 不要用主机名
+    prefer-ip-address: true
+    # 客户端发送心跳给注册中心的频率, 默认 30 秒
+    lease-renewal-interval-in-seconds: 20
+    # 服务端在收到最后一个心跳后的等待时间. 超出将移除该实例, 默认 90 秒, 此值至少要大于 lease-renewal-interval-in-seconds
+    lease-expiration-duration-in-seconds: 60
+  # spring-cloud-netflix-eureka-server.jar!/spring-configuration-metadata.json
+  server:
+    # 关闭自我保护机制, 默认是 true
+    enable-self-preservation: false
+    # server 清理无效节点的时间间隔(默认 60000 毫秒, 也就是 60 秒)
+    eviction-interval-timer-in-ms: 10000
+  # spring-cloud-netflix-eureka-client.jar!/spring-configuration-metadata.json
+  client:
+    # 不注册到 eureka 服务器(单机不需要)
+    register-with-eureka: false
+    # 不从服务器获取注册信息(单机不需要)
+    fetch-registry: false
+    serviceUrl.defaultZone: ${register.center}

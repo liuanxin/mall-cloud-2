@@ -1,0 +1,26 @@
+
+# 测试环境
+
+online: false
+
+logging.config: classpath:log-test.xml
+
+spring.application.name: queue-consume
+
+
+spring:
+  activemq:
+    broker-url: failover:(tcp://ip:port)?timeout=3000&startupMaxReconnectAttempts=5
+    user: admin
+    password: admin
+
+
+register.center: http://test1:8761/eureka/,http://test2:8761/eureka/,http://test3:8761/eureka/
+eureka:
+  client:
+    healthcheck.enabled: true
+    registry-fetch-interval-seconds: 10
+    serviceUrl.defaultZone: ${register.center}
+  instance:
+    lease-renewal-interval-in-seconds: 10
+    lease-expiration-duration-in-seconds: 30

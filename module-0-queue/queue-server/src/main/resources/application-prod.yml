@@ -1,0 +1,36 @@
+
+online: true
+
+server.port: 8071
+
+spring.application.name: queue
+
+spring:
+  mvc.throw-exception-if-no-handler-found: true
+  resources.add-mappings: false
+
+logging.config: classpath:log-prod.xml
+
+
+spring.activemq:
+  broker-url: failover:(tcp://ip:port)?timeout=3000&startupMaxReconnectAttempts=5
+  user: admin
+  password: admin
+  pool:
+    enabled: true
+    max-connections: 10
+
+
+register.center: http://prod1:8761/eureka/,http://prod2:8761/eureka/,http://prod3:8761/eureka/
+eureka:
+  client:
+    healthcheck.enabled: true
+    registry-fetch-interval-seconds: 5
+    serviceUrl.defaultZone: ${register.center}
+  instance:
+    lease-renewal-interval-in-seconds: 5
+    lease-expiration-duration-in-seconds: 15
+
+#spring:
+#  zipkin.base-url: http://127.0.0.1:9411
+#  sleuth.sampler.percentage: 0.1

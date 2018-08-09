@@ -1,0 +1,16 @@
+
+logging.config: classpath:log-prod.xml
+
+server.port: 8761
+
+spring.application.name: register-center
+
+register.center: http://prod1:${server.port}/eureka/,http://prod2:${server.port}/eureka/,http://prod3:${server.port}/eureka/
+eureka:
+  instance:
+    lease-renewal-interval-in-seconds: 5
+    lease-expiration-duration-in-seconds: 15
+  server:
+    eviction-interval-timer-in-ms: 4000
+  client:
+    serviceUrl.defaultZone: ${register.center}

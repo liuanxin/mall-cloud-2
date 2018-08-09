@@ -1,0 +1,26 @@
+
+# 线上环境
+
+online: true
+
+logging.config: classpath:log-prod.xml
+
+spring.application.name: queue-consume
+
+
+spring:
+  activemq:
+    broker-url: failover:(tcp://first:61616,tcp://secondary:61616)?timeout=3000&startupMaxReconnectAttempts=5
+    user: admin
+    password: admin
+
+
+register.center: http://prod1:8761/eureka/,http://prod2:8761/eureka/,http://prod3:8761/eureka/
+eureka:
+  client:
+    healthcheck.enabled: true
+    registry-fetch-interval-seconds: 5
+    serviceUrl.defaultZone: ${register.center}
+  instance:
+    lease-renewal-interval-in-seconds: 5
+    lease-expiration-duration-in-seconds: 15
