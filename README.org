@@ -1,5 +1,5 @@
 
-** 基于 spring cloud 的基础代码结构
+** 基于 spring cloud 的基础代码结构(spring boot 2)
 
 *** 说明
 
