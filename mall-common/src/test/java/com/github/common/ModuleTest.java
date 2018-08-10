@@ -16,11 +16,10 @@ public class ModuleTest {
     /** true 生成断路器 */
     static boolean fallback = true;
 
-    /** 包名 */
-    static String PACKAGE = "com.github";
+    static final String PROJECT = "mall-cloud-2";
+    static final String PACKAGE = "com.github";
     /** 注册中心的端口 */
     static String REGISTER_CENTER_PORT = "8761";
-    // static String PARENT = "/home/tony/project/mall-cloud/";
     private static final String PARENT = ModuleTest.class.getClassLoader().getResource("").getFile() + "../../../";
     static String PACKAGE_PATH = PACKAGE.replaceAll("\\.", "/");
     static String AUTHOR = " *\n * @author https://github.com/liuanxin\n";
@@ -127,7 +126,7 @@ class Parent {
                 "         xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
                 "         xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd\">\n" +
                 "    <parent>\n" +
-                "        <artifactId>mall-cloud-2</artifactId>\n" +
+                "        <artifactId>" + PROJECT + "</artifactId>\n" +
                 "        <groupId>" + PACKAGE + "</groupId>\n" +
                 "        <version>1.0-SNAPSHOT</version>\n" +
                 "    </parent>\n" +
