@@ -26,7 +26,7 @@ public class Money implements Serializable {
     private Long cent;
 
     public Money() {}
-    /** 从前台过来的数据, 或者要反序列化回去. 都使用此构造 */
+    /** 从前台过来的数据转换成金额对象时使用此构造 */
     @JsonCreator
     public Money(String yuan) {
         cent = yuan2Cent(yuan);
@@ -97,8 +97,8 @@ public class Money implements Serializable {
         return ChineseConvert.upperCase(toString());
     }
 
+    /** 元转换为分 */
     private static Long yuan2Cent(String yuan) {
-        // 元转换为分
         if (U.isBlank(yuan)) {
             return null;
         }
@@ -113,8 +113,8 @@ public class Money implements Serializable {
         // U.assertException(money < 0, "金额不能是负数");
         return new BigDecimal(money).movePointRight(SCALE).longValue();
     }
+    /** 分转换为元 */
     private static String cent2Yuan(Long cent) {
-        // 分转换为元
         return U.greater0(cent) ? BigDecimal.valueOf(cent).movePointLeft(SCALE).toString() : U.EMPTY;
     }
 
@@ -125,15 +125,7 @@ public class Money implements Serializable {
         private static final String SPLIT = " ";
         private static final String WHOLE = "整";
         private static final String NEGATIVE = "负";
-        
-        // 正则替换
-        private static final String ZERO = "零";
-        private static final String BILLION = "亿";
-        private static final String MILLION = "万";
-        private static final String TEN = "拾";
-        private static final String DOLLAR = "圆";
-        private static final String BLANK = "";
-        
+
         private static final String[] INTEGER = {
                 "圆", "拾", "佰", "仟",
                 "万", "拾", "佰", "仟",
@@ -164,7 +156,13 @@ public class Money implements Serializable {
 
         private static final Pattern ZERO_DIME = Pattern.compile("零角");
         private static final Pattern ZERO_CENT = Pattern.compile("零分");
-        
+
+        private static final String ZERO = "零";
+        private static final String BILLION = "亿";
+        private static final String MILLION = "万";
+        private static final String TEN = "拾";
+        private static final String DOLLAR = "圆";
+        private static final String BLANK = "";
         /**
          * 转换大写
          *
@@ -173,7 +171,7 @@ public class Money implements Serializable {
          */
         private static String upperCase(String money) {
             // 必要的检查. 如果是 0 直接返回
-            if (U.isBlank(money)) {
+            if (money == null || money.trim().length() == 0) {
                 return MONEY_NOT_EFFECTIVE;
             }
             try {

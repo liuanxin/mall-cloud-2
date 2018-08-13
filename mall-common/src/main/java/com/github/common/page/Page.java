@@ -64,6 +64,10 @@ public class Page implements Serializable {
         this.limit = handlerLimit(limit);
     }
 
+    public int start() {
+        return (page - 1) * limit;
+    }
+
     public static int handlerPage(String page) {
         int pageNum = U.toInt(page);
         if (pageNum <= 0) {

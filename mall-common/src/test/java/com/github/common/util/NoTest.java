@@ -37,10 +37,14 @@ public class NoTest {
         long end = System.currentTimeMillis();
         System.out.println("end order : " + DateUtil.format(new Date(end), DateFormatType.YYYY_MM_DD_HH_MM_SS_SSS));
         System.out.println("耗时: " + ((end - start) / 1000.0));
-        /*
+
+        int i = 0;
         for (String s : set) {
+            if (i >= 200) {
+                return;
+            }
+            i++;
             System.out.println(s);
         }
-        */
     }
 }

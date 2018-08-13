@@ -24,7 +24,7 @@ public final class LogUtil {
     /** 请求信息: 包括 ip、url, param 等  */
     private static final String REQUEST_INFO = "requestInfo";
 
-    /** 输出当前请求信息, 在日志中显示 */
+    /** 将当前请求的上下文信息放进日志 */
     public static void bind(RequestLogContext logContextInfo) {
         recordTime();
         MDC.put(REQUEST_INFO, logContextInfo.requestInfo());

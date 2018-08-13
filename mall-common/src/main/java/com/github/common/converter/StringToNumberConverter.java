@@ -8,9 +8,7 @@ import org.springframework.util.NumberUtils;
 /**
  * 转换数字出错时, 使用 0 代替(默认出错时会抛出 IllegalArgumentException 异常).
  *
- * 此 convert 用于替代 org.springframework.core.convert.support.StringToNumberConverterFactory
- *
- * @see org.springframework.core.convert.support.StringToNumberConverterFactory
+ * 此 convert 用于替代 {@link org.springframework.core.convert.support.StringToNumberConverterFactory}
  */
 public class StringToNumberConverter implements ConverterFactory<String, Number> {
 

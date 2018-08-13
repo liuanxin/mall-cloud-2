@@ -1,10 +1,11 @@
 package com.github.common.http;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.github.common.json.JsonUtil;
 import com.github.common.util.A;
 import com.github.common.util.LogUtil;
 import com.github.common.util.U;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import org.apache.http.*;
 import org.apache.http.client.HttpRequestRetryHandler;
 import org.apache.http.client.config.RequestConfig;
@@ -37,12 +38,13 @@ import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 public class HttpClientUtil {
 
-    private static final int TIME_OUT = 20 * 1000;
+    private static final int TIME_OUT = 30 * 1000;
 
     private static final PoolingHttpClientConnectionManager CONNECTION_MANAGER;
     private static final HttpRequestRetryHandler HTTP_REQUEST_RETRY_HANDLER;
@@ -120,6 +122,18 @@ public class HttpClientUtil {
         url = handleEmptyScheme(url);
         return handleRequest(new HttpGet(url), null);
     }
+    @SuppressWarnings("unchecked")
+    public static <T> String get(String url, T param) {
+        if (U.isBlank(url)) {
+            return null;
+        }
+
+        Map<String, Object> params = Collections.emptyMap();
+        if (U.isNotBlank(param)) {
+            params = JsonUtil.convert(param, Map.class);
+        }
+        return get(url, params);
+    }
     /** 向指定 url 进行 get 请求. 有参数 */
     public static String get(String url, Map<String, Object> params) {
         if (U.isBlank(url)) {
@@ -145,6 +159,18 @@ public class HttpClientUtil {
     }
 
 
+    @SuppressWarnings("unchecked")
+    public static <T> String post(String url, T param) {
+        if (U.isBlank(url)) {
+            return null;
+        }
+
+        Map<String, Object> params = Collections.emptyMap();
+        if (U.isNotBlank(param)) {
+            params = JsonUtil.convert(param, Map.class);
+        }
+        return post(url, params);
+    }
     /** 向指定的 url 进行 post 请求. 有参数 */
     public static String post(String url, Map<String, Object> params) {
         if (U.isBlank(url)) {

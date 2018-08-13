@@ -1,9 +1,9 @@
 package com.github.common.resource;
 
+import com.google.common.collect.Lists;
 import com.github.common.util.A;
 import com.github.common.util.LogUtil;
 import com.github.common.util.U;
-import com.google.common.collect.Lists;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,16 +17,12 @@ import java.util.jar.JarFile;
 
 public final class LoaderClass {
 
-    /**
-     * 基于指定的类(会基于此类来获取类加载器), 在指定的包名下获取所有的枚举
-     */
+    /** 基于指定的类(会基于此类来获取类加载器), 在指定的包名下获取所有的枚举 */
     public static List<Class> getEnumArray(Class clazz, String classPackage) {
         return getClassList(clazz, classPackage, true);
     }
 
-    /**
-     * 基于指定的类(会基于此类来获取类加载器), 在指定的包名下获取所有的实现了 Serializable 接口的类
-     */
+    /** 基于指定的类(会基于此类来获取类加载器), 在指定的包名下获取所有的实现了 Serializable 接口的类 */
     public static List<Class> getSerializableClassList(Class clazz, String classPackage) {
         return getClassList(clazz, classPackage, false);
     }

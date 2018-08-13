@@ -1,9 +1,9 @@
 package com.github.common.http;
 
+import com.google.common.io.Files;
 import com.github.common.util.A;
 import com.github.common.util.LogUtil;
 import com.github.common.util.U;
-import com.google.common.io.Files;
 import okhttp3.*;
 
 import javax.activation.MimetypesFileTypeMap;
@@ -17,15 +17,17 @@ public class HttpOkClientUtil {
 
     // MIME 说明: http://www.w3school.com.cn/media/media_mimeref.asp
 
+    private static final int TIME_OUT = 30;
+
     private static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 
     private static final OkHttpClient HTTP_CLIENT;
     static {
         OkHttpClient.Builder builder = new OkHttpClient().newBuilder()
                 // 连接超时时间
-                .connectTimeout(10, TimeUnit.SECONDS)
+                .connectTimeout(TIME_OUT, TimeUnit.SECONDS)
                 // 响应超时时间
-                .readTimeout(20, TimeUnit.SECONDS)
+                .readTimeout(TIME_OUT, TimeUnit.SECONDS)
                 // 连接池中的最大连接数默认是 5 且每个连接保持 5 分钟
                 // .connectionPool(new ConnectionPool(20, 5, TimeUnit.MINUTES));
                 .connectionPool(new ConnectionPool());

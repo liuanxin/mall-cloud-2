@@ -1,8 +1,8 @@
 package com.github.common.page;
 
-import com.github.common.util.A;
 import com.github.liuanxin.page.model.PageBounds;
 import com.github.liuanxin.page.model.PageList;
+import com.github.common.util.A;
 
 import java.util.ArrayList;
 import java.util.List;

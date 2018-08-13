@@ -2,10 +2,8 @@ package com.github.common.json;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.github.common.util.LogUtil;
 
@@ -15,9 +13,10 @@ import java.util.List;
 
 public class JsonUtil {
 
-    /** 用来渲染给前台的 json 映射器, 定义了一些自定义类的序列化规则, 没有反序列化规则 */
     public static final ObjectMapper RENDER = new RenderObjectMapper();
+
     private static class RenderObjectMapper extends ObjectMapper {
+        private static final long serialVersionUID = 0L;
         private RenderObjectMapper() {
             super();
             // 日期不用 utc 方式显示(utc 是一个整数值)
@@ -51,15 +50,19 @@ public class JsonUtil {
 
     /** 对象转换, 失败将会返回 null */
     public static <S,T> T convert(S source, Class<T> clazz) {
-	    return toObjectNil(toJson(source), clazz);
+        return toObjectNil(toJson(source), clazz);
     }
     /** 集合转换, 失败将会返回 null */
     public static <S,T> List<T> convertList(List<S> sourceList, Class<T> clazz) {
-	    return toListNil(toJson(sourceList), clazz);
+        return toListNil(toJson(sourceList), clazz);
     }
 
-	/** 对象转换成 json 字符串 */
-	public static String toJson(Object obj) {
+    public static <T,S> T convert(S source, TypeReference<?> type) {
+        return toObjectNil(toJson(source), type);
+    }
+
+    /** 对象转换成 json 字符串 */
+    public static String toJson(Object obj) {
         try {
             return RENDER.writeValueAsString(obj);
         } catch (Exception e) {
@@ -67,21 +70,32 @@ public class JsonUtil {
         }
     }
 
-	/** 将 json 字符串转换为对象 */
-	public static <T> T toObject(String json, Class<T> clazz) {
-		try {
-			return RENDER.readValue(json, clazz);
-		} catch (Exception e) {
-			throw new RuntimeException(String.format("json(%s) to Object(%s) exception", json, clazz.getName()), e);
-		}
-	}
+    /** 将 json 字符串转换为对象 */
+    public static <T> T toObject(String json, Class<T> clazz) {
+        try {
+            return RENDER.readValue(json, clazz);
+        } catch (Exception e) {
+            throw new RuntimeException(String.format("json(%s) to Object(%s) exception", json, clazz.getName()), e);
+        }
+    }
     /** 将 json 字符串转换为对象, 当转换异常时, 返回 null */
     public static <T> T toObjectNil(String json, Class<T> clazz) {
         try {
             return RENDER.readValue(json, clazz);
         } catch (Exception e) {
-            if (LogUtil.ROOT_LOG.isErrorEnabled()) {
-                LogUtil.ROOT_LOG.error(String.format("json(%s) to Object(%s) exception", json, clazz.getName()), e);
+            if (LogUtil.ROOT_LOG.isInfoEnabled()) {
+                LogUtil.ROOT_LOG.info(String.format("json(%s) to Object(%s) exception", json, clazz.getName()), e);
+            }
+            return null;
+        }
+    }
+    /** 将 json 字符串转换为泛型对象 */
+    public static <T> T toObjectNil(String json, TypeReference<?> type) {
+        try {
+            return RENDER.readValue(json, type);
+        } catch (IOException e) {
+            if (LogUtil.ROOT_LOG.isInfoEnabled()) {
+                LogUtil.ROOT_LOG.info(String.format("json(%s) to Object(%s) exception", json, type.getClass().getName()), e);
             }
             return null;
         }

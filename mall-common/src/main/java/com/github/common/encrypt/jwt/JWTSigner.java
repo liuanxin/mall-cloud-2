@@ -93,8 +93,8 @@ public class JWTSigner {
     /**
      * Generate the JSON web token payload string from the claims.
      */
-    private String encodedPayload(Map<String, Object> claimsMap, Options options) throws Exception {
-        Map<String, Object> claims = new HashMap<>(claimsMap);
+    private String encodedPayload(Map<String, Object> _claims, Options options) throws Exception {
+        Map<String, Object> claims = new HashMap<>(_claims);
         enforceStringOrURI(claims, "iss");
         enforceStringOrURI(claims, "sub");
         enforceStringOrURICollection(claims, "aud");

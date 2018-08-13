@@ -1,8 +1,8 @@
 package com.github.common.util;
 
-import com.github.common.date.DateUtil;
 import com.github.common.exception.ServiceException;
 import com.github.common.exception.ServiceMustHandleException;
+import com.github.common.date.DateUtil;
 import com.github.common.json.JsonUtil;
 
 import java.io.UnsupportedEncodingException;
@@ -14,17 +14,13 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.security.CodeSource;
 import java.security.ProtectionDomain;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.ThreadLocalRandom;
+import java.util.*;
 import java.util.regex.Pattern;
 
 /** 工具类 */
 public final class U {
 
-    public static final ThreadLocalRandom RANDOM = ThreadLocalRandom.current();
+    public static final Random RANDOM = new Random();
 
     /** 本机的 cpu 核心数 */
     public static final int PROCESSORS = Runtime.getRuntime().availableProcessors();
@@ -124,10 +120,10 @@ public final class U {
     private static final String ENUM_VALUE = "value";
     /**
      * <pre>
-     * 序列化枚举: 属性如果是枚举, 返回给前端时, 可以将 传递 和 显示的都返回, 如以下示例
+     * 序列化枚举, 属性是枚举时, 返回给前端时, 可以将 传递 和 显示的都返回, 如以下示例
      *
      * public enum Gender {
-     *   Nil(0, "未知"), Male(1, "男"), Female(2, "女");
+     *   Male(0, "男"), Female(1, "女");
      *   int code;
      *   String value;
      *
@@ -139,11 +135,11 @@ public final class U {
      *
      *   &#064;JsonValue
      *   public Map<String, String> serializer() {
-     *     return <span style="color:red">serializerEnum(code, value);</span>
+     *     return <span style="color:red">U.serializerEnum(code, value);</span>
      *   }
      *   &#064;JsonCreator
      *   public static Gender deserializer(Object obj) {
-     *     return enumDeserializer(obj, Gender.class);
+     *     return U.enumDeserializer(obj, Gender.class);
      *   }
      * }
      * </pre>
@@ -156,7 +152,7 @@ public final class U {
      * 枚举反序列化, 如以下示例
      *
      * public enum Gender {
-     *   Nil(0, "未知"), Male(1, "男"), Female(2, "女");
+     *   Male(0, "男"), Female(1, "女");
      *   int code;
      *   String value;
      *
@@ -168,11 +164,11 @@ public final class U {
      *
      *   &#064;JsonValue
      *   public Map<String, String> serializer() {
-     *     return serializerEnum(code, value);
+     *     return U.serializerEnum(code, value);
      *   }
      *   &#064;JsonCreator
      *   public static Gender deserializer(Object obj) {
-     *     return <span style="color:red">enumDeserializer(obj, Gender.class);</span>
+     *     return <span style="color:red">U.enumDeserializer(obj, Gender.class);</span>
      *   }
      * }
      * </pre>
@@ -291,6 +287,14 @@ public final class U {
         }
     }
 
+    /** 比例, 主要是指小数点后面的位数 */
+    private static final int SCALE = 2;
+
+    /** 设置金额的精度 */
+    public static BigDecimal setPrecision(BigDecimal money) {
+        return U.isBlank(money) ? money : money.setScale(SCALE, BigDecimal.ROUND_HALF_EVEN);
+    }
+
     // + ==> add
     // - ==> subtract
     // * ==> multiply
@@ -342,7 +346,7 @@ public final class U {
     }
     /** num1 / num2. 返回有 2 位小数点精度的结果 */
     public static BigDecimal divide(BigDecimal num1, Integer num2) {
-        return divide(num1, num2, 2);
+        return divide(num1, num2, SCALE);
     }
     /** num1 / num2. 返回有指定位小数点精度的结果 */
     public static BigDecimal divide(BigDecimal num1, Integer num2, int scale) {
@@ -530,6 +534,10 @@ public final class U {
         return uuid() + getSuffix(fileName);
     }
 
+    /** 拼接 url 和 path */
+    public static String appendUrlAndPath(String url, String path) {
+        return addSuffix(url) + addPrefix(path).substring(1);
+    }
     /** 为空则返回空字符串, 如果传入的 url 中有 ? 则在尾部拼接 &, 否则拼接 ? 返回 */
     public static String appendUrl(String src) {
         if (isBlank(src)) {
@@ -557,7 +565,7 @@ public final class U {
         }
         return src + "/";
     }
-    /** 从 url 中获取图片名, 最后一个 斜杆(/) 后的内容 */
+    /** 从 url 中获取最后一个 斜杆(/) 后的内容 */
     public static String getFileNameInUrl(String url) {
         if (isBlank(url) || !url.contains("/")) {
             return EMPTY;
@@ -719,7 +727,7 @@ public final class U {
         }
     }
 
-    /** 数值为空或小于 1 则抛出异常 */
+    /** 数值为空或小于等于 0 则抛出异常 */
     public static void assert0(Number number, String msg) {
         if (less0(number)) {
             assertException(msg);

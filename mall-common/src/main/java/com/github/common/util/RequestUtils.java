@@ -134,11 +134,11 @@ public final class RequestUtils {
     /** 先从请求头中查, 为空再从参数中查 */
     public static String getHeaderOrParam(String param) {
         HttpServletRequest request = getRequest();
-        String header = request.getHeader(param);
-        if (U.isBlank(header)) {
-            header = request.getParameter(param);
+        String value = request.getHeader(param);
+        if (U.isBlank(value)) {
+            value = request.getParameter(param);
         }
-        return U.isBlank(header) ? U.EMPTY : header.trim();
+        return U.isBlank(value) ? U.EMPTY : value.trim();
     }
 
     /** 格式化头里的参数: 键值以冒号分隔 */
@@ -155,6 +155,7 @@ public final class RequestUtils {
         }
         return sbd.toString();
     }
+
 
     /** 将「json 字符」以 json 格式输出 */
     public static void toJson(JsonResult result, HttpServletResponse response) throws IOException {

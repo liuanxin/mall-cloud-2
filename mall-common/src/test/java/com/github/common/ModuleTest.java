@@ -16,7 +16,7 @@ public class ModuleTest {
     /** true 生成断路器 */
     static boolean fallback = true;
 
-    static final String PROJECT = "mall-cloud-2";
+    static final String PROJECT = "mall-cloud";
     static final String PACKAGE = "com.github";
     /** 注册中心的端口 */
     static String REGISTER_CENTER_PORT = "8761";
@@ -40,12 +40,12 @@ public class ModuleTest {
     }
 
     public static void main(String[] args) throws Exception {
-        generate("0-common",  "8070", "公共");
+//        generate("0-common",  "8070", "公共");
 //        generate("0-queue",   "8071", "消息队列");
 //        generate("0-search",  "8072", "搜索");
-        generate("1-user",    "8091", "用户");
-        generate("2-product", "8092", "商品");
-        generate("3-order",   "8093", "订单");
+//        generate("1-user",    "8091", "用户");
+//        generate("2-product", "8092", "商品");
+//        generate("3-order",   "8093", "订单");
 
         soutInfo();
     }
@@ -154,9 +154,7 @@ class Client {
             "import " + PACKAGE + ".%s.service.%sInterface;\n" +
             "import " + PACKAGE + ".%s.constant.%sConst;\n" +
             (fallback ? "import " + PACKAGE + ".%s.hystrix.%sFallback;\n" : "") +
-            // 2.0
-            "import org.springframework.cloud.openfeign.FeignClient;\n" +
-            //"import org.springframework.cloud.netflix.feign.FeignClient;\n" +
+            "import org.springframework.cloud.netflix.feign.FeignClient;\n" +
             "\n" +
             "/**\n" +
             " * %s相关的调用接口\n" +
@@ -171,7 +169,7 @@ class Client {
             "import " + PACKAGE + ".common.page.PageInfo;\n" +
             "import " + PACKAGE + ".common.page.Pages;\n" +
             "import " + PACKAGE + ".common.util.LogUtil;\n" +
-            "import " + PACKAGE + ".%s.client.%sService;\n" +
+            "import " + PACKAGE + ".%s.client.%sClient;\n" +
             "import org.springframework.stereotype.Component;\n" +
             "\n" +
             "/**\n" +
@@ -371,8 +369,8 @@ class Server {
             "import org.springframework.boot.autoconfigure.SpringBootApplication;\n" +
             "import org.springframework.boot.builder.SpringApplicationBuilder;\n" +
             // 2.0
-            "import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;\n" +
-            //"import org.springframework.boot.web.support.SpringBootServletInitializer;\n" +
+            // "import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;\n" +
+            "import org.springframework.boot.web.support.SpringBootServletInitializer;\n" +
             "import org.springframework.cloud.client.discovery.EnableDiscoveryClient;\n" +
             "import org.springframework.context.ApplicationContext;\n" +
             "\n" +
@@ -563,13 +561,9 @@ class Server {
             "/**\n" +
             " * 处理全局异常的控制类. 如果要自定义错误处理类\n" +
             " *\n" +
-            // 2.0
-            " * @see org.springframework.boot.web.servlet.error.ErrorController\n" +
-            //" * @see org.springframework.boot.autoconfigure.web.ErrorController\n" +
+            " * @see org.springframework.boot.autoconfigure.web.ErrorController\n" +
             " * @see org.springframework.boot.autoconfigure.web.ErrorProperties\n" +
-            // 2.0
-            " * @see org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration\n" +
-            // " * @see org.springframework.boot.autoconfigure.web.ErrorMvcAutoConfiguration\n" +
+            " * @see org.springframework.boot.autoconfigure.web.ErrorMvcAutoConfiguration\n" +
             AUTHOR +
             " */\n" +
             "@RestControllerAdvice\n" +
@@ -942,10 +936,6 @@ class Server {
             "    <logger name=\"org.mybatis\" level=\"warn\"/>\n" +
             "    <logger name=\"org.apache\" level=\"warn\"/>\n" +
             "    <logger name=\"org.jboss\" level=\"warn\"/>\n" +
-            "\n" +
-            "    <logger name=\"io.lettuce\" level=\"warn\"/>\n" +
-            "    <logger name=\"io.netty\" level=\"warn\"/>\n" +
-            "    <logger name=\"reactor\" level=\"warn\"/>\n" +
             "\n\n" +
             "    <root level=\"debug\">\n" +
             "        <appender-ref ref=\"CONSOLE\"/>\n" +
@@ -1005,10 +995,6 @@ class Server {
             "    <logger name=\"org.mybatis\" level=\"warn\"/>\n" +
             "    <logger name=\"org.apache\" level=\"warn\"/>\n" +
             "    <logger name=\"org.jboss\" level=\"warn\"/>\n" +
-            "\n" +
-            "    <logger name=\"io.lettuce\" level=\"warn\"/>\n" +
-            "    <logger name=\"io.netty\" level=\"warn\"/>\n" +
-            "    <logger name=\"reactor\" level=\"warn\"/>\n" +
             "\n\n" +
             "    <root level=\"debug\">\n" +
             "        <appender-ref ref=\"PROJECT\"/>\n" +
@@ -1054,10 +1040,6 @@ class Server {
             "    <logger name=\"org.mybatis\" level=\"error\"/>\n" +
             "    <logger name=\"org.apache\" level=\"error\"/>\n" +
             "    <logger name=\"org.jboss\" level=\"error\"/>\n" +
-            "\n" +
-            "    <logger name=\"io.lettuce\" level=\"error\"/>\n" +
-            "    <logger name=\"io.netty\" level=\"error\"/>\n" +
-            "    <logger name=\"reactor\" level=\"error\"/>\n" +
             "\n\n" +
             "    <root level=\"info\">\n" +
             "        <appender-ref ref=\"ASYNC\"/>\n" +
@@ -1096,10 +1078,6 @@ class Server {
             "\n" +
             "        <dependency>\n" +
             "            <groupId>org.springframework.boot</groupId>\n" +
-            "            <artifactId>spring-boot-starter-web</artifactId>\n" +
-            "        </dependency>\n" +
-            "        <dependency>\n" +
-            "            <groupId>org.springframework.boot</groupId>\n" +
             "            <artifactId>spring-boot-starter-actuator</artifactId>\n" +
             "        </dependency>\n" +
             "        <dependency>\n" +
@@ -1111,10 +1089,6 @@ class Server {
             "                    <artifactId>tomcat-jdbc</artifactId>\n" +
             "                </exclusion>\n" +
             "            </exclusions>\n" +
-            "        </dependency>\n" +
-            "        <dependency>\n" +
-            "            <groupId>org.springframework.boot</groupId>\n" +
-            "            <artifactId>spring-boot-starter-data-redis</artifactId>\n" +
             "        </dependency>\n" +
             "\n" +
             "        <dependency>\n" +
@@ -1231,7 +1205,7 @@ class Server {
         writeFile(new File(configPath, clazzName + "WebConfig.java"), war);
 
         String service = String.format(SERVICE, parentPackageName, comment, clazzName, clazzName,
-                clazzName, comment, clazzName.toUpperCase(), parentPackageName.toLowerCase());
+                clazzName, comment, clazzName.toUpperCase(), parentPackageName);
         writeFile(new File(servicePath, clazzName + "ServiceImpl.java"), service);
 
 

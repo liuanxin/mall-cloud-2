@@ -1,7 +1,7 @@
 package com.github.common.util;
 
-import com.github.common.date.DateUtil;
 import com.google.common.collect.Maps;
+import com.github.common.date.DateUtil;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
@@ -13,14 +13,16 @@ public final class FileUtil {
 
     /** 保存单个文件到指定的位置, 并将此文件的 url 地址返回 */
     public static String save(MultipartFile file, String directoryPrefix, String urlPrefix) {
+        directoryPrefix = directoryPrefix.trim();
         // 保存目录以 / 开头, 结尾不带 /
-        directoryPrefix = U.addPrefix(directoryPrefix.trim());
+        directoryPrefix = U.addPrefix(directoryPrefix);
         if (directoryPrefix.endsWith("/")) {
             directoryPrefix = directoryPrefix.substring(0, directoryPrefix.length() - 1);
         }
-        // 访问地址前缀以 // 开头, 结尾不带 /
+
         urlPrefix = urlPrefix.trim();
-        if (!urlPrefix.startsWith("http://") && !urlPrefix.startsWith("https://")) {
+        // 访问地址前缀以 // 开头, 结尾不带 /
+        if (!urlPrefix.startsWith("http://") && !urlPrefix.startsWith("https://") && !urlPrefix.startsWith("//")) {
             urlPrefix = "//" + urlPrefix;
         } else {
             urlPrefix = urlPrefix.replaceFirst("http(s?)://", "//");

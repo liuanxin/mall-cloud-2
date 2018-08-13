@@ -105,9 +105,9 @@ public final class SecurityCodeUtil {
             str = WORD;
         } else if ("wn".equalsIgnoreCase(style)) {
             str = WORD + NUMBER;
-        } else if ("cn".equalsIgnoreCase(style)) {
+        }/* else if ("cn".equalsIgnoreCase(style)) {
             str = CHINESE;
-        } else {
+        }*/ else {
             str = NUMBER;
         }
 

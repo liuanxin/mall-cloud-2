@@ -1,5 +1,8 @@
 package com.github.common.util;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+
 import java.util.*;
 
 /** 集合相关的工具包 */
@@ -57,41 +60,9 @@ public final class A {
         return sbd.toString();
     }
 
-    public static Long[] convert(String[] ids) {
-        if (isEmpty(ids)) {
-            return null;
-        }
-
-        List<Long> returnData = lists();
-        for (String id : ids) {
-            Long num = U.toLong(id);
-            if (num > 0) {
-                returnData.add(num);
-            }
-        }
-        return returnData.toArray(new Long[returnData.size()]);
-    }
-    public static String[] convert(Long[] ids) {
-        if (isEmpty(ids)) {
-            return null;
-        }
-
-        List<String> returnData = lists();
-        for (Long id : ids) {
-            if (id != null && id > 0) {
-                returnData.add(id.toString());
-            }
-        }
-        return returnData.toArray(new String[returnData.size()]);
-    }
-
-    /** 字符串逗号分割后去重返回 */
-    public static Collection<String> removeDuplicate(String source) {
-        return removeDuplicate(source.split(",|，"));
-    }
     /** 数组去重返回 */
     public static <T> Collection<T> removeDuplicate(T[] source) {
-        return removeDuplicate(lists(source));
+        return removeDuplicate(Lists.newArrayList(source));
     }
     /** 删除重复的项 */
     public static <T> Collection<T> removeDuplicate(Collection<T> array) {
@@ -101,40 +72,10 @@ public final class A {
         return array;
     }
 
-    /** 构造 ArrayList */
-    @SuppressWarnings("unchecked")
-    public static <T> List<T> lists(T... values) {
-        return new ArrayList<T>(Arrays.asList(values));
-    }
-    /** 构造 LinkedList */
-    @SuppressWarnings("unchecked")
-    public static <T> List<T> linkedLists(T... values) {
-        return new LinkedList<T>(Arrays.asList(values));
-    }
-
-    /** 构造 HashSet */
-    @SuppressWarnings("unchecked")
-    public static <T> Set<T> sets(T... sets) {
-        return new HashSet<T>(Arrays.asList(sets));
-    }
-    /** 构造 LinkedSet */
-    @SuppressWarnings("unchecked")
-    public static <T> Set<T> linkedSets(T... sets) {
-        return new LinkedHashSet<T>(Arrays.asList(sets));
-    }
-
-    public static <K, V> HashMap<K, V> newHashMap() {
-        return new HashMap<K, V>();
-    }
-
-    public static <K, V> HashMap<K, V> newLinkedHashMap() {
-        return new LinkedHashMap<K, V>();
-    }
-
     /** 构造 HashMap, 必须保证每两个参数的类型是一致的! 当参数是奇数时, 最后一个 key 将会被忽略 */
     @SuppressWarnings("unchecked")
     public static <K, V> HashMap<K, V> maps(Object... keysAndValues) {
-        return (HashMap<K, V>) maps(newHashMap(), keysAndValues);
+        return (HashMap<K, V>) maps(Maps.newHashMap(), keysAndValues);
     }
     @SuppressWarnings("unchecked")
     private static <K, V> Map<K, V> maps(Map<K, V> result, Object... keysAndValues) {
@@ -150,7 +91,7 @@ public final class A {
     @SuppressWarnings("unchecked")
     /** 构造 LinkedHashMap, 必须保证每两个参数的类型是一致的! 当参数是奇数时, 最后一个 key 将会被忽略 */
     public static <K, V> LinkedHashMap<K, V> linkedMaps(Object... keysAndValues) {
-        return (LinkedHashMap<K, V>) maps(newLinkedHashMap(), keysAndValues);
+        return (LinkedHashMap<K, V>) maps(Maps.newLinkedHashMap(), keysAndValues);
     }
 
     /** 获取集合的第一个元素 */
@@ -182,25 +123,5 @@ public final class A {
     @SuppressWarnings("unchecked")
     public static <T> T rand(Collection<T> source) {
         return isEmpty(source) ? null : (T) source.toArray()[U.RANDOM.nextInt(source.size())];
-    }
-
-    /**
-     * 收集 List 对象中指定的方法(空参数且有返回值, 无返回值或调用异常将忽略), 生成一个新集合返回<br>
-     * 此方法可以用 Lists.transform(list, Model::getProperty) 替代
-     */
-    @SuppressWarnings("unchecked")
-    public static <T> List<T> selectMethod(Collection<?> from, String method) {
-        if (isEmpty(from) || U.isBlank(method)) {
-            return Collections.emptyList();
-        }
-
-        List result = linkedLists();
-        for (Object obj : from) {
-            Object value = U.getMethod(obj, U.fieldToMethod(method));
-            if (value != null) {
-                result.add(value);
-            }
-        }
-        return result;
     }
 }
