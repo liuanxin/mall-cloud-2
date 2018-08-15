@@ -9,9 +9,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static com.github.common.ModuleTest.*;
+import static com.github.common.ModuleTest2.*;
 
-public class ModuleTest {
+public class ModuleTest2 {
 
     /** true 生成断路器 */
     static boolean fallback = true;
@@ -22,7 +22,7 @@ public class ModuleTest {
     static final String GLOBAL = "mall-global";
     /** 注册中心的端口 */
     static String REGISTER_CENTER_PORT = "8761";
-    private static final String PARENT = ModuleTest.class.getClassLoader().getResource("").getFile() + "../../../";
+    private static final String PARENT = ModuleTest2.class.getClassLoader().getResource("").getFile() + "../../../";
     static String PACKAGE_PATH = PACKAGE.replaceAll("\\.", "/");
     static String AUTHOR = " *\n * @author https://github.com/liuanxin\n";
 
@@ -47,7 +47,7 @@ public class ModuleTest {
 //        generate("0-search",  "8072", "搜索");
 //        generate("1-user",    "8091", "用户");
 //        generate("2-product", "8092", "商品");
-//        generate("3-order",   "8093", "订单");
+        generate("333-order",   "8093", "订单");
 
         soutInfo();
     }
