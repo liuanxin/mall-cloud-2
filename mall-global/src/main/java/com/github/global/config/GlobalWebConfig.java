@@ -18,15 +18,15 @@ public class GlobalWebConfig {
 
     @Bean
     @Order(Ordered.HIGHEST_PRECEDENCE)
-    public FilterRegistrationBean corsFilter() {
-        FilterRegistrationBean registrationBean = new FilterRegistrationBean();
+    public FilterRegistrationBean<CorsFilter> corsFilter() {
+        FilterRegistrationBean<CorsFilter> registrationBean = new FilterRegistrationBean<>();
         registrationBean.setFilter(new CorsFilter());
         return registrationBean;
     }
 
     @Bean
-    public FilterRegistrationBean characterFilter() {
-        FilterRegistrationBean filterBean = new FilterRegistrationBean();
+    public FilterRegistrationBean<CharacterEncodingFilter> characterFilter() {
+        FilterRegistrationBean<CharacterEncodingFilter> filterBean = new FilterRegistrationBean<>();
         filterBean.setFilter(new CharacterEncodingFilter(StandardCharsets.UTF_8.displayName(), true));
         return filterBean;
     }
