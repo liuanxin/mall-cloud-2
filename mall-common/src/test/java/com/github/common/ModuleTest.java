@@ -47,7 +47,7 @@ public class ModuleTest {
 //        generate("0-search",  "8072", "搜索");
 //        generate("1-user",    "8091", "用户");
 //        generate("2-product", "8092", "商品");
-        generate("333-order",   "8093", "订单");
+//        generate("3-order",   "8093", "订单");
 
         soutInfo();
     }
