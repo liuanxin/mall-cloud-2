@@ -10,12 +10,19 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.Enumeration;
+import java.util.List;
 
 /** <span style="color:red;">!!!此工具类请只在 Controller 中调用!!!</span> */
 public final class RequestUtils {
 
     private static final String USER_AGENT = "user-agent";
     private static final String REFERRER = "referer";
+
+    private static final String HTTP = "http://";
+    private static final String HTTPS = "http://";
+    private static final String SCHEME = "//";
+    private static final String URL_SPLIT = "/";
+    private static final String WWW = "www.";
 
     /**
      * 获取真实客户端IP
@@ -100,6 +107,7 @@ public final class RequestUtils {
         return getRequest().getHeader(REFERRER);
     }
 
+    /** 返回当前访问的域. 是 request.getRequestURL().toString() 中域的部分 */
     public static String getDomain() {
         StringBuilder domain = new StringBuilder();
 
@@ -115,6 +123,45 @@ public final class RequestUtils {
             domain.append(port);
         }
         return domain.toString();
+    }
+
+    /** 从 url 中获取 domain 信息. 如: http://www.jd.com/product/123 返回 http://www.jd.com */
+    public static String getDomain(String url) {
+        if (U.isBlank(url)) {
+            return U.EMPTY;
+        }
+        if (url.startsWith(HTTP)) {
+            String tmp = url.substring(HTTP.length());
+            return url.substring(0, HTTP.length() + tmp.indexOf(URL_SPLIT));
+        } else if (url.startsWith(HTTPS)) {
+            String tmp = url.substring(HTTPS.length());
+            return url.substring(0, HTTPS.length() + tmp.indexOf(URL_SPLIT));
+        } else if (url.startsWith(SCHEME)) {
+            String tmp = url.substring(SCHEME.length());
+            return url.substring(0, SCHEME.length() + tmp.indexOf(URL_SPLIT));
+        }
+        return url.substring(0, url.indexOf(URL_SPLIT));
+    }
+
+    /** 检查指定的 url 是不是在指定的域名中(域名是以根域名检查, 如 www.qq.com 是以 qq.com 做为检查) */
+    public static boolean checkUrl(String url, List<String> domainList) {
+        url = getDomain(url);
+        for (String domain : domainList) {
+            if (domain.startsWith(HTTP)) {
+                domain = domain.substring(HTTP.length());
+            } else if (domain.startsWith(HTTPS)) {
+                domain = domain.substring(HTTPS.length());
+            } else if (domain.startsWith(SCHEME)) {
+                domain = domain.substring(SCHEME.length());
+            }
+            if (domain.startsWith(WWW)) {
+                domain = domain.substring(WWW.length());
+            }
+            if (url.endsWith("." + domain)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
