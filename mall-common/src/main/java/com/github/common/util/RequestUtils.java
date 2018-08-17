@@ -143,25 +143,27 @@ public final class RequestUtils {
         return url.substring(0, url.indexOf(URL_SPLIT));
     }
 
-    /** 检查指定的 url 是不是在指定的域名中(域名是以根域名检查, 如 www.qq.com 是以 qq.com 做为检查) */
-    public static boolean checkUrl(String url, List<String> domainList) {
+    /** 检查 url 在不在指定的域名中(以根域名检查, 如 www.qq.com 是以 qq.com 为准), 将所在根域名返回, 不在指定域名中则返回空 */
+    public static String getDomainInUrl(String url, List<String> domainList) {
         url = getDomain(url);
-        for (String domain : domainList) {
-            if (domain.startsWith(HTTP)) {
-                domain = domain.substring(HTTP.length());
-            } else if (domain.startsWith(HTTPS)) {
-                domain = domain.substring(HTTPS.length());
-            } else if (domain.startsWith(SCHEME)) {
-                domain = domain.substring(SCHEME.length());
-            }
-            if (domain.startsWith(WWW)) {
-                domain = domain.substring(WWW.length());
-            }
-            if (url.endsWith("." + domain)) {
-                return true;
+        if (U.isNotBlank(url)) {
+            for (String domain : domainList) {
+                if (domain.startsWith(HTTP)) {
+                    domain = domain.substring(HTTP.length());
+                } else if (domain.startsWith(HTTPS)) {
+                    domain = domain.substring(HTTPS.length());
+                } else if (domain.startsWith(SCHEME)) {
+                    domain = domain.substring(SCHEME.length());
+                }
+                if (domain.startsWith(WWW)) {
+                    domain = domain.substring(WWW.length());
+                }
+                if (url.endsWith("." + domain)) {
+                    return domain;
+                }
             }
         }
-        return false;
+        return null;
     }
 
     /**
