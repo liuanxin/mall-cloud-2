@@ -99,7 +99,6 @@ where (`name` = 'xx' and `create_time` < xxx)
 如果要生成条件复杂的 or 语句(比如在一个 and 条件里面有好几个 or), exmple 将会无法实现, 此时就需要手写 sql 了
 
 
-*** 何时需要手工写自己的 customer mapper 文件
 当有一些不得不联表的 sql 语句, 或者基于 example 很难生成的 or 查询, 此时放在 custom.xml 中, 确保自动生成和手写的 sql 分开管理.
 
 PS: 尽量不要使用 join 来联表, 尽量由应用程序来组装数据并每次向数据库发起单一且易维护的 sql 语句,
@@ -108,82 +107,5 @@ PS: 尽量不要使用 join 来联表, 尽量由应用程序来组装数据并�
 java 做内部运算本就是强项, 这一块成为瓶颈可能性很低且易重构, 数据库连接可以由 druid 连接池来达到高性能操作.
 
 阿里在 17 年初出的开发手册中也明确说明: 超级三个表禁止 join, 是有其原因的.
-
-
-*** 如何把枚举类映射成数据库字段
-比如有这样一个 性别 的枚举
-#+BEGIN_SRC java
-/** 用户性别 */
-public enum Gender {
-
-    Male(1, "男"), Female(2, "女");
-
-    int code;
-    String value;
-    Gender(int code, String value) {
-        this.code = code;
-        this.value = value;
-    }
-
-    /** 显示用 */
-    public String getValue() {
-        return value;
-    }
-    /** 数据关联用 */
-    public int getCode() {
-        return code;
-    }
-
-    /** 序列化给前端时, 如果只想给前端返回数值, 去掉此方法并把注解挪到 getCode 即可 */
-    @JsonValue
-    public Map<String, String> serializer() {
-        return U.serializerEnum(code, value);
-    }
-    /** 数据反序列化. 如 male、0、男、{"code": 0, "value": "男"} 都可以反序列化为 Gender.Male 值 */
-    @JsonCreator
-    public static Gender deserializer(Object obj) {
-        return U.enumDeserializer(obj, Gender.class);
-    }
-}
-#+END_SRC
-
-其中 code 和 value 都要有, 一个用来存入数据库, 一个用来显示, 两个 jackson 的注解已经说明了序列化和反序列化的规则,
-此时还需要让 mybatis 也知道, 我在每个模块的 test 中放了 xxxGenerateEnumHandle 这个测试类,
-运行后会在当前模块的 handler 包中生成对应的枚举处理类, 就像下面这样
-
-#+BEGIN_SRC java
-/**
-* 当前 handle 是自动生成的
-*
-* @see org.apache.ibatis.type.TypeHandlerRegistry
-* @see org.apache.ibatis.type.EnumTypeHandler
-* @see org.apache.ibatis.type.EnumOrdinalTypeHandler
-*/
-public class GenderHandler extends BaseTypeHandler {
-
-    @Override
-    public void setNonNullParameter(PreparedStatement ps, int i, Gender parameter, JdbcType jdbcType) throws SQLException {
-        ps.setInt(i, parameter.getCode());
-    }
-
-    @Override
-    public Gender getNullableResult(ResultSet rs, String columnName) throws SQLException {
-        return U.toEnum(Gender.class, rs.getObject(columnName));
-    }
-
-    @Override
-    public Gender getNullableResult(ResultSet rs, int columnIndex) throws SQLException {
-        return U.toEnum(Gender.class, rs.getObject(columnIndex));
-    }
-
-    @Override
-    public Gender getNullableResult(CallableStatement cs, int columnIndex) throws SQLException {
-        return U.toEnum(Gender.class, cs.getObject(columnIndex));
-    }
-}
-#+END_SRC
-
-这个类会被装载到 mybatis 的上下文中去, 这样在整个项目过程中, 任意地方都可以直接使用枚举而不需要基于数值转来转去
-
 
 btw: 在 ide 中安装 lombok 和 mybatis 插件
