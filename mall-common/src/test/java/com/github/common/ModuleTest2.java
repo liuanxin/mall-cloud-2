@@ -818,7 +818,7 @@ class Server {
             "  name: all,${spring.application.name}\n" +
             "  profile: ${spring.profiles.active}\n" +
             "\n" +
-            "management.security.enabled: false\n";
+            "management.endpoints.web.exposure.include: \"*\"\n";
 
     private static final String APPLICATION_TEST_YML = "\n" +
             "server.port: %s\n" +
@@ -847,7 +847,7 @@ class Server {
             "  name: all,${spring.application.name}\n" +
             "  profile: ${spring.profiles.active}\n" +
             "\n" +
-            "management.security.enabled: false\n";
+            "management.endpoints.web.exposure.include: \"*\"\n";
 
     private static final String APPLICATION_PROD_YML = "\n" +
             "server.port: %s\n" +
@@ -875,7 +875,7 @@ class Server {
             "  name: all,${spring.application.name}\n" +
             "  profile: ${spring.profiles.active}\n" +
             "\n" +
-            "management.security.enabled: false\n";
+            "management.endpoints.web.exposure.include: \"*\"\n";
 
     private static final String CONFIG = "\n"+
             "# 当前文件是主要为了抑制 <No URLs will be polled as dynamic configuration sources> 这个警告. 无其他用处\n"+
@@ -895,20 +895,23 @@ class Server {
             "    <property name=\"SQL_PATTERN\" value=\"%d [${PID:- } %t\\\\(%logger\\\\) : %p] %class.%method\\\\(%file:%line\\\\)%n%m%n%n\"/>\n" +
             "\n" +
             "\n" +
+            "    <logger name=\"zipkin.autoconfigure\" level=\"warn\"/>\n" +
+            "    <logger name=\"io.undertow\" level=\"warn\"/>\n" +
+            "    <logger name=\"freemarker\" level=\"warn\"/>\n" +
+            "\n" +
             "    <logger name=\"" + PACKAGE + ".~MODULE_NAME~.repository\" level=\"warn\"/>\n" +
             "    <logger name=\"" + PACKAGE + ".common.mvc\" level=\"warn\"/>\n" +
             "\n" +
-            "    <logger name=\"com.alibaba\" level=\"warn\"/>\n" +
-            "    <logger name=\"com.github\" level=\"warn\"/>\n" +
+            "    <logger name=\"com.netflix\" level=\"error\"/>\n" +
+            "    <!--<logger name=\"com.github\" level=\"warn\"/>-->\n" +
+            "    <logger name=\"com.alibaba\" level=\"error\"/>\n" +
+            "    <logger name=\"com.zaxxer\" level=\"warn\"/>\n" +
             "    <logger name=\"com.sun\" level=\"warn\"/>\n" +
-            "\n" +
-            "    <logger name=\"io.github\" level=\"warn\"/>\n" +
             "\n" +
             "    <logger name=\"org.springframework\" level=\"warn\"/>\n" +
             "    <logger name=\"org.hibernate\" level=\"warn\"/>\n" +
             "    <logger name=\"org.mybatis\" level=\"warn\"/>\n" +
             "    <logger name=\"org.apache\" level=\"warn\"/>\n" +
-            "    <logger name=\"org.I0Itec\" level=\"warn\"/>\n" +
             "    <logger name=\"org.jboss\" level=\"warn\"/>\n" +
             "\n" +
             "\n" +
@@ -1022,14 +1025,18 @@ class Server {
             "        <dependency>\n" +
             "            <groupId>org.springframework.boot</groupId>\n" +
             "            <artifactId>spring-boot-starter-jdbc</artifactId>\n" +
-            "            <exclusions>\n" +
-            "                <exclusion>\n" +
-            "                    <groupId>org.apache.tomcat</groupId>\n" +
-            "                    <artifactId>tomcat-jdbc</artifactId>\n" +
-            "                </exclusion>\n" +
-            "            </exclusions>\n" +
+//            "            <exclusions>\n" +
+//            "                <exclusion>\n" +
+//            "                    <groupId>org.apache.tomcat</groupId>\n" +
+//            "                    <artifactId>tomcat-jdbc</artifactId>\n" +
+//            "                </exclusion>\n" +
+//            "            </exclusions>\n" +
             "        </dependency>\n" +
             "\n" +
+            "        <dependency>\n" +
+            "            <groupId>org.springframework.cloud</groupId>\n" +
+            "            <artifactId>spring-cloud-starter-config</artifactId>\n" +
+            "        </dependency>\n" +
             "        <dependency>\n" +
             "            <groupId>org.springframework.cloud</groupId>\n" +
             "            <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>\n" +
@@ -1039,10 +1046,10 @@ class Server {
 //            "            <artifactId>spring-cloud-starter-zipkin</artifactId>\n" +
 //            "        </dependency>\n" +
             "\n" +
-            "        <dependency>\n" +
-            "            <groupId>com.zaxxer</groupId>\n" +
-            "            <artifactId>HikariCP</artifactId>\n" +
-            "        </dependency>\n" +
+//            "        <dependency>\n" +
+//            "            <groupId>com.zaxxer</groupId>\n" +
+//            "            <artifactId>HikariCP</artifactId>\n" +
+//            "        </dependency>\n" +
             "        <dependency>\n" +
             "            <groupId>mysql</groupId>\n" +
             "            <artifactId>mysql-connector-java</artifactId>\n" +
