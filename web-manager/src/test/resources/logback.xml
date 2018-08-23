@@ -11,7 +11,7 @@
 
     <logger name="com.github.common.mvc" level="warn"/>
 
-    <logger name="com.netflix" level="warn"/>
+    <logger name="com.netflix" level="error"/>
     <!--<logger name="com.github" level="warn"/>-->
     <logger name="com.zaxxer" level="warn"/>
     <logger name="com.sun" level="warn"/>

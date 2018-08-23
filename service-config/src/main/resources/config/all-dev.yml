@@ -1,0 +1,8 @@
+
+# https://docs.spring.io/spring-boot/docs/current/reference/html/common-application-properties.html
+
+online: false
+
+spring:
+  mvc.throw-exception-if-no-handler-found: true
+  resources.add-mappings: false

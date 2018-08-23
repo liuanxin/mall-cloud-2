@@ -1,9 +1,9 @@
 
-logging.config: classpath:log-prod.xml
-
 server.port: 8761
 
-spring.application.name: register-center
+spring:
+  application.name: register-center
+  profiles.active: prod
 
 register.center: http://prod1:${server.port}/eureka/,http://prod2:${server.port}/eureka/,http://prod3:${server.port}/eureka/
 eureka:

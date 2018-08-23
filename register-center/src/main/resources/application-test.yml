@@ -1,9 +1,9 @@
 
-logging.config: classpath:log-test.xml
-
 server.port: 8761
 
-spring.application.name: register-center
+spring:
+  application.name: register-center
+  profiles.active: test
 
 register.center: http://test1:${server.port}/eureka/,http://test2:${server.port}/eureka/,http://test3:${server.port}/eureka/
 eureka:

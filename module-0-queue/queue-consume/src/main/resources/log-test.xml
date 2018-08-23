@@ -16,13 +16,13 @@
     </appender>
 
 
-    <logger name="com.taiheiot.common.mvc" level="warn"/>
+    <logger name="com.github.common.mvc" level="warn"/>
 
     <logger name="httpclient" level="warn"/>
     <logger name="freemarker" level="warn"/>
 
     <logger name="com.alibaba" level="error"/>
-    <logger name="com.netflix" level="warn"/>
+    <logger name="com.netflix" level="error"/>
     <logger name="com.github" level="warn"/>
 
     <logger name="org.springframework" level="warn"/>

@@ -1,0 +1,25 @@
+
+server.port: 8071
+
+
+spring:
+  application.name: search-sync
+  profiles.active: test
+
+
+register.center: http://test1:8761/eureka/,http://test2:8761/eureka/,http://test3:8761/eureka/
+eureka:
+  client:
+    healthcheck.enabled: true
+    registry-fetch-interval-seconds: 10
+    serviceUrl.defaultZone: ${register.center}
+  instance:
+    lease-renewal-interval-in-seconds: 10
+    lease-expiration-duration-in-seconds: 30
+
+
+spring.cloud.config:
+  discovery.enabled: true
+  discovery.serviceId: service-config
+  name: all,search
+  profile: ${spring.profiles.active}

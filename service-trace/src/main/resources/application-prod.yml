@@ -1,3 +1,0 @@
-
-logging.config: classpath:log-prod.xml
-server.port: 9411

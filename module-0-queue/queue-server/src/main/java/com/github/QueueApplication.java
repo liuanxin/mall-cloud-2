@@ -2,19 +2,24 @@ package com.github;
 
 import com.github.common.util.A;
 import com.github.common.util.LogUtil;
-import org.springframework.boot.WebApplicationType;
+import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.context.ApplicationContext;
-import org.springframework.jms.annotation.EnableJms;
 
 @SpringBootApplication
-@EnableJms
-public class QueueApplication {
+@EnableDiscoveryClient
+public class QueueApplication extends SpringBootServletInitializer {
+
+    @Override
+    protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
+        return application.sources(QueueApplication.class);
+    }
 
     public static void main(String[] args) {
-        ApplicationContext ctx = new SpringApplicationBuilder(QueueApplication.class)
-                .web(WebApplicationType.NONE).run(args);
+        ApplicationContext ctx = SpringApplication.run(QueueApplication.class, args);
         if (LogUtil.ROOT_LOG.isDebugEnabled()) {
             String[] activeProfiles = ctx.getEnvironment().getActiveProfiles();
             if (A.isNotEmpty(activeProfiles)) {

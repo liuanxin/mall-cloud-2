@@ -1,0 +1,36 @@
+
+# https://docs.spring.io/spring-boot/docs/current/reference/html/common-application-properties.html
+
+server.port: 8071
+
+
+spring:
+  application.name: search-sync
+  profiles.active: dev
+
+
+register.center: http://127.0.0.1:8761/eureka/
+eureka:
+  client:
+    # 开启健康检查(需要 spring-boot-starter-actuator 包)
+    healthcheck.enabled: true
+    # 客户端间隔多久去拉取服务注册信息, 默认为 30 秒
+    registry-fetch-interval-seconds: 20
+    serviceUrl.defaultZone: ${register.center}
+  instance:
+    # 注册到服务器的是 ip 地址, 不要用主机名(只在开发时这样, 测试和线上还是用默认)
+    prefer-ip-address: true
+    # 客户端发送心跳给注册中心的频率, 默认 30 秒
+    lease-renewal-interval-in-seconds: 20
+    # 服务端在收到最后一个心跳后的等待时间. 超出将移除该实例, 默认 90 秒, 此值至少要大于 lease-renewal-interval-in-seconds
+    lease-expiration-duration-in-seconds: 60
+
+
+spring.cloud.config:
+#  uri: http://127.0.0.1:8001/
+  discovery.enabled: true
+  discovery.serviceId: service-config
+  name: all,search
+  profile: ${spring.profiles.active}
+
+management.security.enabled: false

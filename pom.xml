@@ -23,6 +23,8 @@
 
         <!-- 注册中心模块 -->
         <module>register-center</module>
+        <!-- 服务配置模块 -->
+        <module>service-config</module>
 
         <!-- 公共模块 -->
         <module>module-0-common</module>
@@ -65,7 +67,7 @@
         <poi-ooxml.version>3.17</poi-ooxml.version>
 
         <jedis.version>2.9.0</jedis.version>
-
+        <elasticsearch.version>6.3.2</elasticsearch.version>
         <hikaricp.version>3.2.0</hikaricp.version>
         <mybatis.version>3.4.6</mybatis.version>
         <mybatis-spring.version>1.3.2</mybatis-spring.version>
@@ -293,7 +295,16 @@
                 <artifactId>jedis</artifactId>
                 <version>${jedis.version}</version>
             </dependency>
-
+            <dependency>
+                <groupId>org.elasticsearch.client</groupId>
+                <artifactId>transport</artifactId>
+                <version>${elasticsearch.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.elasticsearch.client</groupId>
+                <artifactId>elasticsearch-rest-high-level-client</artifactId>
+                <version>${elasticsearch.version}</version>
+            </dependency>
             <dependency>
                 <groupId>com.zaxxer</groupId>
                 <artifactId>HikariCP</artifactId>

@@ -1,0 +1,26 @@
+
+server.port: 8072
+
+spring:
+  application.name: search
+  profiles.active: prod
+
+
+register.center: http://prod1:8761/eureka/,http://prod2:8761/eureka/,http://prod3:8761/eureka/
+eureka:
+  client:
+    healthcheck.enabled: true
+    registry-fetch-interval-seconds: 5
+    serviceUrl.defaultZone: ${register.center}
+  instance:
+    lease-renewal-interval-in-seconds: 5
+    lease-expiration-duration-in-seconds: 15
+
+
+spring.cloud.config:
+  discovery.enabled: true
+  discovery.serviceId: service-config
+  name: all,${spring.application.name}
+  profile: ${spring.profiles.active}
+
+management.security.enabled: false

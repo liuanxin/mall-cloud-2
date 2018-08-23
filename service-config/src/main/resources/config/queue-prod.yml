@@ -1,0 +1,10 @@
+
+# https://docs.spring.io/spring-boot/docs/current/reference/html/common-application-properties.html
+
+spring.activemq:
+  broker-url: failover:(tcp://first:61616,tcp://secondary:61616)?timeout=3000&startupMaxReconnectAttempts=5
+  user: admin
+  password: admin
+  pool:
+    enabled: true
+    max-connections: 10

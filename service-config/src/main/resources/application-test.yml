@@ -1,0 +1,22 @@
+
+server.port: 8001
+
+spring:
+  application.name: service-config
+#  cloud.config.server.git:
+#    uri: https://git.xxx.com/orign/project
+#    username: xxx
+#    password: yyy
+#    defaultLabel: develop
+  profiles.active: native
+  cloud.config.server.native.searchLocations: classpath:config/
+
+register.center: http://test1:8761/eureka/,http://test2:8761/eureka/,http://test3:8761/eureka/
+eureka:
+  client:
+    healthcheck.enabled: true
+    registry-fetch-interval-seconds: 10
+    serviceUrl.defaultZone: ${register.center}
+  instance:
+    lease-renewal-interval-in-seconds: 10
+    lease-expiration-duration-in-seconds: 30

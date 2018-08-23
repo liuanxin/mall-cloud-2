@@ -1,0 +1,13 @@
+
+spring.datasource:
+  url: jdbc:mysql://prod_common_db?useSSL=false&useUnicode=true&characterEncoding=utf8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&transformedBitIsBoolean=true
+  username: prod_common_user
+  password: prod_common_pass
+  hikari:
+    minimumIdle: 10
+    maximumPoolSize: 30
+    dataSourceProperties:
+      prepStmtCacheSize: 250
+      prepStmtCacheSqlLimit: 2048
+      cachePrepStmts: true
+      useServerPrepStmts: true

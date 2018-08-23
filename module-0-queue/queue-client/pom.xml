@@ -10,7 +10,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>queue-client</artifactId>
-    <description>将 restful 调用封装成 FeignClient 以达到 rpc 的调用形式(需要引入 feign 包和开启 @EnableFeignClients 注解)</description>
+    <description>消息队列 模块中将 restful 调用封装成 FeignClient 以达到 rpc 的调用形式(需要引入 feign 包和开启 @EnableFeignClients 注解)</description>
 
     <dependencies>
         <dependency>

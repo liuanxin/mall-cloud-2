@@ -1,8 +1,8 @@
 package com.github.queue.client;
 
+import com.github.queue.service.QueueInterface;
 import com.github.queue.constant.QueueConst;
 import com.github.queue.hystrix.QueueFallback;
-import com.github.queue.service.QueueInterface;
 import org.springframework.cloud.openfeign.FeignClient;
 
 /**

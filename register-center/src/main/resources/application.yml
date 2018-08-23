@@ -1,9 +1,9 @@
 
-logging.config: classpath:log-dev.xml
-
 server.port: 8761
 
-spring.application.name: register-center
+spring:
+  application.name: register-center
+  profiles.active: dev
 
 register.center: http://127.0.0.1:${server.port}/eureka/
 eureka:

@@ -12,15 +12,13 @@ spring:
 
 logging.config: classpath:log-dev.xml
 
-
-spring.activemq:
-  broker-url: failover:(tcp://127.0.0.1:61616)?timeout=3000&startupMaxReconnectAttempts=5
-  user: admin
-  password: admin
-  pool:
-    enabled: true
-    max-connections: 1
-
+spring.datasource:
+  url: jdbc:mysql://127.0.0.1:3306/cloud?useSSL=false&useUnicode=true&characterEncoding=utf8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&transformedBitIsBoolean=true&statementInterceptors=com.github.common.sql.ShowSqlInterceptor
+  username: root
+  password: root
+  hikari:
+    minimumIdle: 1
+    maximumPoolSize: 1
 
 register.center: http://127.0.0.1:8761/eureka/
 eureka:

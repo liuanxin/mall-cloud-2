@@ -22,7 +22,7 @@
     </appender>
 
 
-    <logger name="com.taiheiot.common.mvc" level="error"/>
+    <logger name="com.github.common.mvc" level="error"/>
 
     <logger name="httpclient" level="error"/>
     <logger name="freemarker" level="error"/>

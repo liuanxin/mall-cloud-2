@@ -16,9 +16,6 @@
     <modules>
         <module>queue-model</module>
         <module>queue-client</module>
-        <!-- 向 mq 发送消息 -->
         <module>queue-server</module>
-        <!-- 消费 mq 中的消息 -->
-        <module>queue-consume</module>
     </modules>
 </project>
