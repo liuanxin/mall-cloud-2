@@ -1,5 +1,6 @@
 
 server.port: 8070
+logging.config: classpath:log-test.xml
 
 
 spring:

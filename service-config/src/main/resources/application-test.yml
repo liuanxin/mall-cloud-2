@@ -1,5 +1,6 @@
 
 server.port: 8001
+logging.config: classpath:log-test.xml
 
 spring:
   application.name: service-config

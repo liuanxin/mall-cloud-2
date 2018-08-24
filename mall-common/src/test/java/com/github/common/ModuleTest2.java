@@ -787,6 +787,7 @@ class Server {
             "# https://docs.spring.io/spring-boot/docs/current/reference/html/common-application-properties.html\n" +
             "\n" +
             "server.port: %s\n" +
+            "logging.config: classpath:log-dev.xml\n" +
             "\n" +
             "\n" +
             "spring:\n" +
@@ -822,6 +823,7 @@ class Server {
 
     private static final String APPLICATION_TEST_YML = "\n" +
             "server.port: %s\n" +
+            "logging.config: classpath:log-test.xml\n" +
             "\n" +
             "\n" +
             "spring:\n" +
@@ -850,7 +852,8 @@ class Server {
             "management.endpoints.web.exposure.include: \"*\"\n";
 
     private static final String APPLICATION_PROD_YML = "\n" +
-            "server.port: %s\n" +
+            "server.port: %s\n\n" +
+            "logging.config: classpath:log-prod.xml\n" +
             "\n" +
             "spring:\n" +
             "  application.name: %s\n" +
@@ -881,20 +884,12 @@ class Server {
             "# 当前文件是主要为了抑制 <No URLs will be polled as dynamic configuration sources> 这个警告. 无其他用处\n"+
             "# see com.netflix.config.sources.URLConfigurationSource.URLConfigurationSource()\n";
 
-    private static final String SINGLE_LOG_XML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+    private static final String LOG_XML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
             "<configuration>\n" +
-            "\n" +
-            "    <property name=\"FILE_PATH_TEST\" value=\"${user.home}/logs/~MODULE_NAME~-test\"/>\n" +
-            "    <property name=\"LOG_PATTERN_TEST\" value=\"[%X{receiveTime}%d] [${PID:- } %t\\\\(%logger\\\\) : %p]%X{requestInfo} %class{30}#%method\\\\(%file:%line\\\\)%n%m%n%n\"/>\n" +
-            "    <property name=\"SAVE_FILE_TEST\" value=\"7\"/>\n" +
-            "\n" +
-            "    <property name=\"FILE_PATH_PROD\" value=\"${user.home}/logs/~MODULE_NAME~-prod\"/>\n" +
-            "    <property name=\"LOG_PATTERN_PROD\" value=\"[%X{receiveTime}%d] [${PID:- } %t\\\\(%logger\\\\) : %p]%X{requestInfo} %class{30}#%method\\\\(%file:%line\\\\) %m%n%n\"/>\n" +
-            "    <property name=\"SAVE_FILE_PROD\" value=\"15\"/>\n" +
-            "    \n" +
-            "    <property name=\"SQL_PATTERN\" value=\"%d [${PID:- } %t\\\\(%logger\\\\) : %p] %class.%method\\\\(%file:%line\\\\)%n%m%n%n\"/>\n" +
-            "\n" +
-            "\n" +
+            "    <include resource=\"org/springframework/boot/logging/logback/defaults.xml\" />\n" +
+            "    <property name=\"CONSOLE_LOG_PATTERN\" value=\"[%X{receiveTime}%d] [${PID:- } %t\\\\(%logger\\\\) : %p]%X{requestInfo}%n%class.%method\\\\(%file:%line\\\\)%n%m%n%n\"/>\n" +
+            "    <include resource=\"org/springframework/boot/logging/logback/console-appender.xml\" />\n" +
+            "\n\n" +
             "    <logger name=\"zipkin.autoconfigure\" level=\"warn\"/>\n" +
             "    <logger name=\"io.undertow\" level=\"warn\"/>\n" +
             "    <logger name=\"freemarker\" level=\"warn\"/>\n" +
@@ -902,9 +897,8 @@ class Server {
             "    <logger name=\"" + PACKAGE + ".~MODULE_NAME~.repository\" level=\"warn\"/>\n" +
             "    <logger name=\"" + PACKAGE + ".common.mvc\" level=\"warn\"/>\n" +
             "\n" +
-            "    <logger name=\"com.netflix\" level=\"error\"/>\n" +
+            "    <logger name=\"com.netflix\" level=\"warn\"/>\n" +
             "    <!--<logger name=\"com.github\" level=\"warn\"/>-->\n" +
-            "    <logger name=\"com.alibaba\" level=\"error\"/>\n" +
             "    <logger name=\"com.zaxxer\" level=\"warn\"/>\n" +
             "    <logger name=\"com.sun\" level=\"warn\"/>\n" +
             "\n" +
@@ -914,76 +908,125 @@ class Server {
             "    <logger name=\"org.apache\" level=\"warn\"/>\n" +
             "    <logger name=\"org.jboss\" level=\"warn\"/>\n" +
             "\n" +
-            "\n" +
-            "    <!-- 本地开发用到的日志配置 -->\n" +
-            "    <springProfile name=\"dev,default,native\">\n" +
-            "        <include resource=\"org/springframework/boot/logging/logback/defaults.xml\" />\n" +
-            "        <property name=\"CONSOLE_LOG_PATTERN\" value=\"[%X{receiveTime}%d] [${PID:- } %t\\\\(%logger\\\\) : %p]%X{requestInfo}%n%class.%method\\\\(%file:%line\\\\)%n%m%n%n\"/>\n" +
-            "        <include resource=\"org/springframework/boot/logging/logback/console-appender.xml\" />\n" +
-            "\n" +
-            "        <root level=\"debug\">\n" +
-            "            <appender-ref ref=\"CONSOLE\"/>\n" +
-            "        </root>\n" +
-            "    </springProfile>\n" +
-            "\n" +
-            "\n" +
-            "    <!-- 测试时用到的日志配置 -->\n" +
-            "    <springProfile name=\"test\">\n" +
-            "        <appender name=\"PROJECT\" class=\"ch.qos.logback.core.rolling.RollingFileAppender\">\n" +
-            "            <file>${FILE_PATH}.log</file>\n" +
-            "            <rollingPolicy class=\"ch.qos.logback.core.rolling.TimeBasedRollingPolicy\">\n" +
-            "                <fileNamePattern>${FILE_PATH}-%d{yyyy-MM-dd}.log</fileNamePattern>\n" +
-            "                <maxHistory>${SAVE_FILE_TEST}</maxHistory>\n" +
-            "            </rollingPolicy>\n" +
-            "            <encoder>\n" +
-            "                <pattern>${LOG_PATTERN}</pattern>\n" +
-            "            </encoder>\n" +
-            "        </appender>\n" +
-            "\n" +
-            "        <appender name=\"SQL\" class=\"ch.qos.logback.core.rolling.RollingFileAppender\">\n" +
-            "            <file>${FILE_PATH}-sql.log</file>\n" +
-            "            <rollingPolicy class=\"ch.qos.logback.core.rolling.TimeBasedRollingPolicy\">\n" +
-            "                <fileNamePattern>${FILE_PATH}-sql-%d{yyyy-MM-dd}.log</fileNamePattern>\n" +
-            "                <maxHistory>${SAVE_FILE_TEST}</maxHistory>\n" +
-            "            </rollingPolicy>\n" +
-            "            <encoder>\n" +
-            "                <pattern>${SQL_PATTERN}</pattern>\n" +
-            "            </encoder>\n" +
-            "        </appender>\n" +
-            "        <logger name=\"sqlLog\" level=\"debug\" additivity=\"false\">\n" +
-            "            <appender-ref ref=\"SQL\" />\n" +
-            "        </logger>\n" +
-            "\n" +
-            "        <root level=\"debug\">\n" +
-            "            <appender-ref ref=\"PROJECT\"/>\n" +
-            "        </root>\n" +
-            "    </springProfile>\n" +
-            "\n" +
-            "\n" +
-            "    <!-- 生产上用到的日志配置 -->\n" +
-            "    <springProfile name=\"prod\">\n" +
-            "        <appender name=\"PROJECT\" class=\"ch.qos.logback.core.rolling.RollingFileAppender\">\n" +
-            "            <file>${FILE_PATH_PROD}.log</file>\n" +
-            "            <rollingPolicy class=\"ch.qos.logback.core.rolling.TimeBasedRollingPolicy\">\n" +
-            "                <fileNamePattern>${FILE_PATH_PROD}-%d{yyyy-MM-dd}.log</fileNamePattern>\n" +
-            "                <maxHistory>${SAVE_FILE_PROD}</maxHistory>\n" +
-            "            </rollingPolicy>\n" +
-            "            <encoder>\n" +
-            "                <pattern>${LOG_PATTERN_PROD}</pattern>\n" +
-            "            </encoder>\n" +
-            "        </appender>\n" +
-            "        <appender name=\"ASYNC\" class=\"ch.qos.logback.classic.AsyncAppender\">\n" +
-            "            <discardingThreshold>0</discardingThreshold>\n" +
-            "            <includeCallerData>true</includeCallerData>\n" +
-            "            <appender-ref ref =\"PROJECT\"/>\n" +
-            "        </appender>\n" +
-            "\n" +
-            "        <root level=\"info\">\n" +
-            "            <appender-ref ref=\"ASYNC\"/>\n" +
-            "        </root>\n" +
-            "    </springProfile>\n" +
+            "    <logger name=\"io.lettuce\" level=\"warn\"/>\n" +
+            "    <logger name=\"io.netty\" level=\"warn\"/>\n" +
+            "    <logger name=\"reactor\" level=\"warn\"/>\n" +
+            "\n\n" +
+            "    <root level=\"debug\">\n" +
+            "        <appender-ref ref=\"CONSOLE\"/>\n" +
+            "    </root>\n" +
             "</configuration>\n";
 
+    private static final String LOG_TEST_XML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+            "<configuration>\n" +
+            "    <property name=\"FILE_PATH\" value=\"${user.home}/logs/~MODULE_NAME~-test\"/>\n" +
+            "    <property name=\"SQL_PATTERN\" value=\"%d [${PID:- } %t\\\\(%logger\\\\) : %p]%n%class.%method\\\\(%file:%line\\\\)%n%m%n%n\"/>\n" +
+            "    <property name=\"LOG_PATTERN\" value=\"[%X{receiveTime}%d] [${PID:- } %t\\\\(%logger\\\\) : %p]%X{requestInfo} %class{30}#%method\\\\(%file:%line\\\\)%n%m%n%n\"/>\n" +
+            "\n" +
+            "    <appender name=\"PROJECT\" class=\"ch.qos.logback.core.rolling.RollingFileAppender\">\n" +
+            "        <file>${FILE_PATH}.log</file>\n" +
+            "        <!-- yyyy-MM-dd_HH 每小时建一个, yyyy-MM-dd_HH-mm 每分钟建一个 -->\n" +
+            "        <rollingPolicy class=\"ch.qos.logback.core.rolling.TimeBasedRollingPolicy\">\n" +
+            "            <fileNamePattern>${FILE_PATH}-%d{yyyy-MM-dd}.log</fileNamePattern>\n" +
+            "            <maxHistory>7</maxHistory>\n" +
+            "        </rollingPolicy>\n" +
+            "        <!-- 开启了下面的配置将会在文件达到 10MB 的时候才新建文件, 将会按上面的规则一天建一个  -->\n" +
+            "        <!--<triggeringPolicy class=\"ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy\">\n" +
+            "            <MaxFileSize>10MB</MaxFileSize>\n" +
+            "        </triggeringPolicy>-->\n" +
+            "        <encoder>\n" +
+            "            <pattern>${LOG_PATTERN}</pattern>\n" +
+            "        </encoder>\n" +
+            "    </appender>\n" +
+            "\n" +
+            "    <appender name=\"SQL\" class=\"ch.qos.logback.core.rolling.RollingFileAppender\">\n" +
+            "        <file>${FILE_PATH}-sql.log</file>\n" +
+            "        <rollingPolicy class=\"ch.qos.logback.core.rolling.TimeBasedRollingPolicy\">\n" +
+            "            <fileNamePattern>${FILE_PATH}-sql-%d{yyyy-MM-dd}.log</fileNamePattern>\n" +
+            "            <maxHistory>7</maxHistory>\n" +
+            "        </rollingPolicy>\n" +
+            "        <encoder>\n" +
+            "            <pattern>${SQL_PATTERN}</pattern>\n" +
+            "        </encoder>\n" +
+            "    </appender>\n" +
+            "    <logger name=\"sqlLog\" level=\"debug\" additivity=\"false\">\n" +
+            "        <appender-ref ref=\"SQL\" />\n" +
+            "    </logger>\n" +
+            "\n\n" +
+            "    <logger name=\"zipkin.autoconfigure\" level=\"warn\"/>\n" +
+            "    <logger name=\"io.undertow\" level=\"warn\"/>\n" +
+            "    <logger name=\"freemarker\" level=\"warn\"/>\n" +
+            "\n" +
+            "    <logger name=\"" + PACKAGE + ".~MODULE_NAME~.repository\" level=\"warn\"/>\n" +
+            "    <logger name=\"" + PACKAGE + ".common.mvc\" level=\"warn\"/>\n" +
+            "\n" +
+            "    <logger name=\"com.netflix\" level=\"warn\"/>\n" +
+            "    <!--<logger name=\"com.github\" level=\"warn\"/>-->\n" +
+            "    <logger name=\"com.zaxxer\" level=\"warn\"/>\n" +
+            "    <logger name=\"com.sun\" level=\"warn\"/>\n" +
+            "\n" +
+            "    <logger name=\"org.springframework\" level=\"warn\"/>\n" +
+            "    <logger name=\"org.hibernate\" level=\"warn\"/>\n" +
+            "    <logger name=\"org.mybatis\" level=\"warn\"/>\n" +
+            "    <logger name=\"org.apache\" level=\"warn\"/>\n" +
+            "    <logger name=\"org.jboss\" level=\"warn\"/>\n" +
+            "\n" +
+            "    <logger name=\"io.lettuce\" level=\"warn\"/>\n" +
+            "    <logger name=\"io.netty\" level=\"warn\"/>\n" +
+            "    <logger name=\"reactor\" level=\"warn\"/>\n" +
+            "\n\n" +
+            "    <root level=\"debug\">\n" +
+            "        <appender-ref ref=\"PROJECT\"/>\n" +
+            "    </root>\n" +
+            "</configuration>\n";
+
+    private static final String LOG_PROD_XML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+            "<configuration>\n" +
+            "    <property name=\"FILE_PATH\" value=\"${user.home}/logs/~MODULE_NAME~-prod\"/>\n" +
+            "    <property name=\"LOG_PATTERN\" value=\"[%X{receiveTime}%d] [${PID:- } %t\\\\(%logger\\\\) : %p]%X{requestInfo} %class{30}#%method\\\\(%file:%line\\\\) %m%n%n\"/>\n" +
+            "\n" +
+            "    <appender name=\"PROJECT\" class=\"ch.qos.logback.core.rolling.RollingFileAppender\">\n" +
+            "        <file>${FILE_PATH}.log</file>\n" +
+            "        <rollingPolicy class=\"ch.qos.logback.core.rolling.TimeBasedRollingPolicy\">\n" +
+            "            <fileNamePattern>${FILE_PATH}-%d{yyyy-MM-dd}.log</fileNamePattern>\n" +
+            "            <maxHistory>15</maxHistory>\n" +
+            "        </rollingPolicy>\n" +
+            "        <encoder>\n" +
+            "            <pattern>${LOG_PATTERN}</pattern>\n" +
+            "        </encoder>\n" +
+            "    </appender>\n" +
+            "    <appender name=\"ASYNC\" class=\"ch.qos.logback.classic.AsyncAppender\">\n" +
+            "        <discardingThreshold>0</discardingThreshold>\n" +
+            "        <includeCallerData>true</includeCallerData>\n" +
+            "        <appender-ref ref =\"PROJECT\"/>\n" +
+            "    </appender>\n" +
+            "\n\n" +
+            "    <logger name=\"zipkin.autoconfigure\" level=\"error\"/>\n" +
+            "    <logger name=\"io.undertow\" level=\"error\"/>\n" +
+            "    <logger name=\"freemarker\" level=\"error\"/>\n" +
+            "\n" +
+            "    <logger name=\"" + PACKAGE + ".~MODULE_NAME~.repository\" level=\"error\"/>\n" +
+            "    <logger name=\"" + PACKAGE + ".common.mvc\" level=\"error\"/>\n" +
+            "\n" +
+            "    <logger name=\"com.netflix\" level=\"error\"/>\n" +
+            "    <!--<logger name=\"com.github\" level=\"error\"/>-->\n" +
+            "    <logger name=\"com.zaxxer\" level=\"error\"/>\n" +
+            "    <logger name=\"com.sun\" level=\"error\"/>\n" +
+            "\n" +
+            "    <logger name=\"org.springframework\" level=\"error\"/>\n" +
+            "    <logger name=\"org.hibernate\" level=\"error\"/>\n" +
+            "    <logger name=\"org.mybatis\" level=\"error\"/>\n" +
+            "    <logger name=\"org.apache\" level=\"error\"/>\n" +
+            "    <logger name=\"org.jboss\" level=\"error\"/>\n" +
+            "\n" +
+            "    <logger name=\"io.lettuce\" level=\"warn\"/>\n" +
+            "    <logger name=\"io.netty\" level=\"warn\"/>\n" +
+            "    <logger name=\"reactor\" level=\"warn\"/>\n" +
+            "\n\n" +
+            "    <root level=\"info\">\n" +
+            "        <appender-ref ref=\"ASYNC\"/>\n" +
+            "    </root>\n" +
+            "</configuration>\n";
 
     private static final String SERVER_POM = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
             "<project xmlns=\"http://maven.apache.org/POM/4.0.0\"\n" +
@@ -1171,8 +1214,12 @@ class Server {
 
         writeFile(new File(resourcePath, "config.properties"), CONFIG);
 
-        String singleLogXml = SINGLE_LOG_XML.replaceAll("~MODULE_NAME~", parentPackageName);
-        writeFile(new File(resourcePath, "logback-spring.xml"), singleLogXml);
+        String logXml = LOG_XML.replaceAll("~MODULE_NAME~", parentPackageName);
+        writeFile(new File(resourcePath, "log-dev.xml"), logXml);
+        String testXml = LOG_TEST_XML.replaceAll("~MODULE_NAME~", parentPackageName);
+        writeFile(new File(resourcePath, "log-test.xml"), testXml);
+        String prodXml = LOG_PROD_XML.replaceAll("~MODULE_NAME~", parentPackageName);
+        writeFile(new File(resourcePath, "log-prod.xml"), prodXml);
 
 
         File testParent = new File(module + "/" + server + "/src/test/java/" +

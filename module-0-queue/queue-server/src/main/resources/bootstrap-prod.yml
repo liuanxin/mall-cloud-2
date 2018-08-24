@@ -1,6 +1,8 @@
 
 server.port: 8071
 
+logging.config: classpath:log-prod.xml
+
 spring:
   application.name: queue
   profiles.active: prod

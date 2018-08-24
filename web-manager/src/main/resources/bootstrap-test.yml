@@ -1,6 +1,9 @@
 
+server.port: 8686
+logging.config: classpath:log-dev.xml
+
 spring:
-  application.name: web-backend
+  application.name: web-manager
   profiles.active: test
 
 register.center: http://test1:8761/eureka/,http://test2:8761/eureka/,http://test3:8761/eureka/

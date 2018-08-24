@@ -1,5 +1,6 @@
 
 server.port: 8761
+logging.config: classpath:log-test.xml
 
 spring:
   application.name: register-center

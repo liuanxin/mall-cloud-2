@@ -1,7 +1,9 @@
 
-spring.application.name: web-backend
+server.port: 8686
+logging.config: classpath:log-prod.xml
+
 spring:
-  application.name: task
+  application.name: web-backend
   profiles.active: prod
 
 register.center: http://prod1:8761/eureka/,http://prod2:8761/eureka/,http://prod3:8761/eureka/

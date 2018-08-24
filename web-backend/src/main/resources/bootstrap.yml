@@ -1,4 +1,7 @@
 
+server.port: 8686
+logging.config: classpath:log-dev.xml
+
 spring:
   application.name: web-backend
   profiles.active: dev

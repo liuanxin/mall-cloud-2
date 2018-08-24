@@ -14,7 +14,6 @@
             <pattern>${LOG_PATTERN}</pattern>
         </encoder>
     </appender>
-
     <appender name="ASYNC" class="ch.qos.logback.classic.AsyncAppender">
         <discardingThreshold>0</discardingThreshold>
         <includeCallerData>true</includeCallerData>

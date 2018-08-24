@@ -1,6 +1,8 @@
 
 server.port: 8070
 
+logging.config: classpath:log-prod.xml
+
 spring:
   application.name: common
   profiles.active: prod

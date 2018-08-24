@@ -1,18 +1,10 @@
 
-# 线上环境
-
-online: true
-
+server.port: 8071
 logging.config: classpath:log-prod.xml
 
-spring.application.name: queue-consume
-
-
 spring:
-  activemq:
-    broker-url: failover:(tcp://first:61616,tcp://secondary:61616)?timeout=3000&startupMaxReconnectAttempts=5
-    user: admin
-    password: admin
+  application.name: queue
+  profiles.active: prod
 
 
 register.center: http://prod1:8761/eureka/,http://prod2:8761/eureka/,http://prod3:8761/eureka/
@@ -24,3 +16,12 @@ eureka:
   instance:
     lease-renewal-interval-in-seconds: 5
     lease-expiration-duration-in-seconds: 15
+
+
+spring.cloud.config:
+  discovery.enabled: true
+  discovery.serviceId: service-config
+  name: all,${spring.application.name}
+  profile: ${spring.profiles.active}
+
+management.endpoints.web.exposure.include: "*"

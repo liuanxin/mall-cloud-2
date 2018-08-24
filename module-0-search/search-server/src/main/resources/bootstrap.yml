@@ -2,6 +2,7 @@
 # https://docs.spring.io/spring-boot/docs/current/reference/html/common-application-properties.html
 
 server.port: 8072
+logging.config: classpath:log-dev.xml
 
 
 spring:

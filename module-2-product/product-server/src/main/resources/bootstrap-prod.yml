@@ -1,6 +1,8 @@
 
 server.port: 8092
 
+logging.config: classpath:log-prod.xml
+
 spring:
   application.name: product
   profiles.active: prod
