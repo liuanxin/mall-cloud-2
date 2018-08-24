@@ -22,6 +22,7 @@ public class ModuleTest2 {
     static final String GLOBAL = "mall-global";
     /** 注册中心的端口 */
     static String REGISTER_CENTER_PORT = "8761";
+    @SuppressWarnings("ConstantConditions")
     private static final String PARENT = ModuleTest2.class.getClassLoader().getResource("").getFile() + "../../../";
     static String PACKAGE_PATH = PACKAGE.replaceAll("\\.", "/");
     static String AUTHOR = " *\n * @author https://github.com/liuanxin\n";
@@ -122,6 +123,7 @@ public class ModuleTest2 {
 
 class Parent {
     static void generateParent(String moduleName, String model, String client, String server, String module, String comment) {
+        //noinspection ResultOfMethodCallIgnored
         new File(module).mkdirs();
         String PARENT_POM = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                 "<project xmlns=\"http://maven.apache.org/POM/4.0.0\"\n" +
@@ -222,8 +224,9 @@ class Client {
             "    </dependencies>\n" +
             "</project>\n";
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     static void generateClient(String moduleName, String packageName, String client,
-                              String module, String comment) throws IOException {
+                               String module, String comment) throws IOException {
         String parentPackageName = packageName.replace("-", ".");
         String clazzName = capitalize(parentPackageName);
 
@@ -334,6 +337,7 @@ class Model {
             "    </dependencies>\n" +
             "</project>\n";
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     static void generateModel(String moduleName, String packageName, String model,
                               String module, String comment) throws IOException {
         packageName = packageName.replace("-", ".");
@@ -1151,6 +1155,7 @@ class Server {
             "    }\n" +
             "}\n";
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     static void generateServer(String moduleName, String packageName, String model,
                                String server, String module, String port, String comment) throws IOException {
         String parentPackageName = packageName.replace("-", ".");
