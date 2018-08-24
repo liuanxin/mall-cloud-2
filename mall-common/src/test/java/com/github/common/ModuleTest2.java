@@ -43,8 +43,8 @@ public class ModuleTest2 {
 
     public static void main(String[] args) throws Exception {
         generate("0-common",  "8070", "公共");
-        generate("0-queue",   "8071", "消息队列");
-        generate("0-search",  "8072", "搜索");
+//        generate("0-queue",   "8071", "消息队列");
+//        generate("0-search",  "8072", "搜索");
         generate("1-user",    "8091", "用户");
         generate("2-product", "8092", "商品");
         generate("3-order",   "8093", "订单");
