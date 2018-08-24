@@ -1,12 +1,7 @@
 
-server.port: 8071
 logging.config: classpath:log-test.xml
 
-
-spring:
-  application.name: queue
-  profiles.active: test
-
+spring.application.name: queue-consume
 
 register.center: http://test1:8761/eureka/,http://test2:8761/eureka/,http://test3:8761/eureka/
 eureka:
@@ -18,11 +13,10 @@ eureka:
     lease-renewal-interval-in-seconds: 10
     lease-expiration-duration-in-seconds: 30
 
-
 spring.cloud.config:
   discovery.enabled: true
   discovery.serviceId: service-config
-  name: all,${spring.application.name}
-  profile: ${spring.profiles.active}
+  name: all,queue
+  profile: test
 
 management.endpoints.web.exposure.include: "*"

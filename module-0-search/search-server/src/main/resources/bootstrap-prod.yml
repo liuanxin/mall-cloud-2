@@ -3,10 +3,7 @@ server.port: 8072
 
 logging.config: classpath:log-prod.xml
 
-spring:
-  application.name: search
-  profiles.active: prod
-
+spring.application.name: search
 
 register.center: http://prod1:8761/eureka/,http://prod2:8761/eureka/,http://prod3:8761/eureka/
 eureka:
@@ -18,11 +15,10 @@ eureka:
     lease-renewal-interval-in-seconds: 5
     lease-expiration-duration-in-seconds: 15
 
-
 spring.cloud.config:
   discovery.enabled: true
   discovery.serviceId: service-config
   name: all,${spring.application.name}
-  profile: ${spring.profiles.active}
+  profile: prod
 
 management.endpoints.web.exposure.include: "*"

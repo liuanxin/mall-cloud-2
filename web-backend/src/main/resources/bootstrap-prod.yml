@@ -1,10 +1,9 @@
 
 server.port: 8686
+
 logging.config: classpath:log-prod.xml
 
-spring:
-  application.name: web-backend
-  profiles.active: prod
+spring.application.name: web-backend
 
 register.center: http://prod1:8761/eureka/,http://prod2:8761/eureka/,http://prod3:8761/eureka/
 eureka:
@@ -20,4 +19,4 @@ spring.cloud.config:
   discovery.enabled: true
   discovery.serviceId: service-config
   name: all
-  profile: ${spring.profiles.active}
+  profile: prod

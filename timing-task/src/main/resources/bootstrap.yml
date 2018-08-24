@@ -1,10 +1,9 @@
 
 server.port: 8585
+
 logging.config: classpath:log-dev.xml
 
-spring:
-  application.name: task
-  profiles.active: dev
+spring.application.name: task
 
 register.center: http://127.0.0.1:8761/eureka/
 eureka:
@@ -25,4 +24,4 @@ spring.cloud.config:
   discovery.enabled: true
   discovery.serviceId: service-config
   name: all
-  profile: ${spring.profiles.active}
+  profile: dev

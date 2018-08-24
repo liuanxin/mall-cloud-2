@@ -791,13 +791,10 @@ class Server {
             "# https://docs.spring.io/spring-boot/docs/current/reference/html/common-application-properties.html\n" +
             "\n" +
             "server.port: %s\n" +
+            "\n" +
             "logging.config: classpath:log-dev.xml\n" +
             "\n" +
-            "\n" +
-            "spring:\n" +
-            "  application.name: %s\n" +
-            "  profiles.active: dev\n" +
-            "\n" +
+            "spring.application.name: %s\n" +
             "\n" +
             "register.center: http://127.0.0.1:" + REGISTER_CENTER_PORT + "/eureka/\n" +
             "eureka:\n" +
@@ -815,25 +812,21 @@ class Server {
             "    # 服务端在收到最后一个心跳后的等待时间. 超出将移除该实例, 默认 90 秒, 此值至少要大于 lease-renewal-interval-in-seconds\n" +
             "    lease-expiration-duration-in-seconds: 60\n" +
             "\n" +
-            "\n" +
             "spring.cloud.config:\n" +
             "#  uri: http://127.0.0.1:8001/\n" +
             "  discovery.enabled: true\n" +
             "  discovery.serviceId: service-config\n" +
             "  name: all,${spring.application.name}\n" +
-            "  profile: ${spring.profiles.active}\n" +
+            "  profile: dev\n" +
             "\n" +
             "management.endpoints.web.exposure.include: \"*\"\n";
 
     private static final String APPLICATION_TEST_YML = "\n" +
             "server.port: %s\n" +
+            "\n" +
             "logging.config: classpath:log-test.xml\n" +
             "\n" +
-            "\n" +
-            "spring:\n" +
-            "  application.name: %s\n" +
-            "  profiles.active: test\n" +
-            "\n" +
+            "spring.application.name: %s\n" +
             "\n" +
             "register.center: http://test1:" + REGISTER_CENTER_PORT + "/eureka/,http://test2:" +
             REGISTER_CENTER_PORT + "/eureka/,http://test3:" + REGISTER_CENTER_PORT + "/eureka/\n" +
@@ -846,23 +839,20 @@ class Server {
             "    lease-renewal-interval-in-seconds: 10\n" +
             "    lease-expiration-duration-in-seconds: 30\n" +
             "\n" +
-            "\n" +
             "spring.cloud.config:\n" +
             "  discovery.enabled: true\n" +
             "  discovery.serviceId: service-config\n" +
             "  name: all,${spring.application.name}\n" +
-            "  profile: ${spring.profiles.active}\n" +
+            "  profile: test\n" +
             "\n" +
             "management.endpoints.web.exposure.include: \"*\"\n";
 
     private static final String APPLICATION_PROD_YML = "\n" +
-            "server.port: %s\n\n" +
+            "server.port: %s\n" +
+            "\n" +
             "logging.config: classpath:log-prod.xml\n" +
             "\n" +
-            "spring:\n" +
-            "  application.name: %s\n" +
-            "  profiles.active: prod\n" +
-            "\n" +
+            "spring.application.name: %s\n" +
             "\n" +
             "register.center: http://prod1:" + REGISTER_CENTER_PORT + "/eureka/,http://prod2:" +
             REGISTER_CENTER_PORT + "/eureka/,http://prod3:" + REGISTER_CENTER_PORT + "/eureka/\n" +
@@ -875,12 +865,11 @@ class Server {
             "    lease-renewal-interval-in-seconds: 5\n" +
             "    lease-expiration-duration-in-seconds: 15\n" +
             "\n" +
-            "\n" +
             "spring.cloud.config:\n" +
             "  discovery.enabled: true\n" +
             "  discovery.serviceId: service-config\n" +
             "  name: all,${spring.application.name}\n" +
-            "  profile: ${spring.profiles.active}\n" +
+            "  profile: prod\n" +
             "\n" +
             "management.endpoints.web.exposure.include: \"*\"\n";
 

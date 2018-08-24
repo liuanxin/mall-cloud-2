@@ -1,10 +1,9 @@
 
-server.port: 8686
+server.port: 8787
+
 logging.config: classpath:log-dev.xml
 
-spring:
-  application.name: web-manager
-  profiles.active: test
+spring.application.name: web-manager
 
 register.center: http://test1:8761/eureka/,http://test2:8761/eureka/,http://test3:8761/eureka/
 eureka:
@@ -20,4 +19,4 @@ spring.cloud.config:
   discovery.enabled: true
   discovery.serviceId: service-config
   name: all
-  profile: ${spring.profiles.active}
+  profile: test
