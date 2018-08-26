@@ -8,6 +8,7 @@ import com.github.common.json.JsonUtil;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -292,7 +293,7 @@ public final class U {
 
     /** 设置金额的精度 */
     public static BigDecimal setPrecision(BigDecimal money) {
-        return U.isBlank(money) ? money : money.setScale(SCALE, BigDecimal.ROUND_HALF_EVEN);
+        return U.isBlank(money) ? money : money.setScale(SCALE, RoundingMode.HALF_EVEN);
     }
 
     // + ==> add
