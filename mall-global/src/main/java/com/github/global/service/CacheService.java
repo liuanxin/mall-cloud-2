@@ -1,8 +1,10 @@
 package com.github.global.service;
 
+import com.github.common.date.DateUtil;
 import com.github.common.util.U;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.jedis.JedisConnection;
@@ -12,16 +14,18 @@ import org.springframework.util.ReflectionUtils;
 import redis.clients.jedis.Jedis;
 
 import java.lang.reflect.Field;
+import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 @Configuration
+@ConditionalOnClass({ Jedis.class, RedisTemplate.class })
 @ConditionalOnBean({ RedisTemplate.class, StringRedisTemplate.class })
 public class CacheService {
 
     @Autowired
     private RedisConnectionFactory connectionFactory;
 
-    /** @see org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration.RedisConfiguration */
+    /** @see org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration */
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
 
@@ -35,6 +39,13 @@ public class CacheService {
     /** 往 redis 放值, 并设定超时时间 */
     public void set(String key, String value, long timeOut, TimeUnit timeUnit) {
         stringRedisTemplate.opsForValue().set(key, value, timeOut, timeUnit);
+    }
+    /** 往 redis 放值, 并设定超时时间 */
+    public void set(String key, String value, Date expireTime) {
+        Date now = DateUtil.now();
+        if (expireTime.after(now)) {
+            set(key, value, DateUtil.betweenSecond(now, expireTime), TimeUnit.SECONDS);
+        }
     }
     /**
      * <pre>

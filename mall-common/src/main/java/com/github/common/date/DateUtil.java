@@ -3,6 +3,7 @@ package com.github.common.date;
 import com.github.common.util.U;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
+import org.joda.time.Seconds;
 import org.joda.time.format.DateTimeFormat;
 
 import java.text.ParseException;
@@ -175,5 +176,13 @@ public class DateUtil {
             return 0;
         }
         return Days.daysBetween(getDateTimeStart(start), getDateTimeStart(end)).getDays();
+    }
+
+    /** 计算两个日期之间相差的秒数. 如果 start 比 end 大将会返回负数 */
+    public static int betweenSecond(Date start, Date end) {
+        if (U.isBlank(start) || U.isBlank(end)) {
+            return 0;
+        }
+        return Seconds.secondsBetween(new DateTime(start), new DateTime(end)).getSeconds();
     }
 }
