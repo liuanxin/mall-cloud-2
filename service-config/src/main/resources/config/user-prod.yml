@@ -1,6 +1,6 @@
 
 spring.datasource:
-  url: jdbc:mysql://db-common-prod:3306/prod_common_db?useSSL=false&useUnicode=true&characterEncoding=utf8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&transformedBitIsBoolean=true
+  url: jdbc:mysql://db-user-prod:3306/prod_user_db?useSSL=false&useUnicode=true&characterEncoding=utf8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&transformedBitIsBoolean=true
   username: prod_common_user
   password: prod_common_pass
   hikari:
