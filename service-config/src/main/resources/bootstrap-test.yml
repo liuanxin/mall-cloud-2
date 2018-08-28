@@ -4,13 +4,11 @@ logging.config: classpath:log-test.xml
 
 spring:
   application.name: service-config
-#  cloud.config.server.git:
-#    uri: https://git.xxx.com/orign/project
-#    username: xxx
-#    password: yyy
-#    defaultLabel: develop
-  profiles.active: native
-  cloud.config.server.native.searchLocations: classpath:config/
+  cloud.config.server.git:
+    uri: https://git.xxx.com/orign/project
+    username: xxx
+    password: yyy
+    defaultLabel: develop
 
 register.center: http://test1:8761/eureka/,http://test2:8761/eureka/,http://test3:8761/eureka/
 eureka:

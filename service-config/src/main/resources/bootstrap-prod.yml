@@ -8,6 +8,7 @@ spring:
     uri: https://git.xxx.com/orign/project
     username: xxx
     password: yyy
+    defaultLabel: master
 
 register.center: http://prod1:8761/eureka/,http://prod2:8761/eureka/,http://prod3:8761/eureka/
 eureka:
