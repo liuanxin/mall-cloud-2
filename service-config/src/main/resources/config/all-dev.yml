@@ -4,5 +4,12 @@
 online: false
 
 spring:
+  # 找不到处理器时抛异常而不是发错误码
   mvc.throw-exception-if-no-handler-found: true
+  # 不由应用来转发静态资源
   resources.add-mappings: false
+
+## org.springframework.cloud.sleuth.zipkin2.ZipkinProperties
+#  zipkin.base-url: http://127.0.0.1:9411
+#  # 抽样比例, 默认是 10%, 如果 值是 1 则表示 100%, 分布式追踪数据量可能会非常大
+#  sleuth.sampler.percentage: 0.1

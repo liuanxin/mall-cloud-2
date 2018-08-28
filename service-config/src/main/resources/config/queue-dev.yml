@@ -1,6 +1,4 @@
 
-# https://docs.spring.io/spring-boot/docs/current/reference/html/common-application-properties.html
-
 spring:
   activemq:
     broker-url: failover:(tcp://ip:port)?timeout=3000&startupMaxReconnectAttempts=5

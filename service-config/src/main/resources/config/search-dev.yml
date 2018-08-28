@@ -1,4 +1,2 @@
 
-# https://docs.spring.io/spring-boot/docs/current/reference/html/common-application-properties.html
-
 search.ip-port: 127.0.0.1:9200
