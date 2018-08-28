@@ -15,9 +15,22 @@ public class EncryptTest {
     @Test
     public void aesCheck() {
         String encode = Encrypt.aesEncode(SOURCE);
+        System.out.println(encode);
         Assert.assertTrue(encode.length() > 0);
 
         String decode = Encrypt.aesDecode(encode);
+        System.out.println(decode);
+        Assert.assertEquals(SOURCE, decode);
+    }
+
+    @Test
+    public void desCheck() {
+        String encode = Encrypt.desEncode(SOURCE);
+        System.out.println(encode);
+        Assert.assertTrue(encode.length() > 0);
+
+        String decode = Encrypt.desDecode(encode);
+        System.out.println(decode);
         Assert.assertEquals(SOURCE, decode);
     }
 

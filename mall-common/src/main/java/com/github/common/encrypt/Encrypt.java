@@ -8,6 +8,10 @@ import com.github.common.util.LogUtil;
 import lombok.Data;
 
 import javax.crypto.Cipher;
+import javax.crypto.SecretKey;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.DESKeySpec;
+import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -21,44 +25,43 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-/** aes 加密解密, jwt 加密解密, base64 编码解码, md5、sha-1、sha-224、sha-256、sha-384、sha-512 加密算法 */
+/** aes des jwt 加密解密, base64 编码解码, md5、sha-1、sha-224、sha-256、sha-384、sha-512 加密算法 */
 public final class Encrypt {
 
     private static final String AES = "AES";
     /** aes 加解密时, 长度必须为 16 位的密钥 */
     private static final String AES_SECRET = "&gAe#sEn!cr*yp^t";
+    private static final int AES_LEN = 16;
+
+    private static final String DES = "DES";
+    /** des 加解密时, 长度必须为 8 位的密钥 */
+    private static final String DES_SECRET = "%d#*Es^e";
+    private static final int DES_LEN = 8;
 
     private static final String RSA = "RSA";
 
-    private static final String JWT_SECRET_KEY = "*g0$%Te#nr&y^pOt";
+    private static final String JWT_SECRET_KEY = "*W0$%Te#nr&y^pOt";
     private static final JWTSigner JWT_SIGNER = new JWTSigner(JWT_SECRET_KEY);
     private static final JWTVerifier JWT_VERIFIER = new JWTVerifier(JWT_SECRET_KEY);
-    
+
     private static final Charset UTF8 = StandardCharsets.UTF_8;
 
-    /** 使用 aes 加密 */
+    /** 使用 aes 加密(使用默认密钥) */
     public static String aesEncode(String data) {
+        return aesEncode(data, AES_SECRET);
+    }
+    /** 使用 aes 加密 */
+    public static String aesEncode(String data, String secretKey) {
         if (data == null) {
-            return "空值无法加密";
+            throw new RuntimeException("空无需使用 " + AES + " 加密");
         }
-        if (AES_SECRET.length() != 16) {
-            return "密钥必须是 16 位";
+        if (secretKey.length() != AES_LEN) {
+            throw new RuntimeException("使用 " + AES + " 加密时, 密钥必须是 " + AES_LEN + " 位");
         }
-
         try {
             Cipher cipher = Cipher.getInstance(AES);
-            cipher.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(AES_SECRET.getBytes(UTF8), AES));
-            byte[] bytes = cipher.doFinal(data.getBytes(UTF8));
-            // 二进制转换成十六进制字符
-            StringBuilder sbd = new StringBuilder();
-            for (byte bt : bytes) {
-                String hex = (Integer.toHexString(bt & 0XFF));
-                if (hex.length() == 1) {
-                    sbd.append("0");
-                }
-                sbd.append(hex);
-            }
-            return sbd.toString();
+            cipher.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(secretKey.getBytes(UTF8), AES));
+            return binary2Hex(cipher.doFinal(data.getBytes(UTF8)));
         } catch (Exception e) {
             if (LogUtil.ROOT_LOG.isWarnEnabled()) {
                 LogUtil.ROOT_LOG.warn("使用 " + AES + "(" + data + ")加密失败", e);
@@ -66,32 +69,22 @@ public final class Encrypt {
             throw new RuntimeException(AES + "(" + data + ")加密失败");
         }
     }
-
-    /** 使用 aes 解密 */
+    /** 使用 aes 解密(使用默认密钥) */
     public static String aesDecode(String data) {
+        return aesDecode(data, AES_SECRET);
+    }
+    /** 使用 aes 解密 */
+    public static String aesDecode(String data, String secretKey) {
         if (data == null || data.trim().length() == 0) {
-            return "空值无法解密";
+            throw new RuntimeException("空值无需使用 " + AES + " 解密");
         }
-        if (AES_SECRET.length() != 16) {
-            return "密钥必须是 16 位";
+        if (secretKey.length() != AES_LEN) {
+            throw new RuntimeException("使用 " + AES + " 解密时, 密钥必须是 " + AES_LEN + " 位");
         }
-
         try {
-            // 二进制转成十六进制
-            byte[] bt = data.getBytes(UTF8);
-            if ((bt.length % 2) != 0) {
-                return "非偶数位的值无法解密";
-            }
-
-            byte[] bytes = new byte[bt.length / 2];
-            for (int n = 0; n < bt.length; n += 2) {
-                String item = new String(bt, n, 2);
-                bytes[n / 2] = (byte) Integer.parseInt(item, 16);
-            }
-
             Cipher cipher = Cipher.getInstance(AES);
-            cipher.init(Cipher.DECRYPT_MODE, new SecretKeySpec(AES_SECRET.getBytes(UTF8), AES));
-            return new String(cipher.doFinal(bytes), UTF8);
+            cipher.init(Cipher.DECRYPT_MODE, new SecretKeySpec(secretKey.getBytes(UTF8), AES));
+            return new String(cipher.doFinal(hex2Binary(data)), UTF8);
         } catch (Exception e) {
             if (LogUtil.ROOT_LOG.isWarnEnabled()) {
                 LogUtil.ROOT_LOG.warn(AES + "(" + data + ")解密异常", e);
@@ -100,6 +93,61 @@ public final class Encrypt {
         }
     }
 
+    /** 使用 des 加密(使用默认密钥) */
+    public static String desEncode(String data) {
+        return desEncode(data, DES_SECRET);
+    }
+    /** 使用 des 加密 */
+    public static String desEncode(String data, String secretKey) {
+        if (data == null) {
+            throw new RuntimeException("空无需使用 " + DES + " 加密");
+        }
+        if (secretKey.length() != DES_LEN) {
+            throw new RuntimeException("使用 " + DES + " 加密时, 密钥必须是 " + DES_LEN + " 位");
+        }
+        try {
+            byte[] secretKeyBytes = secretKey.getBytes(UTF8);
+            DESKeySpec desKey = new DESKeySpec(secretKeyBytes);
+            SecretKey secretkey = SecretKeyFactory.getInstance(DES).generateSecret(desKey);
+
+            Cipher cipher = Cipher.getInstance("DES/CBC/PKCS5Padding");
+            cipher.init(Cipher.ENCRYPT_MODE, secretkey, new IvParameterSpec(secretKeyBytes));
+            return binary2Hex(cipher.doFinal(data.getBytes()));
+        } catch (Exception e) {
+            if (LogUtil.ROOT_LOG.isWarnEnabled()) {
+                LogUtil.ROOT_LOG.warn("使用 " + AES + "(" + data + ")加密失败", e);
+            }
+            throw new RuntimeException(AES + "(" + data + ")加密失败");
+        }
+    }
+    /** 使用 des 解密(使用默认密钥) */
+    public static String desDecode(String data) {
+        return desDecode(data, DES_SECRET);
+    }
+    /** 使用 des 解密 */
+    public static String desDecode(String data, String secretKey) {
+        if (data == null || data.trim().length() == 0) {
+            throw new RuntimeException("空值无需使用 " + DES + " 解密");
+        }
+        if (secretKey.length() != DES_LEN) {
+            throw new RuntimeException("使用 " + DES + " 解密时, 密钥必须是 " + DES_LEN + " 位");
+        }
+        try {
+            byte[] secretKeyBytes = secretKey.getBytes(UTF8);
+            DESKeySpec desKey = new DESKeySpec(secretKeyBytes);
+            SecretKey key = SecretKeyFactory.getInstance(DES).generateSecret(desKey);
+            Cipher cipher = Cipher.getInstance("DES/CBC/PKCS5Padding");
+            cipher.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(secretKeyBytes));
+            return new String(cipher.doFinal(hex2Binary(data)), UTF8);
+        } catch (Exception e) {
+            if (LogUtil.ROOT_LOG.isWarnEnabled()) {
+                LogUtil.ROOT_LOG.warn(AES + "(" + data + ")解密异常", e);
+            }
+            throw new RuntimeException(AES + "(" + data + ")解密时异常");
+        }
+    }
+
+
     @Data
     public static class RsaPair {
         /** 公钥, 发给客户端 */
@@ -107,7 +155,6 @@ public final class Encrypt {
         /** 私钥, 保存到文件 */
         private String privateKey;
     }
-
     /** 生成 rsa 的密钥对 */
     public static RsaPair genericRsaKeyPair(int keyLength) {
         try {
@@ -126,7 +173,6 @@ public final class Encrypt {
             throw new RuntimeException("RSA(" + keyLength + ")生成密钥对时异常");
         }
     }
-
     /** 使用 rsa 的公钥加密 */
     public static String rsaEncode(String publicKey, String data) {
         try {
@@ -147,7 +193,6 @@ public final class Encrypt {
             throw new RuntimeException("RSA(" + data + ")加密失败");
         }
     }
-
     /** 使用 rsa 的私钥解密 */
     public static String rsaDecode(String privateKey, String data) {
         try {
@@ -169,7 +214,7 @@ public final class Encrypt {
         }
     }
 
-    
+
     /** 使用 jwt 将 map 加密, 其内部默认使用 HmacSHA256 算法 */
     public static String jwtEncode(Map<String, Object> map) {
         return JWT_SIGNER.sign(map);
@@ -292,13 +337,7 @@ public final class Encrypt {
         try {
             MessageDigest md = MessageDigest.getInstance(method);
             md.update(src.getBytes());
-            byte[] byteArray = md.digest();
-
-            StringBuilder sbd = new StringBuilder();
-            for (byte b : byteArray) {
-                sbd.append(Integer.toString((b & 0xff) + 0x100, 16).substring(1));
-            }
-            return sbd.toString();
+            return binary2Hex(md.digest());
         } catch (Exception e) {
             if (LogUtil.ROOT_LOG.isWarnEnabled()) {
                 LogUtil.ROOT_LOG.warn("无法给(" + src + ")生成(" + method + ")摘要", e);
@@ -315,17 +354,40 @@ public final class Encrypt {
             while ((len = in.read(buffer, 0, count)) != -1) {
                 md.update(buffer, 0, len);
             }
-
-            StringBuilder sbd = new StringBuilder();
-            for (byte b : md.digest()) {
-                sbd.append(Integer.toString((b & 0xff) + 0x100, 16).substring(1));
-            }
-            return sbd.toString();
+            return binary2Hex(md.digest());
         } catch (Exception e) {
             if (LogUtil.ROOT_LOG.isWarnEnabled()) {
                 LogUtil.ROOT_LOG.warn("无法生成 md5", e);
             }
             throw new RuntimeException("无法生成 md5");
         }
+    }
+
+    /** 二进制 转换成 十六进制字符串 */
+    public static String binary2Hex(byte[] bytes) {
+        StringBuilder sbd = new StringBuilder();
+
+        for (byte b : bytes) {
+            /*
+            String hex = (Integer.toHexString(b & 0XFF));
+            if (hex.length() == 1) {
+                sbd.append("0");
+            }
+            sbd.append(hex);
+            */
+            // 上面和下面等同
+            sbd.append(Integer.toString((b & 0xff) + 0x100, 16).substring(1));
+        }
+        return sbd.toString();
+    }
+    /** 十六进制字符串 转换成 二进制 */
+    public static byte[] hex2Binary(String data) {
+        byte[] bt = data.getBytes(UTF8);
+        byte[] bytes = new byte[bt.length / 2];
+        for (int n = 0; n < bt.length; n += 2) {
+            String item = new String(bt, n, 2);
+            bytes[n / 2] = (byte) Integer.parseInt(item, 16);
+        }
+        return bytes;
     }
 }
