@@ -7,6 +7,7 @@ import com.github.common.encrypt.jwt.JWTVerifyException;
 import com.github.common.util.LogUtil;
 import lombok.Data;
 
+import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
@@ -25,16 +26,17 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-/** aes des jwt 加密解密, base64 编码解码, md5、sha-1、sha-224、sha-256、sha-384、sha-512 加密算法 */
+/** AES、DES、DES/CBC/PKCS5Padding、jwt 加密解密, base64 编码解码, md5、sha-1、sha-224、sha-256、sha-384、sha-512 加密算法 */
 public final class Encrypt {
 
     private static final String AES = "AES";
-    /** aes 加解密时, 长度必须为 16 位的密钥 */
+    /** aes 加解密时, 长度必须是 16 位的密钥 */
     private static final String AES_SECRET = "&gAe#sEn!cr*yp^t";
     private static final int AES_LEN = 16;
 
     private static final String DES = "DES";
-    /** des 加解密时, 长度必须为 8 位的密钥 */
+    private static final String DES_CBC_PKCS5PADDING = "DES/CBC/PKCS5Padding";
+    /** des 加解密时, 长度必须是 8 位的密钥 */
     private static final String DES_SECRET = "%d#*Es^e";
     private static final int DES_LEN = 8;
 
@@ -56,7 +58,7 @@ public final class Encrypt {
             throw new RuntimeException("空无需使用 " + AES + " 加密");
         }
         if (secretKey.length() != AES_LEN) {
-            throw new RuntimeException("使用 " + AES + " 加密时, 密钥必须是 " + AES_LEN + " 位");
+            throw new RuntimeException(AES + " 加密时, 密钥必须是 " + AES_LEN + " 位");
         }
         try {
             Cipher cipher = Cipher.getInstance(AES);
@@ -64,9 +66,9 @@ public final class Encrypt {
             return binary2Hex(cipher.doFinal(data.getBytes(UTF8)));
         } catch (Exception e) {
             if (LogUtil.ROOT_LOG.isWarnEnabled()) {
-                LogUtil.ROOT_LOG.warn("使用 " + AES + "(" + data + ")加密失败", e);
+                LogUtil.ROOT_LOG.warn(AES + "(" + data + ")加密异常", e);
             }
-            throw new RuntimeException(AES + "(" + data + ")加密失败");
+            throw new RuntimeException(AES + "(" + data + ")加密异常");
         }
     }
     /** 使用 aes 解密(使用默认密钥) */
@@ -79,17 +81,22 @@ public final class Encrypt {
             throw new RuntimeException("空值无需使用 " + AES + " 解密");
         }
         if (secretKey.length() != AES_LEN) {
-            throw new RuntimeException("使用 " + AES + " 解密时, 密钥必须是 " + AES_LEN + " 位");
+            throw new RuntimeException(AES + " 解密时, 密钥必须是 " + AES_LEN + " 位");
         }
         try {
             Cipher cipher = Cipher.getInstance(AES);
             cipher.init(Cipher.DECRYPT_MODE, new SecretKeySpec(secretKey.getBytes(UTF8), AES));
             return new String(cipher.doFinal(hex2Binary(data)), UTF8);
+        } catch (BadPaddingException e) {
+            if (LogUtil.ROOT_LOG.isWarnEnabled()) {
+                LogUtil.ROOT_LOG.warn(AES + "(" + data + ")解密时密钥错误", e);
+            }
+            throw new RuntimeException(AES + "(" + data + ")解密时密钥错误");
         } catch (Exception e) {
             if (LogUtil.ROOT_LOG.isWarnEnabled()) {
                 LogUtil.ROOT_LOG.warn(AES + "(" + data + ")解密异常", e);
             }
-            throw new RuntimeException(AES + "(" + data + ")解密时异常");
+            throw new RuntimeException(AES + "(" + data + ")解密异常");
         }
     }
 
@@ -103,19 +110,18 @@ public final class Encrypt {
             throw new RuntimeException("空无需使用 " + DES + " 加密");
         }
         if (secretKey.length() != DES_LEN) {
-            throw new RuntimeException("使用 " + DES + " 加密时, 密钥必须是 " + DES_LEN + " 位");
+            throw new RuntimeException(DES + " 加密时, 密钥必须是 " + DES_LEN + " 位");
         }
         try {
-            byte[] secretKeyBytes = secretKey.getBytes(UTF8);
-            DESKeySpec desKey = new DESKeySpec(secretKeyBytes);
+            DESKeySpec desKey = new DESKeySpec(secretKey.getBytes(UTF8));
             SecretKey secretkey = SecretKeyFactory.getInstance(DES).generateSecret(desKey);
 
-            Cipher cipher = Cipher.getInstance("DES/CBC/PKCS5Padding");
-            cipher.init(Cipher.ENCRYPT_MODE, secretkey, new IvParameterSpec(secretKeyBytes));
+            Cipher cipher = Cipher.getInstance(DES);
+            cipher.init(Cipher.ENCRYPT_MODE, secretkey, new SecureRandom());
             return binary2Hex(cipher.doFinal(data.getBytes()));
         } catch (Exception e) {
             if (LogUtil.ROOT_LOG.isWarnEnabled()) {
-                LogUtil.ROOT_LOG.warn("使用 " + AES + "(" + data + ")加密失败", e);
+                LogUtil.ROOT_LOG.warn(AES + "(" + data + ")加密失败", e);
             }
             throw new RuntimeException(AES + "(" + data + ")加密失败");
         }
@@ -130,20 +136,84 @@ public final class Encrypt {
             throw new RuntimeException("空值无需使用 " + DES + " 解密");
         }
         if (secretKey.length() != DES_LEN) {
-            throw new RuntimeException("使用 " + DES + " 解密时, 密钥必须是 " + DES_LEN + " 位");
+            throw new RuntimeException(DES + " 解密时, 密钥必须是 " + DES_LEN + " 位");
+        }
+        try {
+            DESKeySpec desKey = new DESKeySpec(secretKey.getBytes(UTF8));
+            SecretKey secretkey = SecretKeyFactory.getInstance(DES).generateSecret(desKey);
+
+            Cipher cipher = Cipher.getInstance(DES);
+            cipher.init(Cipher.DECRYPT_MODE, secretkey, new SecureRandom());
+            return new String(cipher.doFinal(hex2Binary(data)), UTF8);
+        } catch (BadPaddingException e) {
+            if (LogUtil.ROOT_LOG.isWarnEnabled()) {
+                LogUtil.ROOT_LOG.warn(DES + "(" + data + ")解密时密钥错误", e);
+            }
+            throw new RuntimeException(DES + "(" + data + ")解密时密钥错误");
+        } catch (Exception e) {
+            if (LogUtil.ROOT_LOG.isWarnEnabled()) {
+                LogUtil.ROOT_LOG.warn(DES + "(" + data + ")解密异常", e);
+            }
+            throw new RuntimeException(DES + "(" + data + ")解密异常");
+        }
+    }
+
+    /** 使用 DES/CBC/PKCS5Padding 加密(使用默认密钥) */
+    public static String desCbcEncode(String data) {
+        return desCbcEncode(data, DES_SECRET);
+    }
+    /** 使用 DES/CBC/PKCS5Padding 加密 */
+    public static String desCbcEncode(String data, String secretKey) {
+        if (data == null) {
+            throw new RuntimeException("空无需使用 " + DES_CBC_PKCS5PADDING + " 加密");
+        }
+        if (secretKey.length() != DES_LEN) {
+            throw new RuntimeException(DES_CBC_PKCS5PADDING + " 加密时, 密钥必须是 " + DES_LEN + " 位");
+        }
+        try {
+            byte[] secretKeyBytes = secretKey.getBytes(UTF8);
+            DESKeySpec desKey = new DESKeySpec(secretKeyBytes);
+            SecretKey secretkey = SecretKeyFactory.getInstance(DES).generateSecret(desKey);
+
+            Cipher cipher = Cipher.getInstance(DES_CBC_PKCS5PADDING);
+            cipher.init(Cipher.ENCRYPT_MODE, secretkey, new IvParameterSpec(secretKeyBytes));
+            return binary2Hex(cipher.doFinal(data.getBytes()));
+        } catch (Exception e) {
+            if (LogUtil.ROOT_LOG.isWarnEnabled()) {
+                LogUtil.ROOT_LOG.warn(DES_CBC_PKCS5PADDING + "(" + data + ")加密失败", e);
+            }
+            throw new RuntimeException(DES_CBC_PKCS5PADDING + "(" + data + ")加密失败");
+        }
+    }
+    /** 使用 DES/CBC/PKCS5Padding 解密(使用默认密钥) */
+    public static String desCbcDecode(String data) {
+        return desCbcDecode(data, DES_SECRET);
+    }
+    /** 使用 DES/CBC/PKCS5Padding 解密 */
+    public static String desCbcDecode(String data, String secretKey) {
+        if (data == null || data.trim().length() == 0) {
+            throw new RuntimeException("空值无需使用 " + DES_CBC_PKCS5PADDING + " 解密");
+        }
+        if (secretKey.length() != DES_LEN) {
+            throw new RuntimeException(DES_CBC_PKCS5PADDING + " 解密时, 密钥必须是 " + DES_LEN + " 位");
         }
         try {
             byte[] secretKeyBytes = secretKey.getBytes(UTF8);
             DESKeySpec desKey = new DESKeySpec(secretKeyBytes);
             SecretKey key = SecretKeyFactory.getInstance(DES).generateSecret(desKey);
-            Cipher cipher = Cipher.getInstance("DES/CBC/PKCS5Padding");
+            Cipher cipher = Cipher.getInstance(DES_CBC_PKCS5PADDING);
             cipher.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(secretKeyBytes));
             return new String(cipher.doFinal(hex2Binary(data)), UTF8);
+        } catch (BadPaddingException e) {
+            if (LogUtil.ROOT_LOG.isWarnEnabled()) {
+                LogUtil.ROOT_LOG.warn(DES_CBC_PKCS5PADDING + "(" + data + ")解密时密钥错误", e);
+            }
+            throw new RuntimeException(DES_CBC_PKCS5PADDING + "(" + data + ")解密时密钥错误");
         } catch (Exception e) {
             if (LogUtil.ROOT_LOG.isWarnEnabled()) {
-                LogUtil.ROOT_LOG.warn(AES + "(" + data + ")解密异常", e);
+                LogUtil.ROOT_LOG.warn(DES_CBC_PKCS5PADDING + "(" + data + ")解密异常", e);
             }
-            throw new RuntimeException(AES + "(" + data + ")解密时异常");
+            throw new RuntimeException(DES_CBC_PKCS5PADDING + "(" + data + ")解密时异常");
         }
     }
 

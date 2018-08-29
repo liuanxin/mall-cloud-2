@@ -25,12 +25,26 @@ public class EncryptTest {
 
     @Test
     public void desCheck() {
+        String key = "12345678";
+        String abc = Encrypt.desEncode("abc", key);
+        System.out.println(abc);
+        String dec = Encrypt.desDecode(abc, key);
+        System.out.println(dec);
+
         String encode = Encrypt.desEncode(SOURCE);
-        System.out.println(encode);
+        System.out.println("des: " + encode);
         Assert.assertTrue(encode.length() > 0);
 
         String decode = Encrypt.desDecode(encode);
-        System.out.println(decode);
+        System.out.println("des: " + decode);
+        Assert.assertEquals(SOURCE, decode);
+
+        encode = Encrypt.desCbcEncode(SOURCE);
+        System.out.println("des/cbc: " + encode);
+        Assert.assertTrue(encode.length() > 0);
+
+        decode = Encrypt.desCbcDecode(encode);
+        System.out.println("des/cbc: " + decode);
         Assert.assertEquals(SOURCE, decode);
     }
 
