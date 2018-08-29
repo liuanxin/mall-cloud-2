@@ -42,6 +42,8 @@ public final class Encrypt {
 
     private static final String RSA = "RSA";
 
+    private static final String RC4_SECRET_KEY = "^&NK$1j8kO#h=)hU";
+
     private static final String JWT_SECRET_KEY = "*W0$%Te#nr&y^pOt";
     private static final JWTSigner JWT_SIGNER = new JWTSigner(JWT_SECRET_KEY);
     private static final JWTVerifier JWT_VERIFIER = new JWTVerifier(JWT_SECRET_KEY);
@@ -317,9 +319,25 @@ public final class Encrypt {
         return Collections.emptyMap();
     }
 
-    
+
+    /** 使用 rc4 加密(使用默认密钥) */
+    public static String rc4Encode(String input) {
+        return rc4Encode(input, RC4_SECRET_KEY);
+    }
+    /** 使用 rc4 加密 */
+    public static String rc4Encode(String input, String key) {
+        return base64Encode(rc4(input, key));
+    }
+    /** 使用 rc4 解密(使用默认密钥) */
+    public static String rc4Decode(String input) {
+        return rc4Decode(input, RC4_SECRET_KEY);
+    }
+    /** 使用 rc4 解密 */
+    public static String rc4Decode(String input, String key) {
+        return rc4(base64Decode(input), key);
+    }
     /** 使用 rc4 加解密, 如果是密文调用此方法将返回明文 */
-    public static String rc4(String input, String key) {
+    private static String rc4(String input, String key) {
         int[] iS = new int[256];
         byte[] iK = new byte[256];
 
@@ -359,12 +377,26 @@ public final class Encrypt {
 
     /** 使用 base64 编码 */
     public static String base64Encode(String src) {
-        return new String(Base64.getEncoder().encode(src.getBytes(UTF8)), UTF8);
+        try {
+            return new String(Base64.getEncoder().encode(src.getBytes(UTF8)), UTF8);
+        } catch (Exception e) {
+            if (LogUtil.ROOT_LOG.isWarnEnabled()) {
+                LogUtil.ROOT_LOG.warn("base64(" + src + ")编码失败", e);
+            }
+            throw new RuntimeException("base64 编码失败");
+        }
     }
 
     /** 使用 base64 解码 */
     public static String base64Decode(String src) {
-        return new String(Base64.getDecoder().decode(src.getBytes(UTF8)), UTF8);
+        try {
+            return new String(Base64.getDecoder().decode(src.getBytes(UTF8)), UTF8);
+        } catch (Exception e) {
+            if (LogUtil.ROOT_LOG.isWarnEnabled()) {
+                LogUtil.ROOT_LOG.warn("base64(" + src + ")解码失败", e);
+            }
+            throw new RuntimeException("base64 解码失败");
+        }
     }
 
 

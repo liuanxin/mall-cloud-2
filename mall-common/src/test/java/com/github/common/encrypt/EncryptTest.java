@@ -129,6 +129,16 @@ public class EncryptTest {
     }
 
     @Test
+    public void rc4Test() {
+        String encode = Encrypt.rc4Encode(SOURCE);
+        System.out.println(encode);
+
+        String decode = Encrypt.rc4Decode(encode);
+        System.out.println(decode);
+        Assert.assertTrue(SOURCE.equals(decode));
+    }
+
+    @Test
     public void digestTest() {
         String encode = Encrypt.to16Md5(SOURCE);
         Assert.assertTrue(encode.length() == 16);
