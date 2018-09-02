@@ -17,6 +17,6 @@ eureka:
 
 spring.cloud.config:
   discovery.enabled: true
-  discovery.serviceId: service-config
+  discovery.serviceId: config-server
   name: all,${spring.application.name}
   profile: test

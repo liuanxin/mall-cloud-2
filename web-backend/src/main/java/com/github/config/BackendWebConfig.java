@@ -15,8 +15,8 @@ import java.util.List;
 
 /**
  * @see org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
- * @see WebMvcConfigurationSupport
- * @see org.springframework.boot.autoconfigure.web.WebMvcAutoConfiguration.WebMvcAutoConfigurationAdapter
+ * @see org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport
+ * @see org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration
  */
 @Configuration
 public class BackendWebConfig extends WebMvcConfigurationSupport {

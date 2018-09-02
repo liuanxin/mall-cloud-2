@@ -1,11 +1,12 @@
 
-server.port: 8001
+server.port: 8888
 logging.config: classpath:log-dev.xml
 
 spring:
-  application.name: service-config
+  application.name: config-server
   profiles.active: native
-  cloud.config.server.native.searchLocations: file:/home/tony/desktop/config/
+  cloud.config.server.native.searchLocations: file:/home/tony/project/mall-cloud-2/service-config/src/main/resources/config/
+#  cloud.config.server.native.searchLocations: classpath:config/
 
 register.center: http://127.0.0.1:8761/eureka/
 eureka:

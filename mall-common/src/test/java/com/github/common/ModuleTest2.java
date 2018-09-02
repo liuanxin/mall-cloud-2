@@ -787,11 +787,8 @@ class Server {
             "    }\n" +
             "}\n";
 
-    private static final String APPLICATION_YML = "\n" +
-            "# https://docs.spring.io/spring-boot/docs/current/reference/html/common-application-properties.html\n" +
-            "\n" +
-            "server.port: %s\n" +
-            "\n" +
+
+    private static final String BOOTSTRAP_YML = "\n" +
             "logging.config: classpath:log-dev.xml\n" +
             "\n" +
             "spring.application.name: %s\n" +
@@ -799,18 +796,9 @@ class Server {
             "register.center: http://127.0.0.1:" + REGISTER_CENTER_PORT + "/eureka/\n" +
             "eureka:\n" +
             "  client:\n" +
-            "    # 开启健康检查(需要 spring-boot-starter-actuator 包)\n" +
-            "    healthcheck.enabled: true\n" +
             "    # 客户端间隔多久去拉取服务注册信息, 默认为 30 秒\n" +
             "    registry-fetch-interval-seconds: 20\n" +
             "    serviceUrl.defaultZone: ${register.center}\n" +
-            "  instance:\n" +
-            "    # 注册到服务器的是 ip 地址, 不要用主机名(只在开发时这样, 测试和线上还是用默认)\n" +
-            "    prefer-ip-address: true\n" +
-            "    # 客户端发送心跳给注册中心的频率, 默认 30 秒\n" +
-            "    lease-renewal-interval-in-seconds: 20\n" +
-            "    # 服务端在收到最后一个心跳后的等待时间. 超出将移除该实例, 默认 90 秒, 此值至少要大于 lease-renewal-interval-in-seconds\n" +
-            "    lease-expiration-duration-in-seconds: 60\n" +
             "\n" +
             "spring.cloud.config:\n" +
             "#  uri: http://127.0.0.1:8001/\n" +
@@ -821,9 +809,7 @@ class Server {
             "\n" +
             "management.endpoints.web.exposure.include: \"*\"\n";
 
-    private static final String APPLICATION_TEST_YML = "\n" +
-            "server.port: %s\n" +
-            "\n" +
+    private static final String BOOTSTRAP_TEST_YML = "\n" +
             "logging.config: classpath:log-test.xml\n" +
             "\n" +
             "spring.application.name: %s\n" +
@@ -832,12 +818,8 @@ class Server {
             REGISTER_CENTER_PORT + "/eureka/,http://test3:" + REGISTER_CENTER_PORT + "/eureka/\n" +
             "eureka:\n" +
             "  client:\n" +
-            "    healthcheck.enabled: true\n" +
             "    registry-fetch-interval-seconds: 10\n" +
             "    serviceUrl.defaultZone: ${register.center}\n" +
-            "  instance:\n" +
-            "    lease-renewal-interval-in-seconds: 10\n" +
-            "    lease-expiration-duration-in-seconds: 30\n" +
             "\n" +
             "spring.cloud.config:\n" +
             "  discovery.enabled: true\n" +
@@ -847,9 +829,7 @@ class Server {
             "\n" +
             "management.endpoints.web.exposure.include: \"*\"\n";
 
-    private static final String APPLICATION_PROD_YML = "\n" +
-            "server.port: %s\n" +
-            "\n" +
+    private static final String BOOTSTRAP_PROD_YML = "\n" +
             "logging.config: classpath:log-prod.xml\n" +
             "\n" +
             "spring.application.name: %s\n" +
@@ -858,12 +838,8 @@ class Server {
             REGISTER_CENTER_PORT + "/eureka/,http://prod3:" + REGISTER_CENTER_PORT + "/eureka/\n" +
             "eureka:\n" +
             "  client:\n" +
-            "    healthcheck.enabled: true\n" +
             "    registry-fetch-interval-seconds: 5\n" +
             "    serviceUrl.defaultZone: ${register.center}\n" +
-            "  instance:\n" +
-            "    lease-renewal-interval-in-seconds: 5\n" +
-            "    lease-expiration-duration-in-seconds: 15\n" +
             "\n" +
             "spring.cloud.config:\n" +
             "  discovery.enabled: true\n" +
@@ -873,9 +849,67 @@ class Server {
             "\n" +
             "management.endpoints.web.exposure.include: \"*\"\n";
 
+    private static final String APPLICATION_YML = "\n" +
+            "# https://docs.spring.io/spring-boot/docs/current/reference/html/common-application-properties.html\n" +
+            "\n" +
+            "server.port: %s\n" +
+            "\n" +
+            "eureka:\n" +
+            "  # 开启健康检查(需要 spring-boot-starter-actuator 包)\n" +
+            "  client.healthcheck.enabled: true\n" +
+            "  instance:\n" +
+            "    # 注册到服务器的是 ip 地址, 不要用主机名(只在开发时这样, 测试和线上还是用默认)\n" +
+            "    prefer-ip-address: true\n" +
+            "    # 客户端发送心跳给注册中心的频率, 默认 30 秒\n" +
+            "    lease-renewal-interval-in-seconds: 20\n" +
+            "    # 服务端在收到最后一个心跳后的等待时间. 超出将移除该实例, 默认 90 秒, 此值至少要大于 lease-renewal-interval-in-seconds\n" +
+            "    lease-expiration-duration-in-seconds: 60\n";
+
+    private static final String APPLICATION_TEST_YML = "\n" +
+            "server.port: %s\n" +
+            "\n" +
+            "eureka:\n" +
+            "  client.healthcheck.enabled: true\n" +
+            "  instance:\n" +
+            "    lease-renewal-interval-in-seconds: 10\n" +
+            "    lease-expiration-duration-in-seconds: 30\n";
+
+    private static final String APPLICATION_PROD_YML = "\n" +
+            "server.port: %s\n" +
+            "\n" +
+            "eureka:\n" +
+            "  client.healthcheck.enabled: true\n" +
+            "  instance:\n" +
+            "    lease-renewal-interval-in-seconds: 5\n" +
+            "    lease-expiration-duration-in-seconds: 15\n";
+
+
     private static final String CONFIG = "\n"+
             "# 当前文件是主要为了抑制 <No URLs will be polled as dynamic configuration sources> 这个警告. 无其他用处\n"+
             "# see com.netflix.config.sources.URLConfigurationSource.URLConfigurationSource()\n";
+
+
+    private static final String LOG = "    <logger name=\"zipkin.autoconfigure\" level=\"~LEVEL~\"/>\n" +
+                    "    <logger name=\"io.undertow\" level=\"~LEVEL~\"/>\n" +
+                    "    <logger name=\"freemarker\" level=\"~LEVEL~\"/>\n" +
+                    "\n" +
+                    "    <logger name=\"" + PACKAGE + ".~MODULE_NAME~.repository\" level=\"~LEVEL~\"/>\n" +
+                    "    <logger name=\"" + PACKAGE + ".common.mvc\" level=\"~LEVEL~\"/>\n" +
+                    "\n" +
+                    "    <logger name=\"com.netflix\" level=\"~LEVEL~\"/>\n" +
+                    "    <!--<logger name=\"com.github\" level=\"~LEVEL~\"/>-->\n" +
+                    "    <logger name=\"com.zaxxer\" level=\"~LEVEL~\"/>\n" +
+                    "    <logger name=\"com.sun\" level=\"~LEVEL~\"/>\n" +
+                    "\n" +
+                    "    <logger name=\"org.springframework\" level=\"~LEVEL~\"/>\n" +
+                    "    <logger name=\"org.hibernate\" level=\"~LEVEL~\"/>\n" +
+                    "    <logger name=\"org.mybatis\" level=\"~LEVEL~\"/>\n" +
+                    "    <logger name=\"org.apache\" level=\"~LEVEL~\"/>\n" +
+                    "    <logger name=\"org.jboss\" level=\"~LEVEL~\"/>\n" +
+                    "\n" +
+                    "    <logger name=\"io.lettuce\" level=\"~LEVEL~\"/>\n" +
+                    "    <logger name=\"io.netty\" level=\"~LEVEL~\"/>\n" +
+                    "    <logger name=\"reactor\" level=\"~LEVEL~\"/>\n";
 
     private static final String LOG_XML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
             "<configuration>\n" +
@@ -883,27 +917,7 @@ class Server {
             "    <property name=\"CONSOLE_LOG_PATTERN\" value=\"[%X{receiveTime}%d] [${PID:- } %t\\\\(%logger\\\\) : %p]%X{requestInfo}%n%class.%method\\\\(%file:%line\\\\)%n%m%n%n\"/>\n" +
             "    <include resource=\"org/springframework/boot/logging/logback/console-appender.xml\" />\n" +
             "\n\n" +
-            "    <logger name=\"zipkin.autoconfigure\" level=\"warn\"/>\n" +
-            "    <logger name=\"io.undertow\" level=\"warn\"/>\n" +
-            "    <logger name=\"freemarker\" level=\"warn\"/>\n" +
-            "\n" +
-            "    <logger name=\"" + PACKAGE + ".~MODULE_NAME~.repository\" level=\"warn\"/>\n" +
-            "    <logger name=\"" + PACKAGE + ".common.mvc\" level=\"warn\"/>\n" +
-            "\n" +
-            "    <logger name=\"com.netflix\" level=\"warn\"/>\n" +
-            "    <!--<logger name=\"com.github\" level=\"warn\"/>-->\n" +
-            "    <logger name=\"com.zaxxer\" level=\"warn\"/>\n" +
-            "    <logger name=\"com.sun\" level=\"warn\"/>\n" +
-            "\n" +
-            "    <logger name=\"org.springframework\" level=\"warn\"/>\n" +
-            "    <logger name=\"org.hibernate\" level=\"warn\"/>\n" +
-            "    <logger name=\"org.mybatis\" level=\"warn\"/>\n" +
-            "    <logger name=\"org.apache\" level=\"warn\"/>\n" +
-            "    <logger name=\"org.jboss\" level=\"warn\"/>\n" +
-            "\n" +
-            "    <logger name=\"io.lettuce\" level=\"warn\"/>\n" +
-            "    <logger name=\"io.netty\" level=\"warn\"/>\n" +
-            "    <logger name=\"reactor\" level=\"warn\"/>\n" +
+            LOG.replace("~LEVEL~", "warn") +
             "\n\n" +
             "    <root level=\"debug\">\n" +
             "        <appender-ref ref=\"CONSOLE\"/>\n" +
@@ -946,27 +960,7 @@ class Server {
             "        <appender-ref ref=\"SQL\" />\n" +
             "    </logger>\n" +
             "\n\n" +
-            "    <logger name=\"zipkin.autoconfigure\" level=\"warn\"/>\n" +
-            "    <logger name=\"io.undertow\" level=\"warn\"/>\n" +
-            "    <logger name=\"freemarker\" level=\"warn\"/>\n" +
-            "\n" +
-            "    <logger name=\"" + PACKAGE + ".~MODULE_NAME~.repository\" level=\"warn\"/>\n" +
-            "    <logger name=\"" + PACKAGE + ".common.mvc\" level=\"warn\"/>\n" +
-            "\n" +
-            "    <logger name=\"com.netflix\" level=\"warn\"/>\n" +
-            "    <!--<logger name=\"com.github\" level=\"warn\"/>-->\n" +
-            "    <logger name=\"com.zaxxer\" level=\"warn\"/>\n" +
-            "    <logger name=\"com.sun\" level=\"warn\"/>\n" +
-            "\n" +
-            "    <logger name=\"org.springframework\" level=\"warn\"/>\n" +
-            "    <logger name=\"org.hibernate\" level=\"warn\"/>\n" +
-            "    <logger name=\"org.mybatis\" level=\"warn\"/>\n" +
-            "    <logger name=\"org.apache\" level=\"warn\"/>\n" +
-            "    <logger name=\"org.jboss\" level=\"warn\"/>\n" +
-            "\n" +
-            "    <logger name=\"io.lettuce\" level=\"warn\"/>\n" +
-            "    <logger name=\"io.netty\" level=\"warn\"/>\n" +
-            "    <logger name=\"reactor\" level=\"warn\"/>\n" +
+            LOG.replace("~LEVEL~", "warn") +
             "\n\n" +
             "    <root level=\"debug\">\n" +
             "        <appender-ref ref=\"PROJECT\"/>\n" +
@@ -994,27 +988,7 @@ class Server {
             "        <appender-ref ref =\"PROJECT\"/>\n" +
             "    </appender>\n" +
             "\n\n" +
-            "    <logger name=\"zipkin.autoconfigure\" level=\"error\"/>\n" +
-            "    <logger name=\"io.undertow\" level=\"error\"/>\n" +
-            "    <logger name=\"freemarker\" level=\"error\"/>\n" +
-            "\n" +
-            "    <logger name=\"" + PACKAGE + ".~MODULE_NAME~.repository\" level=\"error\"/>\n" +
-            "    <logger name=\"" + PACKAGE + ".common.mvc\" level=\"error\"/>\n" +
-            "\n" +
-            "    <logger name=\"com.netflix\" level=\"error\"/>\n" +
-            "    <!--<logger name=\"com.github\" level=\"error\"/>-->\n" +
-            "    <logger name=\"com.zaxxer\" level=\"error\"/>\n" +
-            "    <logger name=\"com.sun\" level=\"error\"/>\n" +
-            "\n" +
-            "    <logger name=\"org.springframework\" level=\"error\"/>\n" +
-            "    <logger name=\"org.hibernate\" level=\"error\"/>\n" +
-            "    <logger name=\"org.mybatis\" level=\"error\"/>\n" +
-            "    <logger name=\"org.apache\" level=\"error\"/>\n" +
-            "    <logger name=\"org.jboss\" level=\"error\"/>\n" +
-            "\n" +
-            "    <logger name=\"io.lettuce\" level=\"warn\"/>\n" +
-            "    <logger name=\"io.netty\" level=\"warn\"/>\n" +
-            "    <logger name=\"reactor\" level=\"warn\"/>\n" +
+            LOG.replace("~LEVEL~", "error") +
             "\n\n" +
             "    <root level=\"info\">\n" +
             "        <appender-ref ref=\"ASYNC\"/>\n" +
@@ -1067,6 +1041,10 @@ class Server {
 //            "                    <artifactId>tomcat-jdbc</artifactId>\n" +
 //            "                </exclusion>\n" +
 //            "            </exclusions>\n" +
+            "        </dependency>\n" +
+            "        <dependency>\n" +
+            "            <groupId>org.springframework.boot</groupId>\n" +
+            "            <artifactId>spring-boot-starter-data-redis</artifactId>\n" +
             "        </dependency>\n" +
             "\n" +
             "        <dependency>\n" +
@@ -1197,14 +1175,21 @@ class Server {
         new File(resourcePath, parentPackageName).mkdir();
         new File(resourcePath, parentPackageName + "-custom").mkdir();
 
-        String applicationYml = String.format(APPLICATION_YML, port, packageName);
-        writeFile(new File(resourcePath, "bootstrap.yml"), applicationYml);
-        String applicationTestYml = String.format(APPLICATION_TEST_YML, port,
-                packageName, packageName, packageName, packageName);
-        writeFile(new File(resourcePath, "bootstrap-test.yml"), applicationTestYml);
-        String applicationProdYml = String.format(APPLICATION_PROD_YML, port,
-                packageName, packageName, packageName, packageName);
-        writeFile(new File(resourcePath, "bootstrap-prod.yml"), applicationProdYml);
+
+        String bootstrapYml = String.format(BOOTSTRAP_YML, packageName);
+        writeFile(new File(resourcePath, "bootstrap.yml"), bootstrapYml);
+        String bootstrapTestYml = String.format(BOOTSTRAP_TEST_YML, packageName);
+        writeFile(new File(resourcePath, "bootstrap-test.yml"), bootstrapTestYml);
+        String bootstrapProdYml = String.format(BOOTSTRAP_PROD_YML, packageName);
+        writeFile(new File(resourcePath, "bootstrap-prod.yml"), bootstrapProdYml);
+
+        String applicationYml = String.format(APPLICATION_YML, port);
+        writeFile(new File(resourcePath, "application.yml"), applicationYml);
+        String applicationTestYml = String.format(APPLICATION_TEST_YML, port);
+        writeFile(new File(resourcePath, "application-test.yml"), applicationTestYml);
+        String applicationProdYml = String.format(APPLICATION_PROD_YML, port);
+        writeFile(new File(resourcePath, "application-prod.yml"), applicationProdYml);
+
 
         writeFile(new File(resourcePath, "config.properties"), CONFIG);
 

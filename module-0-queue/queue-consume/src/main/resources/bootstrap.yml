@@ -24,7 +24,7 @@ eureka:
 spring.cloud.config:
 #  uri: http://127.0.0.1:8001/
   discovery.enabled: true
-  discovery.serviceId: service-config
+  discovery.serviceId: config-server
   name: all,queue
   profile: dev
 

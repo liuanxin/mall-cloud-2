@@ -8,3 +8,18 @@ spring:
   http.multipart:
     maxFileSize: 12Mb
     maxRequestSize: 20Mb
+
+zuul:
+  ignoredServices: '*'
+  routes:
+    user:
+      path: /user/**
+      serviceId: user
+#      stripPrefix: false
+    product:
+      path: /product/**
+      url:
+#    static:
+#      path: /static/**
+#      url: http://127.0.0.1:xxxx/static
+

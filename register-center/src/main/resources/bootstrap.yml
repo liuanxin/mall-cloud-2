@@ -18,7 +18,7 @@ eureka:
   # spring-cloud-netflix-eureka-server.jar!/spring-configuration-metadata.json
   server:
     # 关闭自我保护机制, 默认是 true
-    enable-self-preservation: false
+    enable-self-preservation: true
     # server 清理无效节点的时间间隔(默认 60000 毫秒, 也就是 60 秒)
     eviction-interval-timer-in-ms: 10000
   # spring-cloud-netflix-eureka-client.jar!/spring-configuration-metadata.json

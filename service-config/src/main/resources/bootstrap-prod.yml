@@ -1,9 +1,9 @@
 
-server.port: 8001
+server.port: 8888
 logging.config: classpath:log-prod.xml
 
 spring:
-  application.name: service-config
+  application.name: config-server
   cloud.config.server.git:
     uri: https://git.xxx.com/orign/project
     username: xxx

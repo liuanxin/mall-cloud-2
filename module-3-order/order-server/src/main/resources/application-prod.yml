@@ -1,0 +1,8 @@
+
+server.port: 8093
+
+eureka:
+  client.healthcheck.enabled: true
+  instance:
+    lease-renewal-interval-in-seconds: 5
+    lease-expiration-duration-in-seconds: 15

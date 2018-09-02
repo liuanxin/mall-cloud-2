@@ -3,8 +3,8 @@ package com.github.config;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.AbstractJsonpResponseBodyAdvice;
 
-@SuppressWarnings("deprecation")
-@ControllerAdvice
+//@SuppressWarnings("deprecation")
+//@ControllerAdvice
 public class BackendJsonpHandler extends AbstractJsonpResponseBodyAdvice {
 
     /**
