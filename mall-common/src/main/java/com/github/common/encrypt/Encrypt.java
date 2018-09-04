@@ -287,6 +287,45 @@ public final class Encrypt {
     }
 
 
+    /**
+     * bcrypt 慢加密
+     *
+     * @param password 原密码
+     * @return 加密后的密码
+     */
+    public static String bcryptEncode(String password) {
+        return BCrypt.encrypt(password, BCrypt.genSalt());
+    }
+    /**
+     * 验证密码是否相同
+     *
+     * @param password 原密码
+     * @param encryptPass 加密后的密码. 60 位
+     * @return 如果加密后相同, 则返回 true
+     */
+    public static boolean checkBcrypt(String password, String encryptPass) {
+        if (encryptPass == null || encryptPass.length() == 0) {
+            return false;
+        }
+
+        try {
+            return encryptPass.equals(BCrypt.encrypt(password, encryptPass));
+        } catch (Exception e) {
+            return false;
+        }
+    }
+    /**
+     * 验证密码是否不相同
+     *
+     * @param password 原密码
+     * @param encryptPass 加密后的密码. 60 位
+     * @return 如果加密后不相同, 则返回 true
+     */
+    public static boolean checkNotBcrypt(String password, String encryptPass) {
+        return !checkBcrypt(password, encryptPass);
+    }
+
+
     /** 使用 jwt 将 map 加密, 其内部默认使用 HmacSHA256 算法 */
     public static String jwtEncode(Map<String, Object> map) {
         return JWT_SIGNER.sign(map);

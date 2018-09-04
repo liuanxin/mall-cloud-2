@@ -114,18 +114,18 @@ public class EncryptTest {
 
     @Test
     public void bcryptTest() {
-        String encode = BCrypt.encrypt(SOURCE);
+        String encode = Encrypt.bcryptEncode(SOURCE);
         Assert.assertTrue(encode.length() > 0);
 
-        String encode2 = BCrypt.encrypt(SOURCE);
+        String encode2 = Encrypt.bcryptEncode(SOURCE);
         // 两次密码的值不同
         Assert.assertNotEquals(encode, encode2);
 
         // 加一个空格, 密码就不同了
-        Assert.assertTrue(BCrypt.notSame(SOURCE + " ", encode));
+        Assert.assertTrue(Encrypt.checkNotBcrypt(SOURCE + " ", encode));
 
-        Assert.assertTrue(BCrypt.same(SOURCE, encode));
-        Assert.assertTrue(BCrypt.same(SOURCE, encode2));
+        Assert.assertTrue(Encrypt.checkBcrypt(SOURCE, encode));
+        Assert.assertTrue(Encrypt.checkBcrypt(SOURCE, encode2));
     }
 
     @Test

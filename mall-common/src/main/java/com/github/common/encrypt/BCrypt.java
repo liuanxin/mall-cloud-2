@@ -17,7 +17,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 
 /** 加密慢算法 */
-public class BCrypt {
+final class BCrypt {
 
     // ========== 可配置项. start ==========
     /** 加密时长值, 大于等于 5, 小于等于 30 之间, 数值越大, 加密的时间越久! 不建议超过 12 */
@@ -624,7 +624,7 @@ public class BCrypt {
      * @param randomSalt 盐
      * @return 加密后的密码
      */
-    private static String encrypt(String password, String randomSalt) {
+    static String encrypt(String password, String randomSalt) {
         if (!randomSalt.startsWith(PREFIX_SALT)) {
             throw new IllegalArgumentException("Invalid salt");
         }
@@ -639,51 +639,10 @@ public class BCrypt {
     }
 
     /** 生成盐. */
-    private static String genSalt() {
+    static String genSalt() {
         byte[] rnd = new byte[SALT_LEN];
         new SecureRandom().nextBytes(rnd);
 
         return PREFIX_SALT + encode_base64(rnd, rnd.length);
     }
-
-    /**
-     * 加密
-     *
-     * @param password 原密码
-     * @return 加密后的密码
-     */
-    public static String encrypt(String password) {
-        return encrypt(password, genSalt());
-    }
-
-    /**
-     * 验证密码是否相同
-     *
-     * @param password 原密码
-     * @param encryptPass 加密后的密码. 60 位
-     * @return 如果加密后相同, 则返回 true
-     */
-    public static boolean same(String password, String encryptPass) {
-        if (encryptPass == null || encryptPass.length() == 0) {
-            return false;
-        }
-
-        try {
-            return encryptPass.equals(encrypt(password, encryptPass));
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
-    /**
-     * 验证密码是否不相同
-     *
-     * @param password 原密码
-     * @param encryptPass 加密后的密码. 60 位
-     * @return 如果加密后不相同, 则返回 true
-     */
-    public static boolean notSame(String password, String encryptPass) {
-        return !same(password, encryptPass);
-    }
-
 }
