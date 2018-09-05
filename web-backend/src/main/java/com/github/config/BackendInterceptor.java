@@ -54,6 +54,10 @@ public class BackendInterceptor implements HandlerInterceptor {
 
     /** 检查登录 */
     private void checkLoginAndPermission(Object handler) {
+        if (!handler.getClass().isAssignableFrom(HandlerMethod.class)) {
+            return;
+        }
+
         NeedLogin needLogin = getAnnotation((HandlerMethod) handler, NeedLogin.class);
         // 标注了 @NeedLogin 且 flag 为 true(默认就是 true)则表示当前请求需要登录
         if (needLogin != null && needLogin.flag()) {
