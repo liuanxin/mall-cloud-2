@@ -5,6 +5,7 @@ import com.github.common.json.JsonUtil;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -188,6 +189,20 @@ public final class RequestUtils {
             value = request.getParameter(param);
         }
         return U.isBlank(value) ? U.EMPTY : value.trim();
+    }
+
+    /** 从 cookie 中获取值 */
+    public static String getCookie(String param) {
+        HttpServletRequest request = getRequest();
+        Cookie[] cookies = request.getCookies();
+        if (A.isNotEmpty(cookies)) {
+            for (Cookie cookie : cookies) {
+                if (cookie.getName().equals(param)) {
+                    return cookie.getValue();
+                }
+            }
+        }
+        return U.EMPTY;
     }
 
     /** 格式化头里的参数: 键值以冒号分隔 */

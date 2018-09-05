@@ -500,8 +500,8 @@ public final class U {
             return EMPTY;
         }
         try {
-            // java 中的 encode 是把空格变成 +, 转义后需要将 + 替换成 %20
-            return URLEncoder.encode(url, StandardCharsets.UTF_8.displayName());//.replaceAll("\\+", "%20");
+            // java 中的 encode 是把空格变成 +, 转义后需要将 + 替换成 %2B
+            return URLEncoder.encode(url, StandardCharsets.UTF_8.displayName());//.replaceAll("\\+", "%2B");
         } catch (UnsupportedEncodingException e) {
             return EMPTY;
         }
@@ -512,8 +512,8 @@ public final class U {
             return EMPTY;
         }
         try {
-            // java 中的 encode 是把空格变成 +, 反转义前需要将 %20 替换成 +
-            return URLDecoder.decode(src/*.replaceAll("%20", "\\+")*/, StandardCharsets.UTF_8.displayName());
+            // java 中的 encode 是把空格变成 +, 反转义前需要将 %2B 替换成 +
+            return URLDecoder.decode(src/*.replaceAll("%2B", "\\+")*/, StandardCharsets.UTF_8.displayName());
         } catch (UnsupportedEncodingException e) {
             return EMPTY;
         }
