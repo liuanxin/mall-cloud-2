@@ -48,6 +48,8 @@
 
         <!-- 服务跟踪模块 -->
         <module>service-trace</module>
+        <!-- 服务管理模块 -->
+        <module>service-admin</module>
     </modules>
 
     <properties>
@@ -59,6 +61,7 @@
 
         <!--<spring-boot.version>2.0.4.RELEASE</spring-boot.version>-->
         <spring-cloud.version>2.0.1.RELEASE</spring-cloud.version>
+        <spring-admin.version>2.0.2</spring-admin.version>
 
         <zipkin.version>2.11.1</zipkin.version>
         <guava.version>26.0-jre</guava.version>
@@ -237,6 +240,12 @@
                 <scope>import</scope>
             </dependency>
 
+            <dependency>
+                <groupId>de.codecentric</groupId>
+                <artifactId>spring-boot-admin-starter-server</artifactId>
+                <version>${spring-admin.version}</version>
+            </dependency>
+
             <!--<dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
@@ -352,11 +361,11 @@
             <artifactId>lombok</artifactId>
         </dependency>
 
-        <dependency>
+        <!--<dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>
             <optional>true</optional>
-        </dependency>
+        </dependency>-->
     </dependencies>
 
     <build>

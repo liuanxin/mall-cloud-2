@@ -13,3 +13,7 @@ eureka:
     lease-renewal-interval-in-seconds: 20
     # 服务端在收到最后一个心跳后的等待时间. 超出将移除该实例, 默认 90 秒, 此值至少要大于 lease-renewal-interval-in-seconds
     lease-expiration-duration-in-seconds: 60
+#    health-check-url-path: /actuator/health
+#    metadata-map:
+#      user.name: ${spring.security.user.name}
+#      user.password: ${spring.security.user.password}

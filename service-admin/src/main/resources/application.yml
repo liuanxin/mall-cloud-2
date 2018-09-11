@@ -1,11 +1,15 @@
 
+# https://docs.spring.io/spring-boot/docs/current/reference/html/common-application-properties.html
+
+server.port: 8008
+
 logging.config: classpath:log-dev.xml
 
 spring:
-  application.name: order
-#  security.user:
-#    name: "client"
-#    password: "client"
+  application.name: service-admin
+  security.user:
+    name: "admin"
+    password: "admin"
 
 register.center: http://127.0.0.1:8761/eureka/
 eureka:
@@ -23,15 +27,10 @@ eureka:
     # 服务端在收到最后一个心跳后的等待时间. 超出将移除该实例, 默认 90 秒, 此值至少要大于 lease-renewal-interval-in-seconds
     lease-expiration-duration-in-seconds: 60
     health-check-url-path: /actuator/health
-#    metadata-map:
-#      user.name: ${spring.security.user.name}
-#      user.password: ${spring.security.user.password}
+    metadata-map:
+      user.name: ${spring.security.user.name}
+      user.password: ${spring.security.user.password}
 
-spring.cloud.config:
-#  uri: http://127.0.0.1:8001/
-  discovery.enabled: true
-  discovery.serviceId: config-server
-  name: all,${spring.application.name}
-  profile: dev
-
-management.endpoints.web.exposure.include: "*"
+management:
+  endpoints.web.exposure.include: "*"
+  endpoint.health.show-details: ALWAYS

@@ -1,22 +1,18 @@
 
-server.port: 8787
+server.port: 8008
 
 logging.config: classpath:log-test.xml
 
-spring.application.name: web-manager
+spring.application.name: service-admin
 
 register.center: http://test1:8761/eureka/,http://test2:8761/eureka/,http://test3:8761/eureka/
 eureka:
   client:
-    healthcheck.enabled: true
     registry-fetch-interval-seconds: 10
     serviceUrl.defaultZone: ${register.center}
+    healthcheck.enabled: true
   instance:
     lease-renewal-interval-in-seconds: 10
     lease-expiration-duration-in-seconds: 30
 
-spring.cloud.config:
-  discovery.enabled: true
-  discovery.serviceId: config-server
-  name: all,${spring.application.name}
-  profile: test
+management.endpoints.web.exposure.include: "*"

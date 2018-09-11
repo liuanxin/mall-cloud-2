@@ -803,7 +803,7 @@ class Server {
             "spring.cloud.config:\n" +
             "#  uri: http://127.0.0.1:8001/\n" +
             "  discovery.enabled: true\n" +
-            "  discovery.serviceId: service-config\n" +
+            "  discovery.serviceId: config-server\n" +
             "  name: all,${spring.application.name}\n" +
             "  profile: dev\n" +
             "\n" +
@@ -823,7 +823,7 @@ class Server {
             "\n" +
             "spring.cloud.config:\n" +
             "  discovery.enabled: true\n" +
-            "  discovery.serviceId: service-config\n" +
+            "  discovery.serviceId: config-server\n" +
             "  name: all,${spring.application.name}\n" +
             "  profile: test\n" +
             "\n" +
@@ -843,7 +843,7 @@ class Server {
             "\n" +
             "spring.cloud.config:\n" +
             "  discovery.enabled: true\n" +
-            "  discovery.serviceId: service-config\n" +
+            "  discovery.serviceId: config-server\n" +
             "  name: all,${spring.application.name}\n" +
             "  profile: prod\n" +
             "\n" +

@@ -1,6 +1,4 @@
 
-server.port: 8787
-
 logging.config: classpath:log-dev.xml
 
 spring.application.name: web-manager
@@ -8,8 +6,6 @@ spring.application.name: web-manager
 register.center: http://127.0.0.1:8761/eureka/
 eureka:
   client:
-    # 开启健康检查(需要 spring-boot-starter-actuator 包)
-    healthcheck.enabled: true
     # 客户端间隔多久去拉取服务注册信息, 默认为 30 秒
     registry-fetch-interval-seconds: 20
     serviceUrl.defaultZone: ${register.center}
