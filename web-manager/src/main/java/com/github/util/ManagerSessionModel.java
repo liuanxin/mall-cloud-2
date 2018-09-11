@@ -2,6 +2,7 @@ package com.github.util;
 
 import com.github.common.json.JsonUtil;
 import com.github.common.util.A;
+import com.github.common.util.U;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -24,6 +25,8 @@ class ManagerSessionModel implements Serializable {
     private static final String DEFAULT_NAME = "未登录用户";
     /** 超级管理员账号 */
     private static final List<String> SUPER_USER = Arrays.asList("admin", "root");
+    /** 无值时的默认模型 */
+    private static final ManagerSessionModel DEFAULT_MODEL = new ManagerSessionModel(DEFAULT_ID, DEFAULT_NAME);
 
 
     // ========== 存放在 session 中的数据 ==========
@@ -51,6 +54,11 @@ class ManagerSessionModel implements Serializable {
         private String method;
     }
 
+
+    private ManagerSessionModel(Long id, String userName) {
+        this.id = id;
+        this.userName = userName;
+    }
 
     private boolean wasLogin() {
         return !DEFAULT_ID.equals(id) && !DEFAULT_NAME.equals(userName);
@@ -97,11 +105,16 @@ class ManagerSessionModel implements Serializable {
 
     static <T, P> ManagerSessionModel assemblyData(T account, List<P> permissions) {
         ManagerSessionModel sessionModel = JsonUtil.convert(account, ManagerSessionModel.class);
-        sessionModel.setPermissionList(JsonUtil.convertList(permissions, Permission.class));
+        if (U.isNotBlank(sessionModel)) {
+            List<Permission> permissionList = JsonUtil.convertList(permissions, Permission.class);
+            if (A.isNotEmpty(permissionList)) {
+                sessionModel.setPermissionList(permissionList);
+            }
+        }
         return sessionModel;
     }
 
     static ManagerSessionModel defaultUser() {
-        return new ManagerSessionModel().setId(DEFAULT_ID).setUserName(DEFAULT_NAME);
+        return DEFAULT_MODEL;
     }
 }
