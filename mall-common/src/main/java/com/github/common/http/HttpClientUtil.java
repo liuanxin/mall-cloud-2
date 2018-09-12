@@ -2,6 +2,7 @@ package com.github.common.http;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.github.common.date.DateUtil;
 import com.github.common.json.JsonUtil;
 import com.github.common.util.A;
 import com.github.common.util.LogUtil;
@@ -39,6 +40,7 @@ import java.io.InterruptedIOException;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -274,10 +276,12 @@ public class HttpClientUtil {
     /** 收集上下文中的数据, 以便记录日志 */
     private static String collectContext(long start, String method, String url, String params,
                                          Header[] requestHeaders, Header[] responseHeaders, String result) {
-        long ms = System.currentTimeMillis() - start;
+        long current = System.currentTimeMillis();
+        long ms = current - start;
+
         StringBuilder sbd = new StringBuilder();
         sbd.append("HttpClient => (").append(method).append(" ").append(url).append(")");
-        if (U.isNotBlank(params)) {
+        if (U.isNotBlank(params) && "get".equalsIgnoreCase(method)) {
             sbd.append(" params(").append(params).append(")");
         }
         if (A.isNotEmpty(requestHeaders)) {
@@ -287,7 +291,9 @@ public class HttpClientUtil {
             }
             sbd.append(")");
         }
-        sbd.append(" time(").append(ms).append("ms)");
+        sbd.append(" time(").append(DateUtil.formatFull(new Date(start))).append(" -> ")
+                .append(DateUtil.formatFull(new Date(current)))
+                .append(" [").append(ms).append("]ms)");
 
         if (A.isNotEmpty(responseHeaders)) {
             sbd.append(", response headers(");
@@ -303,7 +309,7 @@ public class HttpClientUtil {
             }
             sbd.append(", return(").append(result).append(")");
         } else {
-            sbd.append(" return nil");
+            sbd.append(", return nil");
         }
         return sbd.toString();
     }
