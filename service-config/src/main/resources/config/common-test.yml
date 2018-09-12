@@ -11,3 +11,4 @@ spring.datasource:
       prepStmtCacheSqlLimit: 2048
       cachePrepStmts: true
       useServerPrepStmts: true
+

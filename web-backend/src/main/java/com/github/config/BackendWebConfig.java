@@ -14,7 +14,7 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 import java.util.List;
 
 /**
- * @see org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
+ * @see org.springframework.web.servlet.config.annotation.WebMvcConfigurer
  * @see org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport
  * @see org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration
  */
