@@ -39,9 +39,9 @@ public class CorsFilter implements Filter {
             if (U.isBlank(response.getHeader(ACCESS_CONTROL_ALLOW_HEADERS))) {
                 // 如果有自定义头, 附加进去, 避免用 *
                 response.addHeader(ACCESS_CONTROL_ALLOW_HEADERS,
-                        "Accept, Accept-Encoding, Accept-Language, Cache-Control, " +
+                                "Accept, Accept-Encoding, Accept-Language, Cache-Control, " +
                                 "Connection, Cookie, DNT, Host, User-Agent, Content-Type, Authorization, " +
-                                "X-Requested-With, Origin, Access-Control-Request-headers" +
+                                "X-Requested-With, Origin, Access-Control-Request-headers, " +
                                 Const.TOKEN + ", " + Const.VERSION);
             }
             /*
