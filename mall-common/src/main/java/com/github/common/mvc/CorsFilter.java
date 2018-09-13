@@ -41,7 +41,8 @@ public class CorsFilter implements Filter {
                 response.addHeader(ACCESS_CONTROL_ALLOW_HEADERS,
                         "Accept, Accept-Encoding, Accept-Language, Cache-Control, " +
                                 "Connection, Cookie, DNT, Host, User-Agent, Content-Type, Authorization, " +
-                                "X-Requested-With, Origin, Access-Control-Request-headers");
+                                "X-Requested-With, Origin, Access-Control-Request-headers" +
+                                Const.TOKEN + ", " + Const.VERSION);
             }
             /*
             if (RequestUtils.isIeRequest() && U.isBlank(response.getHeader(P3P))) {
