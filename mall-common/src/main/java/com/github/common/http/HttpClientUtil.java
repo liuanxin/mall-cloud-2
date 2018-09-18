@@ -255,7 +255,8 @@ public class HttpClientUtil {
             for (Map.Entry<String, Object> entry : params.entrySet()) {
                 Object value = entry.getValue();
                 if (U.isNotBlank(value)) {
-                    nameValuePairs.add(new BasicNameValuePair(entry.getKey(), value.toString()));
+                    String str = (A.isArray(value)) ? A.toStr((Object[]) value) : value.toString();
+                    nameValuePairs.add(new BasicNameValuePair(entry.getKey(), str));
                 }
             }
             request.setEntity(new UrlEncodedFormEntity(nameValuePairs, StandardCharsets.UTF_8));
