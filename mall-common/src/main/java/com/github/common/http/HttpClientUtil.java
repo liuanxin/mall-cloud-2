@@ -1,12 +1,12 @@
 package com.github.common.http;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.github.common.date.DateUtil;
 import com.github.common.json.JsonUtil;
 import com.github.common.util.A;
 import com.github.common.util.LogUtil;
 import com.github.common.util.U;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import org.apache.http.*;
 import org.apache.http.client.HttpRequestRetryHandler;
 import org.apache.http.client.config.RequestConfig;
@@ -275,14 +275,13 @@ public class HttpClientUtil {
         }
     }
     /** 收集上下文中的数据, 以便记录日志 */
-    private static String collectContext(long start, String method, String url, String params,
+    private static String collectContext(Date start, String method, String url, String params,
                                          Header[] requestHeaders, Header[] responseHeaders, String result) {
-        long current = System.currentTimeMillis();
-        long ms = current - start;
-
         StringBuilder sbd = new StringBuilder();
-        sbd.append("HttpClient => (").append(method).append(" ").append(url).append(")");
-        if (U.isNotBlank(params) && "get".equalsIgnoreCase(method)) {
+        sbd.append("HttpClient => [")
+                .append(DateUtil.formatMs(start)).append(" -> ").append(DateUtil.nowTimeMs())
+                .append("] (").append(method).append(" ").append(url).append(")");
+        if (U.isNotBlank(params)) {
             sbd.append(" params(").append(params).append(")");
         }
         if (A.isNotEmpty(requestHeaders)) {
@@ -292,9 +291,6 @@ public class HttpClientUtil {
             }
             sbd.append(")");
         }
-        sbd.append(" time(").append(DateUtil.formatFull(new Date(start))).append(" -> ")
-                .append(DateUtil.formatFull(new Date(current)))
-                .append(" [").append(ms).append("]ms)");
 
         if (A.isNotEmpty(responseHeaders)) {
             sbd.append(", response headers(");
@@ -320,7 +316,7 @@ public class HttpClientUtil {
         String url = request.getURI().toString();
 
         config(request);
-        long start = System.currentTimeMillis();
+        Date start = DateUtil.now();
         try (CloseableHttpResponse response = createHttpClient().execute(request, HttpClientContext.create())) {
             HttpEntity entity = response.getEntity();
             if (U.isNotBlank(entity)) {

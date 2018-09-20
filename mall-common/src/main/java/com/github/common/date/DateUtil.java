@@ -24,7 +24,7 @@ public class DateUtil {
     }
     /** 返回 yyyy-MM-dd HH:mm:ss SSS 格式的当前时间 */
     public static String nowTimeMs() {
-        return now(DateFormatType.YYYY_MM_DD_HH_MM_SS_SSS);
+        return formatMs(now());
     }
     /** 获取当前时间日期的字符串 */
     public static String now(DateFormatType dateFormatType) {
@@ -45,6 +45,10 @@ public class DateUtil {
     /** 格式化日期和时间 yyyy-MM-dd HH:mm:ss */
     public static String formatFull(Date date) {
         return format(date, DateFormatType.YYYY_MM_DD_HH_MM_SS);
+    }
+    /** 格式化日期和时间毫秒 yyyy-MM-dd HH:mm:ss SSS */
+    public static String formatMs(Date date) {
+        return format(date, DateFormatType.YYYY_MM_DD_HH_MM_SS_SSS);
     }
 
     /** 格式化日期对象成字符串 */

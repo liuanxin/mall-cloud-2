@@ -1,15 +1,17 @@
 package com.github.common.http;
 
-import com.google.common.io.Files;
+import com.github.common.date.DateUtil;
 import com.github.common.util.A;
 import com.github.common.util.LogUtil;
 import com.github.common.util.U;
+import com.google.common.io.Files;
 import okhttp3.*;
 
 import javax.activation.MimetypesFileTypeMap;
 import javax.net.ssl.SSLContext;
 import java.io.File;
 import java.io.IOException;
+import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -158,11 +160,12 @@ public class HttpOkClientUtil {
         }
     }
     /** 收集上下文中的数据, 以便记录日志 */
-    private static String collectContext(long start, String method, String url, String params,
+    private static String collectContext(Date start, String method, String url, String params,
                                          Headers requestHeaders, Headers responseHeaders, String result) {
-        long ms = System.currentTimeMillis() - start;
         StringBuilder sbd = new StringBuilder();
-        sbd.append("OkHttp3 => (").append(method).append(" ").append(url).append(")");
+        sbd.append("OkHttp3 => (")
+                .append(DateUtil.formatMs(start)).append(" -> ").append(DateUtil.nowTimeMs())
+                .append("] (").append(method).append(" ").append(url).append(")");
         if (U.isNotBlank(params)) {
             sbd.append(" params(").append(params).append(")");
         }
@@ -173,7 +176,7 @@ public class HttpOkClientUtil {
             }
             sbd.append(")");
         }
-        sbd.append(" time(").append(ms).append("ms)");
+
         if (U.isNotBlank(responseHeaders)) {
             sbd.append(", response headers(");
             for (String name : responseHeaders.names()) {
@@ -198,7 +201,7 @@ public class HttpOkClientUtil {
         Request request = builder.url(url).build();
         String method = request.method();
 
-        long start = System.currentTimeMillis();
+        Date start = DateUtil.now();
         try (Response response = HTTP_CLIENT.newCall(request).execute()) {
             if (response != null) {
                 ResponseBody body = response.body();
@@ -214,8 +217,8 @@ public class HttpOkClientUtil {
                 }
             }
         } catch (IOException e) {
-            if (LogUtil.ROOT_LOG.isInfoEnabled()) {
-                LogUtil.ROOT_LOG.info(String.format("(%s %s) exception", method, url), e);
+            if (LogUtil.ERROR_LOG.isInfoEnabled()) {
+                LogUtil.ERROR_LOG.info(String.format("(%s %s) exception", method, url), e);
             }
         }
         return null;
@@ -240,8 +243,8 @@ public class HttpOkClientUtil {
                 }
             }
         } catch (IOException e) {
-            if (LogUtil.ROOT_LOG.isInfoEnabled()) {
-                LogUtil.ROOT_LOG.info(String.format("download (%s) to file(%s) exception", url, file), e);
+            if (LogUtil.ERROR_LOG.isInfoEnabled()) {
+                LogUtil.ERROR_LOG.info(String.format("download (%s) to file(%s) exception", url, file), e);
             }
         }
     }
