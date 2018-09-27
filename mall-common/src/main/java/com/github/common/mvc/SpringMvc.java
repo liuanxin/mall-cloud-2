@@ -1,15 +1,15 @@
 package com.github.common.mvc;
 
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.smmdhao.common.converter.StringToDateConverter;
-import com.smmdhao.common.converter.StringToEnumConverter;
-import com.smmdhao.common.converter.StringToMoneyConverter;
-import com.smmdhao.common.converter.StringToNumberConverter;
-import com.smmdhao.common.json.JsonUtil;
-import com.smmdhao.common.page.Page;
-import com.smmdhao.common.util.A;
-import com.smmdhao.common.util.LogUtil;
-import com.smmdhao.common.util.RequestUtils;
+import com.github.common.converter.String2DateConverter;
+import com.github.common.converter.String2MoneyConverter;
+import com.github.common.converter.StringToEnumConverter;
+import com.github.common.converter.StringToNumberConverter;
+import com.github.common.json.JsonUtil;
+import com.github.common.page.Page;
+import com.github.common.util.A;
+import com.github.common.util.LogUtil;
+import com.github.common.util.RequestUtils;
 import org.springframework.core.MethodParameter;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -30,8 +30,8 @@ public final class SpringMvc {
     public static void handlerFormatter(FormatterRegistry registry) {
         registry.addConverterFactory(new StringToNumberConverter());
         registry.addConverterFactory(new StringToEnumConverter());
-        registry.addConverter(new StringToDateConverter());
-        registry.addConverter(new StringToMoneyConverter());
+        registry.addConverter(new String2DateConverter());
+        registry.addConverter(new String2MoneyConverter());
     }
 
     public static void handlerConvert(List<HttpMessageConverter<?>> converters) {
