@@ -69,9 +69,10 @@ public final class SpringMvc {
 
             if (LogUtil.ROOT_LOG.isInfoEnabled()) {
                 String toRender = JsonUtil.toJson(object);
-                // 如果长度大于 6000 就只输出前 200 个字符
-                if (toRender.length() > 6000) {
-                    toRender = toRender.substring(0, 200) + " ...";
+                // 如果长度大于 6000 就只输出前 200 个字符和后 200 个字符
+                int len = toRender.length();
+                if (len > 6000) {
+                    toRender = toRender.substring(0, 200) + " ... " + toRender.substring(len - 200);
                 }
                 LogUtil.ROOT_LOG.info("return json: ({})", toRender);
             }
