@@ -42,7 +42,7 @@ public final class SpringMvc {
                     || converter instanceof MappingJackson2HttpMessageConverter);
         }
         converters.add(new StringHttpMessageConverter(StandardCharsets.UTF_8));
-        converters.add(new CustomizeJacksonConverter());
+        converters.add(0, new CustomizeJacksonConverter());
     }
 
     public static class CustomizeJacksonConverter extends MappingJackson2HttpMessageConverter {
