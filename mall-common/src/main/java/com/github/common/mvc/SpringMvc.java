@@ -1,22 +1,20 @@
 package com.github.common.mvc;
 
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.github.common.converter.String2DateConverter;
-import com.github.common.converter.String2MoneyConverter;
-import com.github.common.converter.StringToEnumConverter;
-import com.github.common.converter.StringToNumberConverter;
-import com.github.common.json.JsonUtil;
-import com.github.common.page.Page;
-import com.github.common.util.LogUtil;
-import com.github.common.util.RequestUtils;
-import com.github.common.util.A;
-import com.github.common.util.U;
+import com.smmdhao.common.converter.StringToDateConverter;
+import com.smmdhao.common.converter.StringToEnumConverter;
+import com.smmdhao.common.converter.StringToMoneyConverter;
+import com.smmdhao.common.converter.StringToNumberConverter;
+import com.smmdhao.common.json.JsonUtil;
+import com.smmdhao.common.page.Page;
+import com.smmdhao.common.util.A;
+import com.smmdhao.common.util.LogUtil;
+import com.smmdhao.common.util.RequestUtils;
 import org.springframework.core.MethodParameter;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
@@ -24,46 +22,53 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Iterator;
 import java.util.List;
 
 public final class SpringMvc {
 
     public static void handlerFormatter(FormatterRegistry registry) {
-        // registry.addConverter(new StringTrimAndEscapeConverter());
         registry.addConverterFactory(new StringToNumberConverter());
         registry.addConverterFactory(new StringToEnumConverter());
-        registry.addConverter(new String2DateConverter());
-        registry.addConverter(new String2MoneyConverter());
+        registry.addConverter(new StringToDateConverter());
+        registry.addConverter(new StringToMoneyConverter());
     }
 
     public static void handlerConvert(List<HttpMessageConverter<?>> converters) {
+        int i = 0, json = 0, string = 0;
         if (A.isNotEmpty(converters)) {
-            converters.removeIf(converter -> converter instanceof StringHttpMessageConverter
-                    || converter instanceof MappingJackson2HttpMessageConverter);
+            Iterator<HttpMessageConverter<?>> iterator = converters.iterator();
+            while (iterator.hasNext()) {
+                HttpMessageConverter<?> converter = iterator.next();
+                if (converter instanceof MappingJackson2HttpMessageConverter) {
+                    iterator.remove();
+                    json = i;
+                }
+                if (converter instanceof StringHttpMessageConverter) {
+                    iterator.remove();
+                    string = i;
+                }
+                i++;
+            }
         }
-        converters.add(new StringHttpMessageConverter(StandardCharsets.UTF_8));
-        converters.add(0, new CustomizeJacksonConverter());
+        // 放到它们原来在的位置
+        if (string > json) {
+            converters.add(json, new CustomizeJacksonConverter());
+            converters.add(string, new StringHttpMessageConverter(StandardCharsets.UTF_8));
+        } else {
+            converters.add(string, new StringHttpMessageConverter(StandardCharsets.UTF_8));
+            converters.add(json, new CustomizeJacksonConverter());
+        }
     }
 
     public static class CustomizeJacksonConverter extends MappingJackson2HttpMessageConverter {
         CustomizeJacksonConverter() { super(JsonUtil.RENDER); }
-        @SuppressWarnings("deprecation")
         @Override
         protected void writeSuffix(JsonGenerator generator, Object object) throws IOException {
             super.writeSuffix(generator, object);
 
             if (LogUtil.ROOT_LOG.isInfoEnabled()) {
-                String jsonp = null;
-                Object render = object;
-                if (object instanceof MappingJacksonValue) {
-                    render = ((MappingJacksonValue) object).getValue();
-                    jsonp = ((MappingJacksonValue) object).getJsonpFunction();
-                }
-                String toRender = JsonUtil.toJson(render);
-                if (U.isNotBlank(jsonp)) {
-                    toRender = "/**/" + jsonp + "(" + toRender + ");";
-                }
-
+                String toRender = JsonUtil.toJson(object);
                 // 如果长度大于 6000 就只输出前 200 个字符
                 if (toRender.length() > 6000) {
                     toRender = toRender.substring(0, 200) + " ...";
