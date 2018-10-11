@@ -2,10 +2,7 @@ package com.github.common.sql;
 
 import com.github.common.util.LogUtil;
 import com.github.common.util.U;
-import com.mysql.jdbc.Connection;
-import com.mysql.jdbc.ResultSetInternalMethods;
-import com.mysql.jdbc.Statement;
-import com.mysql.jdbc.StatementInterceptor;
+import com.mysql.jdbc.*;
 
 import java.sql.SQLException;
 import java.util.Properties;
@@ -30,12 +27,16 @@ public class ShowSqlInterceptor implements StatementInterceptor {
                                                 ResultSetInternalMethods resultSetInternalMethods,
                                                 Connection connection) throws SQLException {
         if (statement != null) {
-            sql = statement.toString();
-            if (U.isNotBlank(sql)) {
-                int index = sql.indexOf(':');
-                if (index > 0) {
-                    sql = sql.substring(index + 1).trim();
+            if (statement instanceof PreparedStatement) {
+                try {
+                    sql = ((PreparedStatement) statement).asSql();
+                } catch (SQLException sqlEx) {
+                    if (LogUtil.SQL_LOG.isDebugEnabled()) {
+                        LogUtil.SQL_LOG.debug("show sql exception", sqlEx);
+                    }
                 }
+            } else {
+                sql = statement.toString();
             }
         }
         if (U.isNotBlank(sql)) {
