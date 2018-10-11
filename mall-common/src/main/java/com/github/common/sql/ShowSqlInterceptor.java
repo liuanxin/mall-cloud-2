@@ -29,21 +29,24 @@ public class ShowSqlInterceptor implements StatementInterceptor {
     public ResultSetInternalMethods postProcess(String sql, Statement statement,
                                                 ResultSetInternalMethods resultSetInternalMethods,
                                                 Connection connection) throws SQLException {
-        if (U.isBlank(sql) && statement != null) {
+        if (statement != null) {
             sql = statement.toString();
-            if (U.isNotBlank(sql) && sql.indexOf(':') > 0) {
-                sql = sql.substring(sql.indexOf(':') + 1).trim();
+            if (U.isNotBlank(sql)) {
+                int index = sql.indexOf(':');
+                if (index > 0) {
+                    sql = sql.substring(index + 1).trim();
+                }
             }
         }
-        if (U.isNotBlank(sql) && !"SELECT 1".equals(sql)) {
+        if (U.isNotBlank(sql)) {
             if (LogUtil.SQL_LOG.isDebugEnabled()) {
                 Long start = TIME.get();
                 // druid -> SQLUtils.formatMySql
                 String formatSql = SqlFormat.format(sql);
                 if (start != null) {
-                    LogUtil.SQL_LOG.debug("time: {} ms, sql: {}", (System.currentTimeMillis() - start), formatSql);
+                    LogUtil.SQL_LOG.debug("time: {} ms, sql:\n{}", (System.currentTimeMillis() - start), formatSql);
                 } else {
-                    LogUtil.SQL_LOG.debug("sql: {}", formatSql);
+                    LogUtil.SQL_LOG.debug("sql:\n{}", formatSql);
                 }
             }
         }
