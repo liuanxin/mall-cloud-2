@@ -41,9 +41,10 @@ public class ShowSqlInterceptor implements StatementInterceptor {
         }
         if (U.isNotBlank(sql)) {
             if (LogUtil.SQL_LOG.isDebugEnabled()) {
-                Long start = TIME.get();
                 // druid -> SQLUtils.formatMySql
                 String formatSql = SqlFormat.format(sql);
+                
+                Long start = TIME.get();
                 if (start != null) {
                     LogUtil.SQL_LOG.debug("time: {} ms, sql:\n{}", (System.currentTimeMillis() - start), formatSql);
                 } else {
