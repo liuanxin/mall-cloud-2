@@ -26,24 +26,27 @@ public class ShowSqlInterceptor implements StatementInterceptor {
     public ResultSetInternalMethods postProcess(String sql, Statement statement,
                                                 ResultSetInternalMethods resultSetInternalMethods,
                                                 Connection connection) throws SQLException {
+        String showSql = null;
         if (statement != null) {
             if (statement instanceof PreparedStatement) {
                 try {
-                    sql = ((PreparedStatement) statement).asSql();
+                    showSql = ((PreparedStatement) statement).asSql();
                 } catch (SQLException sqlEx) {
                     if (LogUtil.SQL_LOG.isDebugEnabled()) {
                         LogUtil.SQL_LOG.debug("show sql exception", sqlEx);
                     }
                 }
             } else {
-                sql = statement.toString();
+                showSql = sql;
             }
+        } else {
+            showSql = sql;
         }
-        if (U.isNotBlank(sql)) {
+        if (U.isNotBlank(showSql)) {
             if (LogUtil.SQL_LOG.isDebugEnabled()) {
                 // druid -> SQLUtils.formatMySql
-                String formatSql = SqlFormat.format(sql);
-                
+                String formatSql = SqlFormat.format(showSql);
+
                 Long start = TIME.get();
                 if (start != null) {
                     LogUtil.SQL_LOG.debug("time: {} ms, sql:\n{}", (System.currentTimeMillis() - start), formatSql);
