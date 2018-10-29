@@ -103,15 +103,13 @@ public class Money implements Serializable {
             return null;
         }
 
-        double money = 0D;
         try {
             // ignore return
-            money = Double.parseDouble(yuan);
-        } catch (NumberFormatException e) {
+            Double.parseDouble(yuan);
+        } catch (NumberFormatException ignore) {
             U.assertException(String.format("不是有效的金额(%s)", yuan));
         }
-        // U.assertException(money < 0, "金额不能是负数");
-        return new BigDecimal(money).movePointRight(SCALE).longValue();
+        return new BigDecimal(yuan).movePointRight(SCALE).longValue();
     }
     /** 分转换为元 */
     private static String cent2Yuan(Long cent) {
