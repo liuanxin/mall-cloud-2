@@ -20,8 +20,12 @@ public enum DateFormatType {
     YYYYMMDDHHMMSSSSS("yyyyMMddHHmmssSSS"),
     /** yyyyMMddHHmmss */
     YYYYMMDDHHMMSS("yyyyMMddHHmmss"),
+    /** yyMMddHHmmss */
+    YYMMDDHHMMSS("yyMMddHHmmss"),
     /** yyyyMMddHHmm */
     YYYYMMDDHHMM("yyyyMMddHHmm"),
+    /** yyMMddHHmm */
+    YYMMDDHHMM("yyMMddHHmm"),
     /** yyyyMMdd */
     YYYYMMDD("yyyyMMdd"),
     /** yyMMdd */
