@@ -24,7 +24,7 @@ public class DateUtil {
     }
     /** 返回 yyyy-MM-dd HH:mm:ss SSS 格式的当前时间 */
     public static String nowTimeMs() {
-        return formatMs(now());
+        return now(DateFormatType.YYYY_MM_DD_HH_MM_SS_SSS);
     }
     /** 获取当前时间日期的字符串 */
     public static String now(DateFormatType dateFormatType) {
@@ -45,10 +45,6 @@ public class DateUtil {
     /** 格式化日期和时间 yyyy-MM-dd HH:mm:ss */
     public static String formatFull(Date date) {
         return format(date, DateFormatType.YYYY_MM_DD_HH_MM_SS);
-    }
-    /** 格式化日期和时间毫秒 yyyy-MM-dd HH:mm:ss SSS */
-    public static String formatMs(Date date) {
-        return format(date, DateFormatType.YYYY_MM_DD_HH_MM_SS_SSS);
     }
 
     /** 格式化日期对象成字符串 */
@@ -108,6 +104,129 @@ public class DateUtil {
                 .minuteOfHour().withMaximumValue()
                 .secondOfMinute().withMaximumValue()
                 .millisOfSecond().withMaximumValue();
+    }
+
+    /** 获取一个日期所在星期天(星期一是第一天)的第一毫秒(00:00:00 000) */
+    private static Date getSundayStart(Date date) {
+        return U.isBlank(date) ? null :
+                new DateTime(date)
+                        .plusWeeks(-1)
+                        .dayOfWeek().withMaximumValue()
+                        .hourOfDay().withMinimumValue()
+                        .minuteOfHour().withMinimumValue()
+                        .secondOfMinute().withMinimumValue()
+                        .millisOfSecond().withMinimumValue().toDate();
+    }
+    /** 获取一个日期所在星期六(星期六是最后一天)的最后一毫秒(23:59:59 999) */
+    private static Date getSaturdayEnd(Date date) {
+        return U.isBlank(date) ? null :
+                new DateTime(date)
+                        .withDayOfWeek(6)
+                        .hourOfDay().withMaximumValue()
+                        .minuteOfHour().withMaximumValue()
+                        .secondOfMinute().withMaximumValue()
+                        .millisOfSecond().withMaximumValue().toDate();
+    }
+
+    /** 获取一个日期所在星期一(星期一是第一天)的第一毫秒(00:00:00 000) */
+    private static Date getMondayStart(Date date) {
+        return U.isBlank(date) ? null :
+                new DateTime(date)
+                        .withDayOfWeek(1)
+                        .hourOfDay().withMinimumValue()
+                        .minuteOfHour().withMinimumValue()
+                        .secondOfMinute().withMinimumValue()
+                        .millisOfSecond().withMinimumValue().toDate();
+    }
+    /** 获取一个日期所在星期天(星期天是最后一天)的最后一毫秒(23:59:59 999) */
+    private static Date getSundayEnd(Date date) {
+        return U.isBlank(date) ? null :
+                new DateTime(date)
+                        .withDayOfWeek(7)
+                        .hourOfDay().withMaximumValue()
+                        .minuteOfHour().withMaximumValue()
+                        .secondOfMinute().withMaximumValue()
+                        .millisOfSecond().withMaximumValue().toDate();
+    }
+
+    /** 获取一个日期所在月的第一毫秒(00:00:00 000) */
+    private static Date getMonthStart(Date date) {
+        return U.isBlank(date) ? null :
+                new DateTime(date)
+                        .dayOfMonth().withMinimumValue()
+                        .hourOfDay().withMinimumValue()
+                        .minuteOfHour().withMinimumValue()
+                        .secondOfMinute().withMinimumValue()
+                        .millisOfSecond().withMinimumValue().toDate();
+    }
+    /** 获取一个日期所在月的最后一毫秒(23:59:59 999) */
+    private static Date getMonthEnd(Date date) {
+        return U.isBlank(date) ? null :
+                new DateTime(date)
+                        .dayOfMonth().withMaximumValue()
+                        .hourOfDay().withMaximumValue()
+                        .minuteOfHour().withMaximumValue()
+                        .secondOfMinute().withMaximumValue()
+                        .millisOfSecond().withMaximumValue().toDate();
+    }
+
+    /** 获取一个日期所在季度的第一毫秒(00:00:00 000) */
+    private static Date getQuarterStart(Date date) {
+        if (U.isBlank(date)) {
+            return null;
+        }
+
+        DateTime dateTime = new DateTime(date);
+        int month = dateTime.getMonthOfYear();
+        // 日期所在月的季度开始月
+        int quarterMonth = (month % 3 != 0) ? ((month / 3) * 3 + 1) : (month - 2);
+
+        return dateTime.monthOfYear().setCopy(quarterMonth)
+                .dayOfMonth().withMinimumValue()
+                .hourOfDay().withMinimumValue()
+                .minuteOfHour().withMinimumValue()
+                .secondOfMinute().withMinimumValue()
+                .millisOfSecond().withMinimumValue().toDate();
+    }
+    /** 获取一个日期所在季度的最后一毫秒(23:59:59 999) */
+    private static Date getQuarterEnd(Date date) {
+        if (U.isBlank(date)) {
+            return null;
+        }
+        DateTime dateTime = new DateTime(date);
+        int month = dateTime.getMonthOfYear();
+        // 日期所在月的季度结束月
+        int quarterMonth = (month % 3 != 0) ? (((month / 3) + 1) * 3) : month;
+
+        return dateTime.monthOfYear().setCopy(quarterMonth)
+                .dayOfMonth().withMaximumValue()
+                .hourOfDay().withMaximumValue()
+                .minuteOfHour().withMaximumValue()
+                .secondOfMinute().withMaximumValue()
+                .millisOfSecond().withMaximumValue().toDate();
+    }
+
+    /** 获取一个日期所在年的第一毫秒(23:59:59 999) */
+    private static Date getYearStart(Date date) {
+        return U.isBlank(date) ? null :
+                new DateTime(date)
+                        .monthOfYear().withMinimumValue()
+                        .dayOfMonth().withMinimumValue()
+                        .hourOfDay().withMinimumValue()
+                        .minuteOfHour().withMinimumValue()
+                        .secondOfMinute().withMinimumValue()
+                        .millisOfSecond().withMinimumValue().toDate();
+    }
+    /** 获取一个日期所在年的最后一毫秒(23:59:59 999) */
+    private static Date getYearEnd(Date date) {
+        return U.isBlank(date) ? null :
+                new DateTime(date)
+                        .monthOfYear().withMaximumValue()
+                        .dayOfMonth().withMaximumValue()
+                        .hourOfDay().withMaximumValue()
+                        .minuteOfHour().withMaximumValue()
+                        .secondOfMinute().withMaximumValue()
+                        .millisOfSecond().withMaximumValue().toDate();
     }
 
     /**
