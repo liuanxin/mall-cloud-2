@@ -21,7 +21,7 @@ final class BCrypt {
 
     // ========== 可配置项. start ==========
     /** 加密时长值, 大于等于 5, 小于等于 30 之间, 数值越大, 加密的时间越久! 不建议超过 12 */
-    private static final int ROUND = 12;
+    private static final int ROUND = 10;
     /** 盐的默认前缀 */
     private static final String PREFIX_SALT = "$2a$" + ROUND + "$";
     // ========== 可配置项. end ==========
