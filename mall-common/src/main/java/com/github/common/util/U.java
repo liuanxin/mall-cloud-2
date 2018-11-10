@@ -670,6 +670,16 @@ public final class U {
                             i++;
                         }
                     }
+                } else if (value instanceof Collection) {
+                    for (Object obj : (Collection) value) {
+                        if (isNotBlank(obj)) {
+                            if (i > 0) {
+                                sbd.append("&");
+                            }
+                            sbd.append(entry.getKey()).append("=").append(obj.toString());
+                            i++;
+                        }
+                    }
                 } else {
                     if (i > 0) {
                         sbd.append("&");
