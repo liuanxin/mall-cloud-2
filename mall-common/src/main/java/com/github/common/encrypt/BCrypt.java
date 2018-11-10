@@ -26,7 +26,7 @@ final class BCrypt {
     private static final String PREFIX_SALT = "$2a$" + ROUND + "$";
     // ========== 可配置项. end ==========
 
-    /** 盐的长度 */
+
     private static final int SALT_LEN = 16;
 
     private static final int P_ORIG[] = {
