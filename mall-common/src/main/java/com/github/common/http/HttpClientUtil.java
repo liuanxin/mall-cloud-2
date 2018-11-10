@@ -255,7 +255,14 @@ public class HttpClientUtil {
             for (Map.Entry<String, Object> entry : params.entrySet()) {
                 Object value = entry.getValue();
                 if (U.isNotBlank(value)) {
-                    String str = (A.isArray(value)) ? A.toStr((Object[]) value) : value.toString();
+                    String str;
+                    if (value.getClass().isArray()) {
+                        str = A.toStr((Object[]) value);
+                    } else if (value instanceof Collection) {
+                        str = A.toStr((Collection<?>) value);
+                    } else {
+                        str = value.toString();
+                    }
                     nameValuePairs.add(new BasicNameValuePair(entry.getKey(), str));
                 }
             }
