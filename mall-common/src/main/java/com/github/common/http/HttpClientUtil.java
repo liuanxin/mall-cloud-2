@@ -307,9 +307,9 @@ public class HttpClientUtil {
             sbd.append(")");
         }
         if (U.isNotBlank(result)) {
-            // 如果长度大于 6000 就只输出前 200 个字符
+            // 如果长度大于 6000 就只输出前后 200 个字符
             if (result.length() > 6000) {
-                result = result.substring(0, 200) + " ...";
+                result = result.substring(0, 200) + " ... " + result.substring(result.length() - 200);
             }
             sbd.append(", return(").append(result).append(")");
         } else {
