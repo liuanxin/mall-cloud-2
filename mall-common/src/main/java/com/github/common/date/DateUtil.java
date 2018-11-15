@@ -107,7 +107,7 @@ public class DateUtil {
     }
 
     /** 获取一个日期所在星期天(星期一是第一天)的第一毫秒(00:00:00 000) */
-    private static Date getSundayStart(Date date) {
+    public static Date getSundayStart(Date date) {
         return U.isBlank(date) ? null :
                 new DateTime(date)
                         .plusWeeks(-1)
@@ -118,7 +118,7 @@ public class DateUtil {
                         .millisOfSecond().withMinimumValue().toDate();
     }
     /** 获取一个日期所在星期六(星期六是最后一天)的最后一毫秒(23:59:59 999) */
-    private static Date getSaturdayEnd(Date date) {
+    public static Date getSaturdayEnd(Date date) {
         return U.isBlank(date) ? null :
                 new DateTime(date)
                         .withDayOfWeek(6)
@@ -129,7 +129,7 @@ public class DateUtil {
     }
 
     /** 获取一个日期所在星期一(星期一是第一天)的第一毫秒(00:00:00 000) */
-    private static Date getMondayStart(Date date) {
+    public static Date getMondayStart(Date date) {
         return U.isBlank(date) ? null :
                 new DateTime(date)
                         .withDayOfWeek(1)
@@ -139,7 +139,7 @@ public class DateUtil {
                         .millisOfSecond().withMinimumValue().toDate();
     }
     /** 获取一个日期所在星期天(星期天是最后一天)的最后一毫秒(23:59:59 999) */
-    private static Date getSundayEnd(Date date) {
+    public static Date getSundayEnd(Date date) {
         return U.isBlank(date) ? null :
                 new DateTime(date)
                         .withDayOfWeek(7)
@@ -150,7 +150,7 @@ public class DateUtil {
     }
 
     /** 获取一个日期所在月的第一毫秒(00:00:00 000) */
-    private static Date getMonthStart(Date date) {
+    public static Date getMonthStart(Date date) {
         return U.isBlank(date) ? null :
                 new DateTime(date)
                         .dayOfMonth().withMinimumValue()
@@ -160,7 +160,7 @@ public class DateUtil {
                         .millisOfSecond().withMinimumValue().toDate();
     }
     /** 获取一个日期所在月的最后一毫秒(23:59:59 999) */
-    private static Date getMonthEnd(Date date) {
+    public static Date getMonthEnd(Date date) {
         return U.isBlank(date) ? null :
                 new DateTime(date)
                         .dayOfMonth().withMaximumValue()
@@ -171,7 +171,7 @@ public class DateUtil {
     }
 
     /** 获取一个日期所在季度的第一毫秒(00:00:00 000) */
-    private static Date getQuarterStart(Date date) {
+    public static Date getQuarterStart(Date date) {
         if (U.isBlank(date)) {
             return null;
         }
@@ -189,7 +189,7 @@ public class DateUtil {
                 .millisOfSecond().withMinimumValue().toDate();
     }
     /** 获取一个日期所在季度的最后一毫秒(23:59:59 999) */
-    private static Date getQuarterEnd(Date date) {
+    public static Date getQuarterEnd(Date date) {
         if (U.isBlank(date)) {
             return null;
         }
@@ -207,7 +207,7 @@ public class DateUtil {
     }
 
     /** 获取一个日期所在年的第一毫秒(23:59:59 999) */
-    private static Date getYearStart(Date date) {
+    public static Date getYearStart(Date date) {
         return U.isBlank(date) ? null :
                 new DateTime(date)
                         .monthOfYear().withMinimumValue()
@@ -218,7 +218,7 @@ public class DateUtil {
                         .millisOfSecond().withMinimumValue().toDate();
     }
     /** 获取一个日期所在年的最后一毫秒(23:59:59 999) */
-    private static Date getYearEnd(Date date) {
+    public static Date getYearEnd(Date date) {
         return U.isBlank(date) ? null :
                 new DateTime(date)
                         .monthOfYear().withMaximumValue()
