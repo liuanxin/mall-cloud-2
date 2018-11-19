@@ -240,6 +240,9 @@ public final class U {
         if (isBlank(obj)) {
             return 0;
         }
+        if (obj instanceof Number) {
+            return ((Number) obj).intValue();
+        }
         try {
             return Integer.parseInt(obj.toString());
         } catch (NumberFormatException e) {
@@ -249,6 +252,9 @@ public final class U {
     public static long toLong(Object obj) {
         if (isBlank(obj)) {
             return 0L;
+        }
+        if (obj instanceof Number) {
+            return ((Number) obj).longValue();
         }
         try {
             return Long.parseLong(obj.toString());
@@ -260,6 +266,9 @@ public final class U {
         if (isBlank(obj)) {
             return 0F;
         }
+        if (obj instanceof Number) {
+            return ((Number) obj).floatValue();
+        }
         try {
             return Float.parseFloat(obj.toString());
         } catch (NumberFormatException e) {
@@ -269,6 +278,9 @@ public final class U {
     public static double toDouble(Object obj) {
         if (isBlank(obj)) {
             return 0D;
+        }
+        if (obj instanceof Number) {
+            return ((Number) obj).doubleValue();
         }
         try {
             return Double.parseDouble(obj.toString());
