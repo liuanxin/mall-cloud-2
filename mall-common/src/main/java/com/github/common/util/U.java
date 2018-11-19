@@ -660,32 +660,35 @@ public final class U {
         for (Map.Entry<String, ?> entry : params.entrySet()) {
             Object value = entry.getValue();
             if (isNotBlank(value)) {
-                if (value.getClass().isArray()) {
-                    for (Object obj : (Object[]) value) {
-                        if (isNotBlank(obj)) {
-                            if (i > 0) {
-                                sbd.append("&");
+                String key = entry.getKey();
+                if (!"password".equalsIgnoreCase(key)) {
+                    if (value.getClass().isArray()) {
+                        for (Object obj : (Object[]) value) {
+                            if (isNotBlank(obj)) {
+                                if (i > 0) {
+                                    sbd.append("&");
+                                }
+                                sbd.append(key).append("=").append(obj.toString());
+                                i++;
                             }
-                            sbd.append(entry.getKey()).append("=").append(obj.toString());
-                            i++;
                         }
-                    }
-                } else if (value instanceof Collection) {
-                    for (Object obj : (Collection) value) {
-                        if (isNotBlank(obj)) {
-                            if (i > 0) {
-                                sbd.append("&");
+                    } else if (value instanceof Collection) {
+                        for (Object obj : (Collection) value) {
+                            if (isNotBlank(obj)) {
+                                if (i > 0) {
+                                    sbd.append("&");
+                                }
+                                sbd.append(key).append("=").append(obj.toString());
+                                i++;
                             }
-                            sbd.append(entry.getKey()).append("=").append(obj.toString());
-                            i++;
                         }
+                    } else {
+                        if (i > 0) {
+                            sbd.append("&");
+                        }
+                        sbd.append(key).append("=").append(value.toString());
+                        i++;
                     }
-                } else {
-                    if (i > 0) {
-                        sbd.append("&");
-                    }
-                    sbd.append(entry.getKey()).append("=").append(value.toString());
-                    i++;
                 }
             }
         }
