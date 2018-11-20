@@ -167,6 +167,10 @@ public class HttpOkClientUtil {
                 .append(DateUtil.formatMs(start)).append(" -> ").append(DateUtil.nowTimeMs())
                 .append("] (").append(method).append(" ").append(url).append(")");
         if (U.isNotBlank(params)) {
+            // 如果长度大于 6000 就只输出前后 200 个字符
+            if (params.length() > 6000) {
+                params = params.substring(0, 200) + " ... " + params.substring(params.length() - 200);
+            }
             sbd.append(" params(").append(params).append(")");
         }
         if (U.isNotBlank(requestHeaders)) {
