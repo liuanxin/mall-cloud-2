@@ -32,7 +32,6 @@ import org.apache.http.util.EntityUtils;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLException;
-import javax.net.ssl.SSLHandshakeException;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -44,6 +43,7 @@ import java.util.*;
 public class HttpClientUtil {
 
     private static final int TIME_OUT = 30 * 1000;
+    private static final String USER_AGENT = "Mozilla/5.0 (httpclient4.5; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36";
 
     private static final PoolingHttpClientConnectionManager CONNECTION_MANAGER;
     private static final HttpRequestRetryHandler HTTP_REQUEST_RETRY_HANDLER;
@@ -78,7 +78,7 @@ public class HttpClientUtil {
                     return true;
                 }
                 // SSL 握手异常时不重试
-                if (exception instanceof SSLHandshakeException || exception instanceof SSLException) {
+                if (exception instanceof SSLException) {
                     return false;
                 }
                 // 超时时不重试
@@ -99,6 +99,7 @@ public class HttpClientUtil {
 
     private static CloseableHttpClient createHttpClient() {
         return HttpClients.custom()
+                .setUserAgent(USER_AGENT)
                 .setConnectionManager(CONNECTION_MANAGER)
                 .setRetryHandler(HTTP_REQUEST_RETRY_HANDLER).build();
     }
@@ -282,12 +283,12 @@ public class HttpClientUtil {
     private static String collectContext(Date start, String method, String url, String params,
                                          Header[] requestHeaders, Header[] responseHeaders, String result) {
         StringBuilder sbd = new StringBuilder();
-        sbd.append("HttpClient => [")
+        sbd.append("HttpClient4.5 => [")
                 .append(DateUtil.formatMs(start)).append(" -> ").append(DateUtil.nowTimeMs())
                 .append("] (").append(method).append(" ").append(url).append(")");
         if (U.isNotBlank(params)) {
             // 如果长度大于 6000 就只输出前后 200 个字符
-            if (params.length() > 6000) {
+            if (params.length() > 1000) {
                 params = params.substring(0, 200) + " ... " + params.substring(params.length() - 200);
             }
             sbd.append(" params(").append(params).append(")");
@@ -299,7 +300,6 @@ public class HttpClientUtil {
             }
             sbd.append(")");
         }
-
         if (A.isNotEmpty(responseHeaders)) {
             sbd.append(", response headers(");
             for (Header header : responseHeaders) {
@@ -309,12 +309,12 @@ public class HttpClientUtil {
         }
         if (U.isNotBlank(result)) {
             // 如果长度大于 6000 就只输出前后 200 个字符
-            if (result.length() > 6000) {
+            if (result.length() > 1000) {
                 result = result.substring(0, 200) + " ... " + result.substring(result.length() - 200);
             }
             sbd.append(", return(").append(result).append(")");
         } else {
-            sbd.append(", return nil");
+            sbd.append(", return null");
         }
         return sbd.toString();
     }
@@ -345,7 +345,6 @@ public class HttpClientUtil {
         }
         return null;
     }
-
 
     /** 用 get 方式请求 url 并将响应结果保存指定的文件 */
     public static void download(String url, String file) {

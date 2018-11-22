@@ -19,6 +19,8 @@ public class HttpOkClientUtil {
 
     // MIME 说明: http://www.w3school.com.cn/media/media_mimeref.asp
 
+    private static final String USER_AGENT = "Mozilla/5.0 (okhttp3; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36";
+
     private static final int TIME_OUT = 30;
 
     private static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
@@ -168,7 +170,7 @@ public class HttpOkClientUtil {
                 .append("] (").append(method).append(" ").append(url).append(")");
         if (U.isNotBlank(params)) {
             // 如果长度大于 6000 就只输出前后 200 个字符
-            if (params.length() > 6000) {
+            if (params.length() > 1000) {
                 params = params.substring(0, 200) + " ... " + params.substring(params.length() - 200);
             }
             sbd.append(" params(").append(params).append(")");
@@ -180,7 +182,6 @@ public class HttpOkClientUtil {
             }
             sbd.append(")");
         }
-
         if (U.isNotBlank(responseHeaders)) {
             sbd.append(", response headers(");
             for (String name : responseHeaders.names()) {
@@ -190,19 +191,19 @@ public class HttpOkClientUtil {
         }
         if (U.isNotBlank(result)) {
             // 如果长度大于 6000 就只输出前 200 个字符
-            if (result.length() > 6000) {
+            if (result.length() > 1000) {
                 result = result.substring(0, 200) + " ...";
             }
             sbd.append(", return(").append(result).append(")");
         } else {
-            sbd.append(" return null");
+            sbd.append(", return null");
         }
         return sbd.toString();
     }
     /** 发起 http 请求 */
     private static String handleRequest(String url, Request.Builder builder, String params) {
         url = handleEmptyScheme(url);
-        Request request = builder.url(url).build();
+        Request request = wrapperRequest(builder, url);
         String method = request.method();
 
         Date start = DateUtil.now();
@@ -228,11 +229,15 @@ public class HttpOkClientUtil {
         return null;
     }
 
+    private static Request wrapperRequest(Request.Builder builder, String url) {
+        return builder.header("User-Agent", USER_AGENT).url(url).build();
+    }
 
     /** 用 get 方式请求 url 并将响应结果保存指定的文件 */
+    @SuppressWarnings("UnstableApiUsage")
     public static void download(String url, String file) {
         url = handleEmptyScheme(url);
-        Request request = new Request.Builder().url(url).build();
+        Request request = wrapperRequest(new Request.Builder(), url);
 
         long start = System.currentTimeMillis();
         try (Response response = HTTP_CLIENT.newCall(request).execute()) {
