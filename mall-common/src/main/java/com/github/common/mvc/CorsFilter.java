@@ -25,8 +25,7 @@ public class CorsFilter implements Filter {
     private void handlerCors(HttpServletRequest request, HttpServletResponse response) {
         String origin = request.getHeader(ORIGIN);
         String domain = getDomain(request);
-
-        if (U.isNotBlank(origin) && !origin.equals(domain)) {
+        if (needResponseCors(origin, domain)) {
             if (U.isBlank(response.getHeader(ACCESS_CONTROL_ALLOW_ORIGIN))) {
                 response.addHeader(ACCESS_CONTROL_ALLOW_ORIGIN, origin);
             }
@@ -45,12 +44,13 @@ public class CorsFilter implements Filter {
                                 Const.TOKEN + ", " + Const.VERSION);
             }
             /*
-            if (RequestUtils.isIeRequest() && U.isBlank(response.getHeader(P3P))) {
+            if (request.getHeader("user-agent").toUpperCase().contains("MSIE") && U.isBlank(response.getHeader(P3P))) {
                 response.addHeader(P3P, "CP='CAO IDC DSP COR ADM DEVi TAIi PSA PSD IVAi IVDi CONi HIS OUR IND CNT'");
             }
             */
         }
     }
+    /** 获取请求域 */
     private String getDomain(HttpServletRequest request) {
         StringBuilder domain = new StringBuilder();
 
@@ -65,6 +65,34 @@ public class CorsFilter implements Filter {
             domain.append(port);
         }
         return domain.toString();
+    }
+    /** 需要响应 cors 头则返回 true */
+    private boolean needResponseCors(String origin, String domain) {
+        // 如果 origin 和 domain 是一样的, 响应 cors 没什么必要
+        if (U.isBlank(origin) || U.isBlank(domain) || origin.equals(domain)) {
+            return false;
+        }
+
+        // 如果当前页是 http://manager.google.com, 请求的是 http://api.google.com, 也就是根域是一样的则表示需要响应 cors
+        String rootOrigin = getRootDomain(origin);
+        String rootDomain = getRootDomain(domain);
+        if (rootOrigin.equals(rootDomain)) {
+            return true;
+        }
+        // 如果当前页是 http://www.taobao.com, 请求的是 http://www.tmall.com, 也就是同公司的不同域名, 也需要响应 cors
+        // ...
+
+        return true;
+    }
+    private String getRootDomain(String domain) {
+        if (!domain.contains(".")) {
+            return domain;
+        }
+        if (domain.contains("//")) {
+            domain = domain.substring(domain.indexOf("//") + 2);
+        }
+        String root = domain.substring(domain.indexOf(".") + 1);
+        return root.contains(".") ? root : domain;
     }
 
     @Override

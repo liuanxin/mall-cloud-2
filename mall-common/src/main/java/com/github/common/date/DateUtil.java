@@ -38,6 +38,10 @@ public class DateUtil {
     public static String formatUsaDate(Date date) {
         return format(date, DateFormatType.USA_YYYY_MM_DD);
     }
+    /** 格式化日期 yyyy-MM-dd HH:mm:ss SSS */
+    public static String formatMs(Date date) {
+        return format(date, DateFormatType.YYYY_MM_DD_HH_MM_SS_SSS);
+    }
     /** 格式化时间 HH:mm:ss */
     public static String formatTime(Date date) {
         return format(date, DateFormatType.HH_MM_SS);
