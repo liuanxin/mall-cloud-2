@@ -31,9 +31,15 @@ public final class Pages {
 
     /** 在 service 的实现类中调用 --> 在 repository 方法上的参数是 PageBounds, service 上的参数是 Page, 使用此方法进行转换 */
     public static PageBounds param(Page page) {
-        return page.isWasMobile() ?
-                new PageBounds(page.getLimit()) :
-                new PageBounds(page.getPage(), page.getLimit());
+        return new PageBounds(page.getPage(), page.getLimit());
+    }
+
+    /**
+     * 在 service 的实现类中调用 --> 在 repository 方法上的参数是 PageBounds, service 上的参数是 Page, 使用此方法进行转换.
+     * 此方法会自动基于当前请求是 pc 还是手机来忽略当前页码
+     */
+    public static PageBounds autoParam(Page page) {
+        return page.isWasMobile() ? new PageBounds(page.getLimit()) : param(page);
     }
 
     /** 在 service 的实现类中调用 --> 在 repository 方法上的返回类型是 List, service 上的返回类型是 PageInfo, 使用此方法进行转换 */
