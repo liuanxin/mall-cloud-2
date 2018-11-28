@@ -108,12 +108,24 @@ public final class RequestUtils {
         return getRequest().getHeader(REFERRER);
     }
 
-    /** 返回当前访问的域. 是 request.getRequestURL().toString() 中域的部分 */
+    /** 获取请求地址, 比如请求的是 http://www.abc.com/x/y 将返回 /x/y */
+    public static String getRequestUri() {
+        return getRequest().getRequestURI();
+    }
+    /** 获取请求地址, 如 http://www.abc.com/x/y */
+    public static String getRequestUrl() {
+        return getDomain() + getRequestUri();
+    }
+
+    /** 返回当前访问的域. 是 request.getRequestURL().toString() 中域的部分, 默认的 scheme 不会返回 https */
     public static String getDomain() {
         StringBuilder domain = new StringBuilder();
 
         HttpServletRequest request = getRequest();
-        String scheme = request.getScheme();
+        String scheme = request.getHeader("X-Forwarded-Proto");
+        if (U.isBlank(scheme)) {
+            scheme = request.getScheme();
+        }
         int port = request.getServerPort();
         boolean http = ("http".equals(scheme) && port != 80);
         boolean https = ("https".equals(scheme) && port != 443);
