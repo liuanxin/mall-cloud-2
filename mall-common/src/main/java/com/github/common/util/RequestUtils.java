@@ -222,12 +222,10 @@ public final class RequestUtils {
         HttpServletRequest request = getRequest();
 
         StringBuilder sbd = new StringBuilder();
-        Enumeration<String> headerNames = request.getHeaderNames();
-        while (headerNames.hasMoreElements()) {
-            sbd.append("<");
-            String headName = headerNames.nextElement();
-            sbd.append(headName).append(" : ").append(request.getHeader(headName));
-            sbd.append(">");
+        Enumeration<String> headers = request.getHeaderNames();
+        while (headers.hasMoreElements()) {
+            String headName = headers.nextElement();
+            sbd.append("<").append(headName).append(" : ").append(request.getHeader(headName)).append(">");
         }
         return sbd.toString();
     }
