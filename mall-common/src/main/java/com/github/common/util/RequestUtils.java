@@ -128,7 +128,7 @@ public final class RequestUtils {
         }
         int port = request.getServerPort();
         boolean http = ("http".equals(scheme) && port != 80);
-        boolean https = ("https".equals(scheme) && port != 443);
+        boolean https = ("https".equals(scheme) && port != 80 && port != 443);
 
         domain.append(scheme).append("://").append(request.getServerName());
         if (http || https) {
