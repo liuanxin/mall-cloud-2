@@ -1,8 +1,8 @@
 package com.github.common.util;
 
+import com.github.common.date.DateUtil;
 import com.github.common.exception.ServiceException;
 import com.github.common.exception.ServiceMustHandleException;
-import com.github.common.date.DateUtil;
 import com.github.common.json.JsonUtil;
 
 import java.io.UnsupportedEncodingException;
@@ -377,6 +377,37 @@ public final class U {
 
 
     // ========== object & string ==========
+    public static boolean equals(Object obj1, Object obj2) {
+        if (obj1 == obj2) {
+            return true;
+        } else if (obj1 != null && obj2 != null) {
+            String s1 = obj1.toString();
+            String s2 = obj2.toString();
+            if (s1.length() != s2.length()) {
+                return false;
+            } else {
+                return s1.equals(s2);
+            }
+        } else {
+            return false;
+        }
+    }
+    public static boolean equalsIgnoreCase(Object obj1, Object obj2) {
+        if (obj1 == obj2) {
+            return true;
+        } else if (obj1 != null && obj2 != null) {
+            String s1 = obj1.toString();
+            String s2 = obj2.toString();
+            if (s1.length() != s2.length()) {
+                return false;
+            } else {
+                return s1.equalsIgnoreCase(s2);
+            }
+        } else {
+            return false;
+        }
+    }
+
     public static String toStr(Object obj) {
         return isBlank(obj) ? EMPTY : obj.toString();
     }
