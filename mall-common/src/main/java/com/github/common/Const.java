@@ -52,5 +52,5 @@ public final class Const {
     public static final String VERSION = "X-v";
 
     /** cors 支持的所有方法 */
-    public static final String[] SUPPORT_METHODS = new String[] { "HEAD", "GET", "POST", "PUT", "DELETE", "OPTIONS" };
+    public static final String[] SUPPORT_METHODS = new String[] { "GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "TRACE" };
 }
