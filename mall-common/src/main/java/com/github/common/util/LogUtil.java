@@ -73,7 +73,15 @@ public final class LogUtil {
                 sbd.append(" (").append(id).append("/").append(name).append(")");
             }
             sbd.append(" (").append(method).append(" ").append(url).append(")");
-            sbd.append(" params(").append(params).append(")");
+            sbd.append(" params(");
+            // 请求参数长度大于 6000 就只输出前后 200 个字符
+            int len = params.length();
+            if (len > 6000) {
+                sbd.append(params, 0, 200).append(" ... ").append(params, len - 200, len);
+            } else {
+                sbd.append(params);
+            }
+            sbd.append(")");
             sbd.append(" headers(").append(heads).append(")");
             sbd.append("]");
             return sbd.toString();

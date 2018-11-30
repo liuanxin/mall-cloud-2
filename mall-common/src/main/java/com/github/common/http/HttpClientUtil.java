@@ -287,7 +287,7 @@ public class HttpClientUtil {
                 .append(DateUtil.formatMs(start)).append(" -> ").append(DateUtil.nowTimeMs())
                 .append("] (").append(method).append(" ").append(url).append(")");
         if (U.isNotBlank(params)) {
-            // 如果长度大于 6000 就只输出前后 200 个字符
+            // 请求参数长度大于 1000 就只输出前后 200 个字符
             if (params.length() > 1000) {
                 params = params.substring(0, 200) + " ... " + params.substring(params.length() - 200);
             }
@@ -308,13 +308,13 @@ public class HttpClientUtil {
             sbd.append(")");
         }
         if (U.isNotBlank(result)) {
-            // 如果长度大于 6000 就只输出前后 200 个字符
+            // 返回结果长度大于 1000 就只输出前后 200 个字符
             if (result.length() > 1000) {
                 result = result.substring(0, 200) + " ... " + result.substring(result.length() - 200);
             }
             sbd.append(", return(").append(result).append(")");
         } else {
-            sbd.append(", return null");
+            sbd.append(", return nil");
         }
         return sbd.toString();
     }
