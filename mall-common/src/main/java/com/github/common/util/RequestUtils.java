@@ -119,23 +119,22 @@ public final class RequestUtils {
 
     /** 返回当前访问的域. 是 request.getRequestURL().toString() 中域的部分, 默认的 scheme 不会返回 https */
     public static String getDomain() {
-        StringBuilder domain = new StringBuilder();
+        StringBuilder sbd = new StringBuilder();
 
         HttpServletRequest request = getRequest();
         String scheme = request.getHeader("X-Forwarded-Proto");
-        if (U.isBlank(scheme)) {
-            scheme = request.getScheme();
+        if (U.isNotBlank(scheme)) {
+            sbd.append(scheme);
+        } else {
+            sbd.append(request.getScheme());
         }
-        int port = request.getServerPort();
-        boolean http = ("http".equals(scheme) && port != 80);
-        boolean https = ("https".equals(scheme) && port != 80 && port != 443);
+        sbd.append("://").append(request.getServerName());
 
-        domain.append(scheme).append("://").append(request.getServerName());
-        if (http || https) {
-            domain.append(':');
-            domain.append(port);
+        int port = request.getServerPort();
+        if (port != 80 && port != 443) {
+            sbd.append(':').append(port);
         }
-        return domain.toString();
+        return sbd.toString();
     }
 
     /** 从 url 中获取 domain 信息. 如: http://www.jd.com/product/123 返回 http://www.jd.com */
@@ -157,7 +156,7 @@ public final class RequestUtils {
     }
 
     /** 检查 url 在不在指定的域名中(以根域名检查, 如 www.qq.com 是以 qq.com 为准), 将所在根域名返回, 不在指定域名中则返回空 */
-    public static String getDomainInUrl(String url, List<String> domainList) {
+    public static String getRootDomainInUrl(String url, List<String> domainList) {
         url = getDomain(url);
         if (U.isNotBlank(url)) {
             for (String domain : domainList) {
