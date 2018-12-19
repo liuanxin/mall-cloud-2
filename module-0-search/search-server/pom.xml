@@ -74,6 +74,11 @@
             <groupId>com.github.liuanxin</groupId>
             <artifactId>api-document</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>org.elasticsearch.client</groupId>
+            <artifactId>elasticsearch-rest-high-level-client</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
