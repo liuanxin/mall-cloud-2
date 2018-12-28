@@ -18,26 +18,36 @@ public final class AppTokenHandler {
     /** 生成 token 的过期时间单位 */
     private static final TimeUnit TOKEN_EXPIRE_TIME_UNIT = TimeUnit.DAYS;
 
-    /** 基于存进 session 的数据生成 token 返回, 登录后调用返回给 app 由其保存下来 */
-    @SuppressWarnings("unchecked")
+
+    /** 基于存进 session 的数据(7 天后过期)生成 token 返回, 登录后调用返回给 app 由其保存下来 */
     public static <T> String generateToken(T session) {
+        return generateToken(session, TOKEN_EXPIRE_TIME);
+    }
+    /** 基于存进 session 的数据(设置过期时间)生成 token 返回, 登录后调用返回给 app 由其保存下来 */
+    @SuppressWarnings("unchecked")
+    public static <T> String generateToken(T session, long expireDay) {
         if (U.isNotBlank(session)) {
-            Map<String, Object> jwt = JsonUtil.convert(session, Map.class);
-            if (A.isNotEmpty(jwt)) {
+            Map<String, Object> map = JsonUtil.convert(session, Map.class);
+            if (A.isNotEmpty(map)) {
                 // 过期时间一周
-                return Encrypt.jwtEncode(jwt, TOKEN_EXPIRE_TIME, TOKEN_EXPIRE_TIME_UNIT);
+                return Encrypt.jwtEncode(map, expireDay, TOKEN_EXPIRE_TIME_UNIT);
             }
         }
         return U.EMPTY;
     }
 
-    /** 重置 token 的过期时间, 每次访问时都应该调用此方法 */
+
+    /** 重置 token 的过期时间(7 天后过期), 每次访问时都应该调用此方法 */
     public static String resetTokenExpireTime() {
+        return resetTokenExpireTime(TOKEN_EXPIRE_TIME);
+    }
+    /** 重置 token 的过期时间, 每次访问时都应该调用此方法 */
+    public static String resetTokenExpireTime(long expireDay) {
         String token = getToken();
         if (U.isNotBlank(token)) {
             Map<String, Object> session = Encrypt.jwtDecode(token);
             if (A.isNotEmpty(session)) {
-                return Encrypt.jwtEncode(session, TOKEN_EXPIRE_TIME, TOKEN_EXPIRE_TIME_UNIT);
+                return Encrypt.jwtEncode(session, expireDay, TOKEN_EXPIRE_TIME_UNIT);
             }
         }
         return U.EMPTY;
