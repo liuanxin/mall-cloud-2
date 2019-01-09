@@ -29,7 +29,10 @@ public final class U {
     public static final String EMPTY = "";
 
     private static final String LIKE = "%";
-    private static final String PHONE = "^1[0-9]{10}$";
+
+    // 匹配所有手机卡: ^(?:\+?86)?1(?:3\d{3}|5[^4\D]\d{2}|8\d{3}|7[^0129\D](?(?<=4)(?:0\d|1[0-2]|9\d)|\d{2})|9[189]\d{2}|66\d{2})\d{6}$
+    /** 匹配所有支持短信功能的号码（手机卡 + 上网卡） */
+    private static final String PHONE = "^(?:\\+?86)?1(?:3\\d{3}|5[^4\\D]\\d{2}|8\\d{3}|7[^29\\D](?(?<=4)(?:0\\d|1[0-2]|9\\d)|\\d{2})|9[189]\\d{2}|6[567]\\d{2}|4[579]\\d{2})\\d{6}$";
     /** _abc-def@123-hij.uvw_xyz.com 是正确的, -123@xyz.com 不是 */
     private static final String EMAIL = "^\\w[\\w\\-]*@([\\w\\-]+\\.\\w+)+$";
     /** ico, jpeg, jpg, bmp, png 后缀 */
