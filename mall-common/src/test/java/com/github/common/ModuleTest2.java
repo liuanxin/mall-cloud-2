@@ -157,7 +157,7 @@ class Client {
             "\n" +
             "import " + PACKAGE + ".%s.service.%sService;\n" +
             "import " + PACKAGE + ".%s.constant.%sConst;\n" +
-            (fallback ? "import " + PACKAGE + ".%s.hystrix.%sFallback;\n" : "") +
+            (fallback ? "import " + PACKAGE + ".%s.hystrix.%sClientFallback;\n" : "") +
             "import org.springframework.cloud.openfeign.FeignClient;\n" +
             "\n" +
             "/**\n" +
