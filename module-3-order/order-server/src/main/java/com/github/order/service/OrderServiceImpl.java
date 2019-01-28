@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author https://github.com/liuanxin
  */
 @RestController
-public class OrderServiceImpl implements OrderInterface {
+public class OrderServiceImpl implements OrderService {
     
     @Override
     public PageInfo demo(String xx, Integer page, Integer limit) {

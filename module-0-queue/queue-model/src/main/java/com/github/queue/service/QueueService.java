@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
  *
  * @author https://github.com/liuanxin
  */
-public interface QueueInterface {
+public interface QueueService {
 
     @GetMapping(QueueConst.QUEUE_DEMO)
     void submitSimple(String simpleInfo);

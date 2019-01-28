@@ -1,7 +1,7 @@
 package com.github.message.service;
 
 import com.github.queue.constant.QueueConst;
-import com.github.queue.service.QueueInterface;
+import com.github.queue.service.QueueService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jms.core.JmsTemplate;
@@ -18,7 +18,7 @@ import javax.jms.Queue;
  *     id="com.github.message.service.MessageService" /&gt;
  */
 @RestController
-public class QueueServiceImpl implements QueueInterface {
+public class QueueServiceImpl implements QueueService {
 
     @Autowired
     private JmsTemplate jmsTemplate;

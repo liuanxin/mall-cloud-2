@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author https://github.com/liuanxin
  */
 @RestController
-public class UserServiceImpl implements UserInterface {
+public class UserServiceImpl implements UserService {
     
     @Override
     public PageInfo demo(String xx, Integer page, Integer limit) {

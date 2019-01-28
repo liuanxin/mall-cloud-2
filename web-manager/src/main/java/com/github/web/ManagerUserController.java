@@ -7,7 +7,8 @@ import com.github.dto.DemoDto;
 import com.github.liuanxin.api.annotation.ApiGroup;
 import com.github.liuanxin.api.annotation.ApiMethod;
 import com.github.liuanxin.api.annotation.ApiParam;
-import com.github.user.client.UserService;
+import com.github.user.constant.UserConst;
+import com.github.user.service.UserService;
 import com.github.vo.DemoVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/user")
-@ApiGroup({"user-用户"})
+@ApiGroup(UserConst.MODULE_INFO)
 public class ManagerUserController {
 
     @Autowired

@@ -1,18 +1,18 @@
-package com.github.search.hystrix;
+package com.github.order.hystrix;
 
 import com.github.common.page.PageInfo;
 import com.github.common.page.Pages;
 import com.github.common.util.LogUtil;
-import com.github.search.client.SearchService;
+import com.github.order.client.OrderClient;
 import org.springframework.stereotype.Component;
 
 /**
- * 搜索相关的断路器
+ * 订单相关的断路器
  *
  * @author https://github.com/liuanxin
  */
 @Component
-public class SearchFallback implements SearchService {
+public class OrderClientFallback implements OrderClient {
 
     @Override
     public PageInfo demo(String xx, Integer page, Integer limit) {

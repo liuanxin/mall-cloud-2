@@ -1,18 +1,18 @@
-package com.github.order.hystrix;
+package com.github.product.hystrix;
 
 import com.github.common.page.PageInfo;
 import com.github.common.page.Pages;
 import com.github.common.util.LogUtil;
-import com.github.order.client.OrderService;
+import com.github.product.client.ProductClient;
 import org.springframework.stereotype.Component;
 
 /**
- * 订单相关的断路器
+ * 商品相关的断路器
  *
  * @author https://github.com/liuanxin
  */
 @Component
-public class OrderFallback implements OrderService {
+public class ProductClientFallback implements ProductClient {
 
     @Override
     public PageInfo demo(String xx, Integer page, Integer limit) {

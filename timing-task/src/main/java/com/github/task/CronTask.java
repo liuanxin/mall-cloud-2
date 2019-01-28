@@ -1,7 +1,7 @@
 package com.github.task;
 
 import com.github.common.util.LogUtil;
-import com.github.order.client.OrderService;
+import com.github.order.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;

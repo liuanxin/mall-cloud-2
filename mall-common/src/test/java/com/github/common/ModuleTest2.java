@@ -155,7 +155,7 @@ class Parent {
 class Client {
     private static final String CLIENT = "package " + PACKAGE + ".%s.client;\n" +
             "\n" +
-            "import " + PACKAGE + ".%s.service.%sInterface;\n" +
+            "import " + PACKAGE + ".%s.service.%sService;\n" +
             "import " + PACKAGE + ".%s.constant.%sConst;\n" +
             (fallback ? "import " + PACKAGE + ".%s.hystrix.%sFallback;\n" : "") +
             "import org.springframework.cloud.openfeign.FeignClient;\n" +
@@ -164,8 +164,8 @@ class Client {
             " * %s相关的调用接口\n" +
             AUTHOR +
             " */\n" +
-            "@FeignClient(value = %sConst.MODULE_NAME" + (fallback ? ", fallback = %sFallback.class" : "") + ")\n" +
-            "public interface %sService extends %sInterface {\n" +
+            "@FeignClient(value = %sConst.MODULE_NAME" + (fallback ? ", fallback = %sClientFallback.class" : "") + ")\n" +
+            "public interface %sClient extends %sService {\n" +
             "}\n";
 
     private static final String FALLBACK = "package " + PACKAGE + ".%s.hystrix;\n" +
@@ -173,7 +173,7 @@ class Client {
             "import " + PACKAGE + ".common.page.PageInfo;\n" +
             "import " + PACKAGE + ".common.page.Pages;\n" +
             "import " + PACKAGE + ".common.util.LogUtil;\n" +
-            "import " + PACKAGE + ".%s.client.%sService;\n" +
+            "import " + PACKAGE + ".%s.client.%sClient;\n" +
             "import org.springframework.stereotype.Component;\n" +
             "\n" +
             "/**\n" +
@@ -181,7 +181,7 @@ class Client {
             AUTHOR +
             " */\n" +
             "@Component\n" +
-            "public class %sFallback implements %sService {\n" +
+            "public class %sClientFallback implements %sClient {\n" +
             "\n" +
             "    @Override\n" +
             "    public PageInfo demo(String xx, Integer page, Integer limit) {\n" +
@@ -250,13 +250,13 @@ class Client {
             modelHystrix.mkdirs();
             String interfaceModel = String.format(FALLBACK, parentPackageName,
                     parentPackageName, clazzName, comment, clazzName, clazzName);
-            writeFile(new File(modelHystrix, clazzName + "Fallback.java"), interfaceModel);
+            writeFile(new File(modelHystrix, clazzName + "ClientFallback.java"), interfaceModel);
         } else {
             constModel = String.format(CLIENT, parentPackageName,
                     parentPackageName, clazzName, parentPackageName, clazzName,
                     comment, clazzName, clazzName, clazzName, clazzName);
         }
-        writeFile(new File(model_client, clazzName + "Service.java"), constModel);
+        writeFile(new File(model_client, clazzName + "Client.java"), constModel);
     }
 }
 
@@ -292,7 +292,7 @@ class Model {
             " * %s相关的接口\n" +
             AUTHOR +
             " */\n" +
-            "public interface %sInterface {\n" +
+            "public interface %sService {\n" +
             "    \n" +
             "    /**\n" +
             "     * 示例接口\n" +
@@ -361,7 +361,7 @@ class Model {
 
         String interfaceModel = String.format(INTERFACE, packageName, packageName, clazzName,
                 comment, clazzName, clazzName, clazzName.toUpperCase());
-        writeFile(new File(model_interface, clazzName + "Interface.java"), interfaceModel);
+        writeFile(new File(model_interface, clazzName + "Service.java"), interfaceModel);
     }
 }
 
@@ -771,7 +771,7 @@ class Server {
             AUTHOR +
             " */\n" +
             "@RestController\n" +
-            "public class %sServiceImpl implements %sInterface {\n" +
+            "public class %sServiceImpl implements %sService {\n" +
             "    \n" +
             "    @Override\n" +
             "    public PageInfo demo(String xx, Integer page, Integer limit) {\n" +

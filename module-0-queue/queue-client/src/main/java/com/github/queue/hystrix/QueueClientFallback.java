@@ -1,7 +1,7 @@
 package com.github.queue.hystrix;
 
 import com.github.common.util.LogUtil;
-import com.github.queue.client.QueueService;
+import com.github.queue.client.QueueClient;
 import org.springframework.stereotype.Component;
 
 /**
@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
  * @author https://github.com/liuanxin
  */
 @Component
-public class QueueFallback implements QueueService {
+public class QueueClientFallback implements QueueClient {
 
     @Override
     public void submitSimple(String simpleInfo) {

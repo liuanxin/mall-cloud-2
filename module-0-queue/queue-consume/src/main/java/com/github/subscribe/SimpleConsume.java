@@ -1,7 +1,7 @@
 package com.github.subscribe;
 
 import com.github.common.util.LogUtil;
-import com.github.order.client.OrderService;
+import com.github.order.service.OrderService;
 import com.github.queue.constant.QueueConst;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.annotation.JmsListener;

@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author https://github.com/liuanxin
  */
 @RestController
-public class CommonServiceImpl implements CommonInterface {
+public class CommonServiceImpl implements CommonService {
     
     @Override
     public PageInfo demo(String xx, Integer page, Integer limit) {

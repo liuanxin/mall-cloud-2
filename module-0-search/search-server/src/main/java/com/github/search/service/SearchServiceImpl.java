@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author https://github.com/liuanxin
  */
 @RestController
-public class SearchServiceImpl implements SearchInterface {
+public class SearchServiceImpl implements SearchService {
     
     @Override
     public PageInfo demo(String xx, Integer page, Integer limit) {
