@@ -5,7 +5,6 @@ import java.net.NetworkInterface;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.security.SecureRandom;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Enumeration;
@@ -110,9 +109,8 @@ public final class NoUtil {
         return processId;
     }
 
-    private static final DateFormat DATE_FORMAT = new SimpleDateFormat("HHyyssMMmmdd");
     private static String unitCode() {
-        String unit = Integer.toString(Math.abs(DATE_FORMAT.format(new Date()).hashCode()));
+        String unit = Integer.toString(Math.abs(new SimpleDateFormat("HHyyssMMmmdd").format(new Date()).hashCode()));
         return unit.substring(unit.length() - HORIZONTAL_LEN, unit.length());
     }
 

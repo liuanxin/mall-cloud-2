@@ -23,3 +23,5 @@ zuul:
 #      path: /static/**
 #      url: http://127.0.0.1:xxxx/static
 
+
+feign.hystrix.enabled: true

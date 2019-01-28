@@ -8,3 +8,5 @@ spring:
   http.multipart:
     maxFileSize: 12Mb
     maxRequestSize: 20Mb
+
+feign.hystrix.enabled: true
