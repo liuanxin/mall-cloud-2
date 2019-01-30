@@ -2,8 +2,6 @@ package com.github.common.constant;
 
 /**
  * 公共模块相关的常数设置类
- *
- * @author https://github.com/liuanxin
  */
 public final class CommonConst {
 

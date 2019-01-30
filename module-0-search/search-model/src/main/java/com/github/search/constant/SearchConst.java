@@ -2,8 +2,6 @@ package com.github.search.constant;
 
 /**
  * 搜索模块相关的常数设置类
- *
- * @author https://github.com/liuanxin
  */
 public final class SearchConst {
 

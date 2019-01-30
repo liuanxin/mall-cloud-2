@@ -6,9 +6,7 @@ import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBui
 import java.util.regex.Pattern;
 
 /**
- * 在页面渲染时拼接 url 等的工具类
- *
- * @author https://github.com/liuanxin/
+ * 在页面渲染时拼接 url 等的工具类/
  */
 public final class Render {
 

@@ -2,8 +2,6 @@ package com.github.product.constant;
 
 /**
  * 商品模块相关的常数设置类
- *
- * @author https://github.com/liuanxin
  */
 public final class ProductConst {
 

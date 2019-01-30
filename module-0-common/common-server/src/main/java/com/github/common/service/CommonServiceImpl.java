@@ -9,8 +9,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * 公共模块的接口实现类
- *
- * @author https://github.com/liuanxin
  */
 @RestController
 public class CommonServiceImpl implements CommonService {

@@ -7,8 +7,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 /**
  * 搜索相关的接口
- *
- * @author https://github.com/liuanxin
  */
 public interface SearchService {
     

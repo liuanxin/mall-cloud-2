@@ -1,7 +1,7 @@
 package com.github.order.config;
 
-import com.github.common.resource.CollectTypeHandlerUtil;
 import com.github.common.resource.CollectResourceUtil;
+import com.github.common.resource.CollectTypeHandlerUtil;
 import com.github.common.util.A;
 import com.github.global.constant.GlobalConst;
 import com.github.order.constant.OrderConst;
@@ -10,8 +10,6 @@ import org.springframework.core.io.Resource;
 
 /**
  * 订单模块的配置数据. 主要是 mybatis 的多配置目录和类型处理器
- *
- * @author https://github.com/liuanxin
  */
 final class OrderConfigData {
 

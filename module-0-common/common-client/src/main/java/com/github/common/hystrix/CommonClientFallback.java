@@ -8,8 +8,6 @@ import org.springframework.stereotype.Component;
 
 /**
  * 公共相关的断路器
- *
- * @author https://github.com/liuanxin
  */
 @Component
 public class CommonClientFallback implements CommonClient {

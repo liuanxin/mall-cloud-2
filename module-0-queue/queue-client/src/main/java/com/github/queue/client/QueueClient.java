@@ -7,8 +7,6 @@ import org.springframework.cloud.openfeign.FeignClient;
 
 /**
  * 消息队列相关的调用接口
- *
- * @author https://github.com/liuanxin
  */
 @FeignClient(value = QueueConst.MODULE_NAME, fallback = QueueClientFallback.class)
 public interface QueueClient extends QueueService {

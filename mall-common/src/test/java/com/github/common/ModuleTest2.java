@@ -545,6 +545,7 @@ class Server {
     private static final String EXCEPTION = "package " + PACKAGE + ".%s.config;\n" +
             "\n" +
             "import " + PACKAGE + ".common.exception.ForbiddenException;\n" +
+            "import " + PACKAGE + ".common.exception.NotFoundException;\n" +
             "import " + PACKAGE + ".common.exception.NotLoginException;\n" +
             "import " + PACKAGE + ".common.exception.ServiceException;\n" +
             "import " + PACKAGE + ".common.json.JsonResult;\n" +
@@ -603,6 +604,18 @@ class Server {
             "        }\n" +
             "        return new ResponseEntity<>(JsonResult.notPermission(msg), HttpStatus.FORBIDDEN);\n" +
             "    }\n" +
+            "    /** 404 */\n" +
+            "    @ExceptionHandler(NotFoundException.class)\n" +
+            "    public ResponseEntity<JsonResult> notFound(NotFoundException e) {\n" +
+            "        String msg = e.getMessage();\n" +
+            "        if (LogUtil.ROOT_LOG.isDebugEnabled()) {\n" +
+            "            LogUtil.ROOT_LOG.debug(msg);\n" +
+            "        }\n" +
+            "        return new ResponseEntity<>(JsonResult.notFound(msg), HttpStatus.NOT_FOUND);\n" +
+            "    }\n" +
+            "\n" +
+            "\n" +
+            "    // 以下是 spring 的内部异常\n" +
             "\n" +
             "    @ExceptionHandler(NoHandlerFoundException.class)\n" +
             "    public ResponseEntity<JsonResult> noHandler(NoHandlerFoundException e) {\n" +
@@ -635,6 +648,8 @@ class Server {
             "        // 右移 20 位相当于除以两次 1024, 正好表示从字节到 Mb\n" +
             "        return fail(String.format(\"上传文件太大! 请保持在 %%sM 以内\", (e.getMaxUploadSize() >> 20)));\n" +
             "    }\n" +
+            "\n" +
+            "    // 以上是 spring 的内部异常\n" +
             "\n" +
             "\n" +
             "    /** 未知的所有其他异常 */\n" +

@@ -7,8 +7,6 @@ import org.springframework.cloud.openfeign.FeignClient;
 
 /**
  * 商品相关的调用接口
- *
- * @author https://github.com/liuanxin
  */
 @FeignClient(value = ProductConst.MODULE_NAME, fallback = ProductClientFallback.class)
 public interface ProductClient extends ProductService {

@@ -1,6 +1,7 @@
 package com.github.product.config;
 
 import com.github.common.exception.ForbiddenException;
+import com.github.common.exception.NotFoundException;
 import com.github.common.exception.NotLoginException;
 import com.github.common.exception.ServiceException;
 import com.github.common.json.JsonResult;
@@ -24,8 +25,6 @@ import org.springframework.web.servlet.NoHandlerFoundException;
  * @see org.springframework.boot.web.servlet.error.ErrorController
  * @see org.springframework.boot.autoconfigure.web.ErrorProperties
  * @see org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration
- *
- * @author https://github.com/liuanxin
  */
 @RestControllerAdvice
 public class ProductGlobalException {
@@ -61,6 +60,19 @@ public class ProductGlobalException {
         return new ResponseEntity<>(JsonResult.notPermission(msg), HttpStatus.FORBIDDEN);
     }
 
+    /** 404 */
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseEntity<JsonResult> notFound(NotFoundException e) {
+        String msg = e.getMessage();
+        if (LogUtil.ROOT_LOG.isDebugEnabled()) {
+            LogUtil.ROOT_LOG.debug(msg);
+        }
+        return new ResponseEntity<>(JsonResult.notFound(msg), HttpStatus.NOT_FOUND);
+    }
+
+
+    // 以下是 spring 的内部异常
+
     @ExceptionHandler(NoHandlerFoundException.class)
     public ResponseEntity<JsonResult> noHandler(NoHandlerFoundException e) {
         bindAndPrintLog(e);
@@ -92,6 +104,8 @@ public class ProductGlobalException {
         // 右移 20 位相当于除以两次 1024, 正好表示从字节到 Mb
         return fail(String.format("上传文件太大! 请保持在 %sM 以内", (e.getMaxUploadSize() >> 20)));
     }
+
+    // 以上是 spring 的内部异常
 
 
     /** 未知的所有其他异常 */

@@ -7,8 +7,6 @@ import org.springframework.cloud.openfeign.FeignClient;
 
 /**
  * 搜索相关的调用接口
- *
- * @author https://github.com/liuanxin
  */
 @FeignClient(value = SearchConst.MODULE_NAME, fallback = SearchClientFallback.class)
 public interface SearchClient extends SearchService {

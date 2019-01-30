@@ -7,8 +7,6 @@ import org.springframework.cloud.openfeign.FeignClient;
 
 /**
  * 公共相关的调用接口
- *
- * @author https://github.com/liuanxin
  */
 @FeignClient(value = CommonConst.MODULE_NAME, fallback = CommonClientFallback.class)
 public interface CommonClient extends CommonService {

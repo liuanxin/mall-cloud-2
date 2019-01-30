@@ -2,8 +2,6 @@ package com.github.user.constant;
 
 /**
  * 用户模块相关的常数设置类
- *
- * @author https://github.com/liuanxin
  */
 public final class UserConst {
 

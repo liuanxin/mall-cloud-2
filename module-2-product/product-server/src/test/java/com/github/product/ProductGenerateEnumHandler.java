@@ -7,8 +7,6 @@ import org.junit.Test;
 
 /**
  * 商品模块生成 enumHandle 的工具类
- *
- * @author https://github.com/liuanxin
  */
 public class ProductGenerateEnumHandler {
 

@@ -1,7 +1,7 @@
 package com.github.user.config;
 
-import com.github.liuanxin.page.PageInterceptor;
 import com.github.common.Const;
+import com.github.liuanxin.page.PageInterceptor;
 import org.apache.ibatis.plugin.Interceptor;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.spring.SqlSessionFactoryBean;
@@ -19,8 +19,6 @@ import javax.sql.DataSource;
  * @see org.mybatis.spring.annotation.MapperScannerRegistrar#registerBeanDefinitions
  * @see org.mybatis.spring.mapper.MapperScannerConfigurer#postProcessBeanDefinitionRegistry
  * @see org.mybatis.spring.mapper.ClassPathMapperScanner
- *
- * @author https://github.com/liuanxin
  */
 @Configuration
 @MapperScan(basePackages = Const.BASE_PACKAGE)

@@ -2,8 +2,6 @@ package com.github.queue.constant;
 
 /**
  * 消息队列模块相关的常数设置类
- *
- * @author https://github.com/liuanxin
  */
 public final class QueueConst {
 

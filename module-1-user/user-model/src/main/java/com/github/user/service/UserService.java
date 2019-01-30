@@ -7,8 +7,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 /**
  * 用户相关的接口
- *
- * @author https://github.com/liuanxin
  */
 public interface UserService {
     

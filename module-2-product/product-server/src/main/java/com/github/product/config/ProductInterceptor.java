@@ -10,8 +10,6 @@ import javax.servlet.http.HttpServletResponse;
 
 /**
  * 商品模块的 web 拦截器
- *
- * @author https://github.com/liuanxin
  */
 public class ProductInterceptor implements HandlerInterceptor {
 

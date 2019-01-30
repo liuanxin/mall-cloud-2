@@ -7,8 +7,6 @@ import org.junit.Test;
 
 /**
  * 消息队列模块生成 enumHandle 的工具类
- *
- * @author https://github.com/liuanxin
  */
 public class QueueGenerateEnumHandler {
 

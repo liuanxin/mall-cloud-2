@@ -8,8 +8,6 @@ import org.springframework.stereotype.Component;
 
 /**
  * 商品相关的断路器
- *
- * @author https://github.com/liuanxin
  */
 @Component
 public class ProductClientFallback implements ProductClient {

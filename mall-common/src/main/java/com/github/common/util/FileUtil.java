@@ -1,7 +1,7 @@
 package com.github.common.util;
 
-import com.google.common.collect.Maps;
 import com.github.common.date.DateUtil;
+import com.google.common.collect.Maps;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
@@ -48,7 +48,7 @@ public final class FileUtil {
             if (LogUtil.ROOT_LOG.isErrorEnabled()) {
                 LogUtil.ROOT_LOG.error("upload file exception", e);
             }
-            U.assertException("文件上传时异常");
+            U.throwException("文件上传时异常");
         }
         return urlPrefix + middlePath + newName;
     }

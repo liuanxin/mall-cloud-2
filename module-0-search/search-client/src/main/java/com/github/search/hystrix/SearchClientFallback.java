@@ -8,8 +8,6 @@ import org.springframework.stereotype.Component;
 
 /**
  * 搜索相关的断路器
- *
- * @author https://github.com/liuanxin
  */
 @Component
 public class SearchClientFallback implements SearchClient {

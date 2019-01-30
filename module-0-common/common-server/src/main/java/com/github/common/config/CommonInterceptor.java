@@ -10,8 +10,6 @@ import javax.servlet.http.HttpServletResponse;
 
 /**
  * 公共模块的 web 拦截器
- *
- * @author https://github.com/liuanxin
  */
 public class CommonInterceptor implements HandlerInterceptor {
 

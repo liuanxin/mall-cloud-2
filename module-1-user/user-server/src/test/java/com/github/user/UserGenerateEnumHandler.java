@@ -7,8 +7,6 @@ import org.junit.Test;
 
 /**
  * 用户模块生成 enumHandle 的工具类
- *
- * @author https://github.com/liuanxin
  */
 public class UserGenerateEnumHandler {
 

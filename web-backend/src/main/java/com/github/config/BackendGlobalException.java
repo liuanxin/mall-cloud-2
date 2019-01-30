@@ -1,6 +1,7 @@
 package com.github.config;
 
 import com.github.common.exception.ForbiddenException;
+import com.github.common.exception.NotFoundException;
 import com.github.common.exception.NotLoginException;
 import com.github.common.exception.ServiceException;
 import com.github.common.json.JsonResult;
@@ -41,7 +42,6 @@ public class BackendGlobalException {
         }
         return fail(msg);
     }
-
     /** 未登录 */
     @ExceptionHandler(NotLoginException.class)
     public ResponseEntity<JsonResult> notLogin(NotLoginException e) {
@@ -51,7 +51,6 @@ public class BackendGlobalException {
         }
         return new ResponseEntity<>(JsonResult.notLogin(msg), HttpStatus.UNAUTHORIZED);
     }
-
     /** 无权限 */
     @ExceptionHandler(ForbiddenException.class)
     public ResponseEntity<JsonResult> forbidden(ForbiddenException e) {
@@ -61,6 +60,18 @@ public class BackendGlobalException {
         }
         return new ResponseEntity<>(JsonResult.notPermission(msg), HttpStatus.FORBIDDEN);
     }
+    /** 404 */
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseEntity<JsonResult> notFound(NotFoundException e) {
+        String msg = e.getMessage();
+        if (LogUtil.ROOT_LOG.isDebugEnabled()) {
+            LogUtil.ROOT_LOG.debug(msg);
+        }
+        return new ResponseEntity<>(JsonResult.notFound(msg), HttpStatus.NOT_FOUND);
+    }
+
+
+    // 以下是 spring 的内部异常
 
     @ExceptionHandler(NoHandlerFoundException.class)
     public ResponseEntity<JsonResult> noHandler(NoHandlerFoundException e) {
@@ -93,6 +104,9 @@ public class BackendGlobalException {
         // 右移 20 位相当于除以两次 1024, 正好表示从字节到 Mb
         return fail(String.format("上传文件太大! 请保持在 %sM 以内", (e.getMaxUploadSize() >> 20)));
     }
+
+    // 以上是 spring 的内部异常
+
 
     /** 未知的所有其他异常 */
     @ExceptionHandler(Throwable.class)

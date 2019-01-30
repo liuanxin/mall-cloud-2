@@ -14,9 +14,7 @@ import java.util.regex.Pattern;
  * 4. 把 &lt;!--[if lt IE 7 ]> &lt;html class="no-js ie6"> &lt;![endif]--> 还原回来<br>
  * 5. 把 换行符 替换成一个空格, 再将多个空格替换成一个<br>
  * 6. 把 &lt;pre> &lt;textarea> 还原回去<br>
- * 7. 把 js 代码还原回去(先把字符串里的「//  / *  * /」替换成指定的占位, 再去掉注释, 再把字符串里面的指定占位还原回去)<br>
- *
- * @author https://github.com/liuanxin/
+ * 7. 把 js 代码还原回去(先把字符串里的「//  / *  * /」替换成指定的占位, 再去掉注释, 再把字符串里面的指定占位还原回去)<br>/
  */
 public final class Compressor {
 

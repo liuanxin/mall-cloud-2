@@ -15,8 +15,6 @@ import java.util.List;
 
 /**
  * 搜索模块的配置数据. 主要是 mybatis 的多配置目录和类型处理器
- *
- * @author https://github.com/liuanxin
  */
 @Configuration
 public class SearchWebConfig extends WebMvcConfigurationSupport {

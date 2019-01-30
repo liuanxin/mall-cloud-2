@@ -2,8 +2,6 @@ package com.github.order.constant;
 
 /**
  * 订单模块相关的常数设置类
- *
- * @author https://github.com/liuanxin
  */
 public final class OrderConst {
 

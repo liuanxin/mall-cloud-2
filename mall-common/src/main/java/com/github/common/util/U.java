@@ -1,6 +1,7 @@
 package com.github.common.util;
 
 import com.github.common.date.DateUtil;
+import com.github.common.exception.NotFoundException;
 import com.github.common.exception.ServiceException;
 import com.github.common.exception.ServiceMustHandleException;
 import com.github.common.json.JsonUtil;
@@ -762,55 +763,60 @@ public final class U {
     /** 对象为 null、空白符、"null" 字符串时, 则抛出异常 */
     public static void assertNil(Object obj, String msg) {
         if (isBlank(obj)) {
-            assertException(msg);
+            throwException(msg);
         }
     }
 
     /** 数组为 null 或 长度为 0 时则抛出异常 */
     public static <T> void assertEmpty(T[] array, String msg) {
         if (A.isEmpty(array)) {
-            assertException(msg);
+            throwException(msg);
         }
     }
 
     /** 列表为 null 或 长度为 0 时则抛出异常 */
     public static <T> void assertEmpty(Collection<T> list, String msg) {
         if (A.isEmpty(list)) {
-            assertException(msg);
+            throwException(msg);
         }
     }
 
     /** map 为 null 或 长度为 0 时则抛出异常 */
     public static <K,V> void assertEmpty(Map<K,V> map, String msg) {
         if (A.isEmpty(map)) {
-            assertException(msg);
+            throwException(msg);
         }
     }
 
     /** 数值为空或小于等于 0 则抛出异常 */
     public static void assert0(Number number, String msg) {
         if (less0(number)) {
-            assertException(msg);
+            throwException(msg);
         }
     }
 
     /** 字符长度不在指定的倍数之间则抛出异常 */
     public static void assertLength(String str, int min, int max, String name) {
         if (!lengthBorder(str, min, max)) {
-            assertException(String.format("%s长度要在 %s 到 %s 位之间", name, min, max));
+            throwException(String.format("%s长度要在 %s 到 %s 位之间", name, min, max));
         }
     }
 
     /** 条件为 true 则抛出业务异常 */
     public static void assertException(Boolean flag, String msg) {
         if (flag != null && flag) {
-            assertException(msg);
+            throwException(msg);
         }
     }
 
     /** 无条件抛出业务异常 */
-    public static void assertException(String msg) {
+    public static void throwException(String msg) {
         throw new ServiceException(msg);
+    }
+
+    /** 404 */
+    public static void notExceptionException(String msg) {
+        throw new NotFoundException(msg);
     }
 
     /** 条件为 true 则抛出必须处理的异常 */

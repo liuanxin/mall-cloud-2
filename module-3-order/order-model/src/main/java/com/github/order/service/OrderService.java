@@ -7,8 +7,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 /**
  * 订单相关的接口
- *
- * @author https://github.com/liuanxin
  */
 public interface OrderService {
     
