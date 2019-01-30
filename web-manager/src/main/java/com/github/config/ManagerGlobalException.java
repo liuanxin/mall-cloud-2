@@ -67,7 +67,7 @@ public class ManagerGlobalException {
         if (LogUtil.ROOT_LOG.isDebugEnabled()) {
             LogUtil.ROOT_LOG.debug(msg);
         }
-        return new ResponseEntity<>(JsonResult.notFound(msg), HttpStatus.NOT_FOUND);
+        return notFound(msg);
     }
 
 
@@ -77,8 +77,7 @@ public class ManagerGlobalException {
     public ResponseEntity<JsonResult> noHandler(NoHandlerFoundException e) {
         bindAndPrintLog(e);
 
-        String msg = String.format("没找到(%s %s)", e.getHttpMethod(), e.getRequestURL());
-        return new ResponseEntity<>(JsonResult.notFound(msg), HttpStatus.NOT_FOUND);
+        return notFound(String.format("没找到(%s %s)", e.getHttpMethod(), e.getRequestURL()));
     }
     @ExceptionHandler(MissingServletRequestParameterException.class)
     public ResponseEntity<JsonResult> missParam(MissingServletRequestParameterException e) {
@@ -134,5 +133,8 @@ public class ManagerGlobalException {
     }
     private ResponseEntity<JsonResult> fail(String msg) {
         return new ResponseEntity<>(JsonResult.fail(msg), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+    private ResponseEntity<JsonResult> notFound(String msg) {
+        return new ResponseEntity<>(JsonResult.notFound(msg), HttpStatus.NOT_FOUND);
     }
 }

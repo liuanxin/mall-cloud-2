@@ -59,7 +59,6 @@ public class UserGlobalException {
         }
         return new ResponseEntity<>(JsonResult.notPermission(msg), HttpStatus.FORBIDDEN);
     }
-
     /** 404 */
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<JsonResult> notFound(NotFoundException e) {
@@ -67,7 +66,7 @@ public class UserGlobalException {
         if (LogUtil.ROOT_LOG.isDebugEnabled()) {
             LogUtil.ROOT_LOG.debug(msg);
         }
-        return new ResponseEntity<>(JsonResult.notFound(msg), HttpStatus.NOT_FOUND);
+        return notFound(msg);
     }
 
 
@@ -77,8 +76,7 @@ public class UserGlobalException {
     public ResponseEntity<JsonResult> noHandler(NoHandlerFoundException e) {
         bindAndPrintLog(e);
 
-        String msg = String.format("没找到(%s %s)", e.getHttpMethod(), e.getRequestURL());
-        return new ResponseEntity<>(JsonResult.notFound(msg), HttpStatus.NOT_FOUND);
+        return notFound(String.format("没找到(%s %s)", e.getHttpMethod(), e.getRequestURL()));
     }
     @ExceptionHandler(MissingServletRequestParameterException.class)
     public ResponseEntity<JsonResult> missParam(MissingServletRequestParameterException e) {
@@ -132,5 +130,8 @@ public class UserGlobalException {
     }
     private ResponseEntity<JsonResult> fail(String msg) {
         return new ResponseEntity<>(JsonResult.fail(msg), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+    private ResponseEntity<JsonResult> notFound(String msg) {
+        return new ResponseEntity<>(JsonResult.notFound(msg), HttpStatus.NOT_FOUND);
     }
 }
