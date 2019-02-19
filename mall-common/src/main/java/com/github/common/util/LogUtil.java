@@ -71,9 +71,9 @@ public final class LogUtil {
             sbd.append(ip);
             if (U.isNotBlank(id) || U.isNotBlank(name)) {
                 sbd.append(" (");
-                sbd.append(U.isBlank(id) ? "id 为空" : id);
+                sbd.append(U.isBlank(id) ? U.EMPTY : id);
                 sbd.append("/");
-                sbd.append(U.isBlank(name) ? "name 为空" : name);
+                sbd.append(U.isBlank(name) ? U.EMPTY : name);
                 sbd.append(")");
             }
             sbd.append(" (").append(method).append(" ").append(url).append(")");
