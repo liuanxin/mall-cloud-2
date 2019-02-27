@@ -1,6 +1,5 @@
 package com.github.util;
 
-import com.github.common.exception.NotLoginException;
 import com.github.common.json.JsonUtil;
 import com.github.common.mvc.AppTokenHandler;
 import com.github.common.util.LogUtil;
@@ -73,7 +72,7 @@ public class BackendSessionUtil {
     /** 验证登录, 未登录则抛出异常 */
     public static void checkLogin() {
         if (!getSessionInfo().wasLogin()) {
-            throw new NotLoginException();
+            U.notLoginException();
         }
     }
 

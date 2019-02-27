@@ -81,7 +81,7 @@ public class Money implements Serializable {
     /** 检查金额是否是负数 */
     public void checkNegative() {
         if (cent == null || cent < 0) {
-            U.throwException("金额不能是负数");
+            U.serviceException("金额不能是负数");
         }
     }
 
@@ -107,7 +107,7 @@ public class Money implements Serializable {
             // ignore return
             Double.parseDouble(yuan);
         } catch (NumberFormatException ignore) {
-            U.throwException(String.format("不是有效的金额(%s)", yuan));
+            U.serviceException(String.format("不是有效的金额(%s)", yuan));
         }
         return new BigDecimal(yuan).movePointRight(SCALE).longValue();
     }

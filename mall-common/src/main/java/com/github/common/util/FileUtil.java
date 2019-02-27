@@ -48,7 +48,7 @@ public final class FileUtil {
             if (LogUtil.ROOT_LOG.isErrorEnabled()) {
                 LogUtil.ROOT_LOG.error("upload file exception", e);
             }
-            U.throwException("文件上传时异常");
+            U.serviceException("文件上传时异常");
         }
         return urlPrefix + middlePath + newName;
     }

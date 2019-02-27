@@ -1,9 +1,7 @@
 package com.github.common.util;
 
 import com.github.common.date.DateUtil;
-import com.github.common.exception.NotFoundException;
-import com.github.common.exception.ServiceException;
-import com.github.common.exception.ServiceMustHandleException;
+import com.github.common.exception.*;
 import com.github.common.json.JsonUtil;
 
 import java.io.UnsupportedEncodingException;
@@ -763,67 +761,68 @@ public final class U {
     /** 对象为 null、空白符、"null" 字符串时, 则抛出异常 */
     public static void assertNil(Object obj, String msg) {
         if (isBlank(obj)) {
-            throwException(msg);
+            serviceException(msg);
         }
     }
 
     /** 数组为 null 或 长度为 0 时则抛出异常 */
     public static <T> void assertEmpty(T[] array, String msg) {
         if (A.isEmpty(array)) {
-            throwException(msg);
+            serviceException(msg);
         }
     }
 
     /** 列表为 null 或 长度为 0 时则抛出异常 */
     public static <T> void assertEmpty(Collection<T> list, String msg) {
         if (A.isEmpty(list)) {
-            throwException(msg);
+            serviceException(msg);
         }
     }
 
     /** map 为 null 或 长度为 0 时则抛出异常 */
     public static <K,V> void assertEmpty(Map<K,V> map, String msg) {
         if (A.isEmpty(map)) {
-            throwException(msg);
+            serviceException(msg);
         }
     }
 
     /** 数值为空或小于等于 0 则抛出异常 */
     public static void assert0(Number number, String msg) {
         if (less0(number)) {
-            throwException(msg);
-        }
-    }
-
-    /** 字符长度不在指定的倍数之间则抛出异常 */
-    public static void assertLength(String str, int min, int max, String name) {
-        if (!lengthBorder(str, min, max)) {
-            throwException(String.format("%s长度要在 %s 到 %s 位之间", name, min, max));
+            serviceException(msg);
         }
     }
 
     /** 条件为 true 则抛出业务异常 */
     public static void assertException(Boolean flag, String msg) {
         if (flag != null && flag) {
-            throwException(msg);
+            serviceException(msg);
         }
     }
 
-    /** 无条件抛出业务异常 */
-    public static void throwException(String msg) {
-        throw new ServiceException(msg);
+    /** 需要权限 */
+    public static void forbiddenException(String msg) {
+        throw new ForbiddenException(msg);
     }
 
     /** 404 */
-    public static void notExceptionException(String msg) {
+    public static void notFoundException(String msg) {
         throw new NotFoundException(msg);
     }
 
-    /** 条件为 true 则抛出必须处理的异常 */
-    public static void assertMustHandleException(Boolean flag, String msg) throws ServiceMustHandleException {
-        if (flag != null && flag) {
-            throw new ServiceMustHandleException(msg);
-        }
+    /** 未登录 */
+    public static void notLoginException() {
+        throw new NotLoginException();
+    }
+
+    /** 业务异常 */
+    public static void serviceException(String msg) {
+        throw new ServiceException(msg);
+    }
+
+    /** 必须处理的异常 */
+    public static void assertMustHandleException(String msg) throws ServiceMustHandleException {
+        throw new ServiceMustHandleException(msg);
     }
 
     public static String returnMsg(Throwable e, boolean online) {

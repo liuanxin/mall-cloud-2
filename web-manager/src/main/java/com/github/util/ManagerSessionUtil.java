@@ -1,7 +1,5 @@
 package com.github.util;
 
-import com.github.common.exception.ForbiddenException;
-import com.github.common.exception.NotLoginException;
 import com.github.common.json.JsonUtil;
 import com.github.common.util.LogUtil;
 import com.github.common.util.RequestUtils;
@@ -66,7 +64,7 @@ public class ManagerSessionUtil {
     /** 验证登录, 未登录则抛出异常 */
     public static void checkLogin() {
         if (getSessionInfo().notLogin()) {
-            throw new NotLoginException();
+            U.notLoginException();
         }
     }
 
@@ -80,7 +78,7 @@ public class ManagerSessionUtil {
             String method = request.getMethod();
 
             if (sessionModel.notPermission(url, method)) {
-                throw new ForbiddenException(String.format("您没有(%s)的 %s 访问权限", url, method));
+                U.forbiddenException(String.format("您没有(%s)的 %s 访问权限", url, method));
             }
         }
     }
