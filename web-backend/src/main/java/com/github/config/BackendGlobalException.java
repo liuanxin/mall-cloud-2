@@ -1,9 +1,6 @@
 package com.github.config;
 
-import com.github.common.exception.ForbiddenException;
-import com.github.common.exception.NotFoundException;
-import com.github.common.exception.NotLoginException;
-import com.github.common.exception.ServiceException;
+import com.github.common.exception.*;
 import com.github.common.json.JsonResult;
 import com.github.common.util.A;
 import com.github.common.util.LogUtil;
@@ -11,7 +8,6 @@ import com.github.common.util.RequestUtils;
 import com.github.common.util.U;
 import com.github.util.BackendSessionUtil;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
@@ -40,7 +36,9 @@ public class BackendGlobalException {
         if (LogUtil.ROOT_LOG.isDebugEnabled()) {
             LogUtil.ROOT_LOG.debug(msg);
         }
-        return fail(msg);
+
+        JsonResult result = JsonResult.serviceFail(msg);
+        return ResponseEntity.status(result.getCode()).body(result);
     }
     /** 未登录 */
     @ExceptionHandler(NotLoginException.class)
@@ -49,7 +47,9 @@ public class BackendGlobalException {
         if (LogUtil.ROOT_LOG.isDebugEnabled()) {
             LogUtil.ROOT_LOG.debug(msg);
         }
-        return new ResponseEntity<>(JsonResult.notLogin(msg), HttpStatus.UNAUTHORIZED);
+
+        JsonResult result = JsonResult.notLogin(msg);
+        return ResponseEntity.status(result.getCode()).body(result);
     }
     /** 无权限 */
     @ExceptionHandler(ForbiddenException.class)
@@ -58,7 +58,9 @@ public class BackendGlobalException {
         if (LogUtil.ROOT_LOG.isDebugEnabled()) {
             LogUtil.ROOT_LOG.debug(msg);
         }
-        return new ResponseEntity<>(JsonResult.notPermission(msg), HttpStatus.FORBIDDEN);
+
+        JsonResult result = JsonResult.notPermission(msg);
+        return ResponseEntity.status(result.getCode()).body(result);
     }
     /** 404 */
     @ExceptionHandler(NotFoundException.class)
@@ -67,7 +69,20 @@ public class BackendGlobalException {
         if (LogUtil.ROOT_LOG.isDebugEnabled()) {
             LogUtil.ROOT_LOG.debug(msg);
         }
-        return notFound(msg);
+
+        JsonResult result = JsonResult.notFound(msg);
+        return ResponseEntity.status(result.getCode()).body(result);
+    }
+    /** 错误的请求 */
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<JsonResult> badRequest(BadRequestException e) {
+        String msg = e.getMessage();
+        if (LogUtil.ROOT_LOG.isDebugEnabled()) {
+            LogUtil.ROOT_LOG.debug(msg);
+        }
+
+        JsonResult result = JsonResult.badRequest(msg);
+        return ResponseEntity.status(result.getCode()).body(result);
     }
 
 
@@ -77,14 +92,17 @@ public class BackendGlobalException {
     public ResponseEntity<JsonResult> noHandler(NoHandlerFoundException e) {
         bindAndPrintLog(e);
 
-        return notFound(String.format("没找到(%s %s)", e.getHttpMethod(), e.getRequestURL()));
+        String msg = String.format("没找到(%s %s)", e.getHttpMethod(), e.getRequestURL());
+        JsonResult result = JsonResult.notFound(msg);
+        return ResponseEntity.status(result.getCode()).body(result);
     }
     @ExceptionHandler(MissingServletRequestParameterException.class)
     public ResponseEntity<JsonResult> missParam(MissingServletRequestParameterException e) {
         bindAndPrintLog(e);
 
         String msg = String.format("缺少必须的参数(%s), 类型(%s)", e.getParameterName(), e.getParameterType());
-        return new ResponseEntity<>(JsonResult.badRequest(msg), HttpStatus.BAD_REQUEST);
+        JsonResult result = JsonResult.badRequest(msg);
+        return ResponseEntity.status(result.getCode()).body(result);
     }
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public ResponseEntity<JsonResult> notSupported(HttpRequestMethodNotSupportedException e) {
@@ -94,14 +112,17 @@ public class BackendGlobalException {
         if (!online) {
             msg += String.format(" 当前(%s), 支持(%s)", e.getMethod(), A.toStr(e.getSupportedMethods()));
         }
-        return fail(msg);
+        JsonResult result = JsonResult.serviceFail(msg);
+        return ResponseEntity.status(result.getCode()).body(result);
     }
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public ResponseEntity<JsonResult> uploadSizeExceeded(MaxUploadSizeExceededException e) {
         bindAndPrintLog(e);
 
         // 右移 20 位相当于除以两次 1024, 正好表示从字节到 Mb
-        return fail(String.format("上传文件太大! 请保持在 %sM 以内", (e.getMaxUploadSize() >> 20)));
+        String msg = String.format("上传文件太大! 请保持在 %sM 以内", (e.getMaxUploadSize() >> 20));
+        JsonResult result = JsonResult.serviceFail(msg);
+        return ResponseEntity.status(result.getCode()).body(result);
     }
 
     // 以上是 spring 的内部异常
@@ -113,7 +134,10 @@ public class BackendGlobalException {
         if (LogUtil.ROOT_LOG.isErrorEnabled()) {
             LogUtil.ROOT_LOG.error("有错误", e);
         }
-        return fail(U.returnMsg(e, online));
+
+        String msg = U.returnMsg(e, online);
+        JsonResult<Object> result = JsonResult.fail(msg);
+        return ResponseEntity.status(result.getCode()).body(result);
     }
 
     // ==================================================
@@ -130,11 +154,5 @@ public class BackendGlobalException {
                 LogUtil.unbind();
             }
         }
-    }
-    private ResponseEntity<JsonResult> fail(String msg) {
-        return new ResponseEntity<>(JsonResult.fail(msg), HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-    private ResponseEntity<JsonResult> notFound(String msg) {
-        return new ResponseEntity<>(JsonResult.notFound(msg), HttpStatus.NOT_FOUND);
     }
 }

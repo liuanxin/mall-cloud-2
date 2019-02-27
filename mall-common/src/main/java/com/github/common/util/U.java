@@ -709,23 +709,11 @@ public final class U {
                 if (!"password".equalsIgnoreCase(key)) {
                     if (value.getClass().isArray()) {
                         for (Object obj : (Object[]) value) {
-                            if (isNotBlank(obj)) {
-                                if (i > 0) {
-                                    sbd.append("&");
-                                }
-                                sbd.append(key).append("=").append(obj.toString());
-                                i++;
-                            }
+                            i = appendParam(sbd, i, key, obj);
                         }
                     } else if (value instanceof Collection) {
                         for (Object obj : (Collection) value) {
-                            if (isNotBlank(obj)) {
-                                if (i > 0) {
-                                    sbd.append("&");
-                                }
-                                sbd.append(key).append("=").append(obj.toString());
-                                i++;
-                            }
+                            i = appendParam(sbd, i, key, obj);
                         }
                     } else {
                         if (i > 0) {
@@ -738,6 +726,16 @@ public final class U {
             }
         }
         return sbd.toString();
+    }
+    private static int appendParam(StringBuilder sbd, int i, String key, Object obj) {
+        if (isNotBlank(obj)) {
+            if (i > 0) {
+                sbd.append("&");
+            }
+            sbd.append(key).append("=").append(obj.toString());
+            i++;
+        }
+        return i;
     }
 
     /** 获取指定类所在 jar 包的地址 */
@@ -798,6 +796,12 @@ public final class U {
         if (flag != null && flag) {
             serviceException(msg);
         }
+    }
+
+
+    /** 错误的请求 */
+    public static void badRequestException(String msg) {
+        throw new BadRequestException(msg);
     }
 
     /** 需要权限 */

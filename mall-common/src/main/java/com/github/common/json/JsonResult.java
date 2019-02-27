@@ -47,38 +47,34 @@ public class JsonResult<T> {
 
     // ---------- 在 service 中请只使用下面的静态方法就好了. 不要 new JsonResult()... 这样操作 ----------
 
-    /** 请求成功且不需要返回数据, 当返回 "地址添加成功" 这一类说明时 */
     public static <T> JsonResult<T> success(String msg) {
         return new JsonResult<T>(JsonCode.SUCCESS, msg);
     }
-    /** 请求成功且有返回数据时 */
     public static <T> JsonResult<T> success(String msg, T data) {
         return new JsonResult<T>(JsonCode.SUCCESS, msg, data);
     }
 
-    /** 参数错误 */
     public static <T> JsonResult<T> badRequest(String msg) {
-        // return new JsonResult<T>(JsonCode.BAD_REQUEST, msg);
-        return new JsonResult<T>(JsonCode.FAIL, msg);
+        return new JsonResult<T>(JsonCode.BAD_REQUEST, msg);
     }
 
-    /** 未登录 */
     public static <T> JsonResult<T> notLogin(String msg) {
         return new JsonResult<T>(JsonCode.NOT_LOGIN, msg);
     }
 
-    /** 无权限 */
     public static <T> JsonResult<T> notPermission(String msg) {
-        // return new JsonResult<T>(JsonCode.NOT_PERMISSION, msg);
-        return new JsonResult<T>(JsonCode.FAIL, msg);
+        return new JsonResult<T>(JsonCode.NOT_PERMISSION, msg);
     }
 
-    /** 未找到 */
     public static <T> JsonResult<T> notFound(String msg) {
         return new JsonResult<T>(JsonCode.NOT_FOUND, msg);
     }
 
-    /** 请求失败 */
+    public static <T> JsonResult<T> serviceFail(String msg) {
+        // return new JsonResult<T>(JsonCode.SERVICE_FAIL, msg);
+        return new JsonResult<T>(JsonCode.FAIL, msg);
+    }
+
     public static <T> JsonResult<T> fail(String msg) {
         return new JsonResult<T>(JsonCode.FAIL, msg);
     }
