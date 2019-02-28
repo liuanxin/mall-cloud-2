@@ -1,5 +1,6 @@
 package com.github.common.json;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.github.liuanxin.api.annotation.ApiReturn;
 import lombok.Getter;
@@ -12,12 +13,7 @@ import lombok.Setter;
 @NoArgsConstructor
 public class JsonResult<T> {
 
-    /**
-     * 返回码
-     *
-     * @see JsonCode
-     */
-    @ApiReturn("返回码")
+    @JsonIgnore
     private int code;
 
     /** 返回说明. 如: 用户名密码错误, 收货地址添加成功 等 */

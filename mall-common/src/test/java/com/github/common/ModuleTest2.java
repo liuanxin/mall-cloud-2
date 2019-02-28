@@ -575,81 +575,81 @@ class Server {
             "\n" +
             "    /** 业务异常 */\n" +
             "    @ExceptionHandler(ServiceException.class)\n" +
-            "    public ResponseEntity<JsonResult> service(ServiceException e) {\n" +
+            "    public ResponseEntity<String> service(ServiceException e) {\n" +
             "        String msg = e.getMessage();\n" +
             "        if (LogUtil.ROOT_LOG.isDebugEnabled()) {\n" +
             "            LogUtil.ROOT_LOG.debug(msg);\n" +
             "        }\n" +
             "\n" +
             "        JsonResult result = JsonResult.serviceFail(msg);\n" +
-            "        return ResponseEntity.status(result.getCode()).body(result);\n" +
+            "        return ResponseEntity.status(result.getCode()).body(result.getMsg());\n" +
             "    }\n" +
             "    /** 未登录 */\n" +
             "    @ExceptionHandler(NotLoginException.class)\n" +
-            "    public ResponseEntity<JsonResult> notLogin(NotLoginException e) {\n" +
+            "    public ResponseEntity<String> notLogin(NotLoginException e) {\n" +
             "        String msg = e.getMessage();\n" +
             "        if (LogUtil.ROOT_LOG.isDebugEnabled()) {\n" +
             "            LogUtil.ROOT_LOG.debug(msg);\n" +
             "        }\n" +
             "\n" +
             "        JsonResult result = JsonResult.notLogin(msg);\n" +
-            "        return ResponseEntity.status(result.getCode()).body(result);\n" +
+            "        return ResponseEntity.status(result.getCode()).body(result.getMsg());\n" +
             "    }\n" +
             "    /** 无权限 */\n" +
             "    @ExceptionHandler(ForbiddenException.class)\n" +
-            "    public ResponseEntity<JsonResult> forbidden(ForbiddenException e) {\n" +
+            "    public ResponseEntity<String> forbidden(ForbiddenException e) {\n" +
             "        String msg = e.getMessage();\n" +
             "        if (LogUtil.ROOT_LOG.isDebugEnabled()) {\n" +
             "            LogUtil.ROOT_LOG.debug(msg);\n" +
             "        }\n" +
             "\n" +
             "        JsonResult result = JsonResult.notPermission(msg);\n" +
-            "        return ResponseEntity.status(result.getCode()).body(result);\n" +
+            "        return ResponseEntity.status(result.getCode()).body(result.getMsg());\n" +
             "    }\n" +
             "    /** 404 */\n" +
             "    @ExceptionHandler(NotFoundException.class)\n" +
-            "    public ResponseEntity<JsonResult> notFound(NotFoundException e) {\n" +
+            "    public ResponseEntity<String> notFound(NotFoundException e) {\n" +
             "        String msg = e.getMessage();\n" +
             "        if (LogUtil.ROOT_LOG.isDebugEnabled()) {\n" +
             "            LogUtil.ROOT_LOG.debug(msg);\n" +
             "        }\n" +
             "\n" +
             "        JsonResult result = JsonResult.notFound(msg);\n" +
-            "        return ResponseEntity.status(result.getCode()).body(result);\n" +
+            "        return ResponseEntity.status(result.getCode()).body(result.getMsg());\n" +
             "    }\n" +
             "    /** 错误的请求 */\n" +
             "    @ExceptionHandler(BadRequestException.class)\n" +
-            "    public ResponseEntity<JsonResult> badRequest(BadRequestException e) {\n" +
+            "    public ResponseEntity<String> badRequest(BadRequestException e) {\n" +
             "        String msg = e.getMessage();\n" +
             "        if (LogUtil.ROOT_LOG.isDebugEnabled()) {\n" +
             "            LogUtil.ROOT_LOG.debug(msg);\n" +
             "        }\n" +
             "\n" +
             "        JsonResult result = JsonResult.badRequest(msg);\n" +
-            "        return ResponseEntity.status(result.getCode()).body(result);\n" +
+            "        return ResponseEntity.status(result.getCode()).body(result.getMsg());\n" +
             "    }\n" +
             "\n" +
             "\n" +
             "    // 以下是 spring 的内部异常\n" +
             "\n" +
             "    @ExceptionHandler(NoHandlerFoundException.class)\n" +
-            "    public ResponseEntity<JsonResult> noHandler(NoHandlerFoundException e) {\n" +
+            "    public ResponseEntity<String> noHandler(NoHandlerFoundException e) {\n" +
             "        bindAndPrintLog(e);\n" +
             "\n" +
             "        String msg = String.format(\"没找到(%%s %%s)\", e.getHttpMethod(), e.getRequestURL());\n" +
             "        JsonResult result = JsonResult.notFound(msg);\n" +
-            "        return ResponseEntity.status(result.getCode()).body(result);\n" +
+            "        return ResponseEntity.status(result.getCode()).body(result.getMsg());\n" +
             "    }\n" +
             "    @ExceptionHandler(MissingServletRequestParameterException.class)\n" +
-            "    public ResponseEntity<JsonResult> missParam(MissingServletRequestParameterException e) {\n" +
+            "    public ResponseEntity<String> missParam(MissingServletRequestParameterException e) {\n" +
             "        bindAndPrintLog(e);\n" +
             "\n" +
             "        String msg = String.format(\"缺少必须的参数(%%s), 类型(%%s)\", e.getParameterName(), e.getParameterType());\n" +
             "        JsonResult result = JsonResult.badRequest(msg);\n" +
-            "        return ResponseEntity.status(result.getCode()).body(result);\n" +
+            "        return ResponseEntity.status(result.getCode()).body(result.getMsg());\n" +
             "    }\n" +
             "    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)\n" +
-            "    public ResponseEntity<JsonResult> notSupported(HttpRequestMethodNotSupportedException e) {\n" +
+            "    public ResponseEntity<String> notSupported(HttpRequestMethodNotSupportedException e) {\n" +
             "        bindAndPrintLog(e);\n" +
             "\n" +
             "        String msg = \"不支持此种请求方式.\";\n" +
@@ -657,16 +657,16 @@ class Server {
             "            msg += String.format(\" 当前(%%s), 支持(%%s)\", e.getMethod(), A.toStr(e.getSupportedMethods()));\n" +
             "        }\n" +
             "        JsonResult result = JsonResult.serviceFail(msg);\n" +
-            "        return ResponseEntity.status(result.getCode()).body(result);\n" +
+            "        return ResponseEntity.status(result.getCode()).body(result.getMsg());\n" +
             "    }\n" +
             "    @ExceptionHandler(MaxUploadSizeExceededException.class)\n" +
-            "    public ResponseEntity<JsonResult> uploadSizeExceeded(MaxUploadSizeExceededException e) {\n" +
+            "    public ResponseEntity<String> uploadSizeExceeded(MaxUploadSizeExceededException e) {\n" +
             "        bindAndPrintLog(e);\n" +
             "\n" +
             "        // 右移 20 位相当于除以两次 1024, 正好表示从字节到 Mb\n" +
             "        String msg = String.format(\"上传文件太大! 请保持在 %%sM 以内\", (e.getMaxUploadSize() >> 20));\n" +
             "        JsonResult result = JsonResult.serviceFail(msg);\n" +
-            "        return ResponseEntity.status(result.getCode()).body(result);\n" +
+            "        return ResponseEntity.status(result.getCode()).body(result.getMsg());\n" +
             "    }\n" +
             "\n" +
             "    // 以上是 spring 的内部异常\n" +
@@ -674,14 +674,14 @@ class Server {
             "\n" +
             "    /** 未知的所有其他异常 */\n" +
             "    @ExceptionHandler(Throwable.class)\n" +
-            "    public ResponseEntity<JsonResult> other(Throwable e) {\n" +
+            "    public ResponseEntity<String> other(Throwable e) {\n" +
             "        if (LogUtil.ROOT_LOG.isErrorEnabled()) {\n" +
             "            LogUtil.ROOT_LOG.error(\"有错误\", e);\n" +
             "        }\n" +
             "\n" +
             "        String msg = U.returnMsg(e, online);\n" +
             "        JsonResult<Object> result = JsonResult.fail(msg);\n" +
-            "        return ResponseEntity.status(result.getCode()).body(result);\n" +
+            "        return ResponseEntity.status(result.getCode()).body(result.getMsg());\n" +
             "    }\n" +
             "\n" +
             "    // ==================================================\n" +
@@ -1191,8 +1191,8 @@ class Server {
         String dataSource = String.format(DATA_SOURCE, parentPackageName, clazzName, clazzName, clazzName);
         writeFile(new File(configPath, clazzName + "DataSourceInit.java"), dataSource);
 
-        String exception = String.format(EXCEPTION, parentPackageName, clazzName);
-        writeFile(new File(configPath, clazzName + "GlobalException.java"), exception);
+//        String exception = String.format(EXCEPTION, parentPackageName, clazzName);
+//        writeFile(new File(configPath, clazzName + "GlobalException.java"), exception);
 
         String interceptor = String.format(INTERCEPTOR, parentPackageName, comment, clazzName, clazzName);
         writeFile(new File(configPath, clazzName + "Interceptor.java"), interceptor);
