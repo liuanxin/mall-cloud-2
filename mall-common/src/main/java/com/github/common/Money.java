@@ -26,15 +26,21 @@ public class Money implements Serializable {
     private Long cent;
 
     public Money() {}
+
+    public Money(Long cent) {
+        this.cent = cent;
+    }
     /** 从前台过来的数据转换成金额对象时使用此构造 */
     @JsonCreator
     public Money(String yuan) {
         cent = yuan2Cent(yuan);
-        // checkNegative();
     }
-    /** 从数据库过来的数据, 使用此构造 */
-    public Money(Long cent) {
-        this.cent = cent;
+
+    /** 在前台或者在页面上显示 */
+    @JsonValue
+    @Override
+    public String toString() {
+        return cent2Yuan(cent);
     }
 
     public Long getCent() {
@@ -78,18 +84,13 @@ public class Money implements Serializable {
     }
 
 
-    /** 检查金额是否是负数 */
-    public void checkNegative() {
-        if (cent == null || cent < 0) {
-            U.serviceException("金额不能是负数");
-        }
+    /** 金额如果 >= 0 就返回 true */
+    public boolean greaterAndEqualZero() {
+        return cent != null && cent >= 0;
     }
-
-    /** 在前台或者在页面上显示 */
-    @JsonValue
-    @Override
-    public String toString() {
-        return cent2Yuan(cent);
+    /** 金额如果 > 0 就返回 true */
+    public boolean greaterZero() {
+        return cent != null && cent > 0;
     }
 
     /** 输出大写中文 */
@@ -129,7 +130,8 @@ public class Money implements Serializable {
                 "万", "拾", "佰", "仟",
                 "亿", "拾", "佰", "仟"
         };
-        private static final String[] DECIMAL = {/*"厘", */"分", "角"};
+        /** 如果需要比分还小的单位, 上面的 SCALE 也要改, 比如到 微 则 SCALE 要改成 7 */
+        private static final String[] DECIMAL = { /* "微", "忽", "丝", "毫", "厘", */ "分", "角" };
         private static final String[] NUM = {
                 "零", "壹", "贰", "叁", "肆", "伍", "陆", "柒", "捌", "玖"
         };
@@ -201,20 +203,14 @@ public class Money implements Serializable {
                 if (leftLong < 0) {
                     sbd.append(NEGATIVE);
                 }
-                for (int i = 0; i < left.length(); i++) {
-                    int number = U.toInt(String.valueOf(left.charAt(i)));
-                    sbd.append(NUM[number]).append(INTEGER[left.length() - i - 1]);
-                }
+                appendNum(left, sbd, INTEGER);
             }
 
             // 处理小数位后面的值
             long rightLong = U.toLong(right);
             if (rightLong > 0) {
                 sbd.append(SPLIT);
-                for (int i = 0; i < right.length(); i++) {
-                    int number = U.toInt(String.valueOf(right.charAt(i)));
-                    sbd.append(NUM[number]).append(DECIMAL[right.length() - i - 1]);
-                }
+                appendNum(right, sbd, DECIMAL);
             } else if (rightLong == 0) {
                 sbd.append(WHOLE);
             }
@@ -245,6 +241,13 @@ public class Money implements Serializable {
             result = ZERO_DIME.matcher(result).replaceAll(BLANK);
             result = ZERO_CENT.matcher(result).replaceAll(BLANK);
             return result;
+        }
+
+        private static void appendNum(String num, StringBuilder sbd, String[] integer) {
+            for (int i = 0; i < num.length(); i++) {
+                int number = U.toInt(String.valueOf(num.charAt(i)));
+                sbd.append(NUM[number]).append(integer[num.length() - i - 1]);
+            }
         }
     }
 }
