@@ -1,6 +1,5 @@
 package com.github.common.json;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.github.liuanxin.api.annotation.ApiReturn;
 import lombok.Getter;
@@ -13,8 +12,9 @@ import lombok.Setter;
 @NoArgsConstructor
 public class JsonResult<T> {
 
-    @JsonIgnore
-    private int code;
+    // 应该只有响应编码就可以了, 当前实体表示处理成功后的返回, 200 以外的响应编码统一处理
+    // @ApiReturn("返回码")
+    // private int code;
 
     /** 返回说明. 如: 用户名密码错误, 收货地址添加成功 等 */
     @ApiReturn("返回说明. 如: 用户名密码错误, 收货地址添加成功 等")
@@ -31,47 +31,22 @@ public class JsonResult<T> {
     private String token;
     */
 
-    private JsonResult(JsonCode code, String msg) {
-        this.code = code.flag;
+    private JsonResult(String msg) {
         this.msg = msg;
     }
-    private JsonResult(JsonCode code, String msg, T data) {
-        this(code, msg);
+    private JsonResult(String msg, T data) {
+        this.msg = msg;
         this.data = data;
     }
 
 
-    // ---------- 在 service 中请只使用下面的静态方法就好了. 不要 new JsonResult()... 这样操作 ----------
+    // --------------------
 
     public static <T> JsonResult<T> success(String msg) {
-        return new JsonResult<T>(JsonCode.SUCCESS, msg);
+        return new JsonResult<T>(msg);
     }
+
     public static <T> JsonResult<T> success(String msg, T data) {
-        return new JsonResult<T>(JsonCode.SUCCESS, msg, data);
-    }
-
-    public static <T> JsonResult<T> badRequest(String msg) {
-        return new JsonResult<T>(JsonCode.BAD_REQUEST, msg);
-    }
-
-    public static <T> JsonResult<T> notLogin(String msg) {
-        return new JsonResult<T>(JsonCode.NOT_LOGIN, msg);
-    }
-
-    public static <T> JsonResult<T> notPermission(String msg) {
-        return new JsonResult<T>(JsonCode.NOT_PERMISSION, msg);
-    }
-
-    public static <T> JsonResult<T> notFound(String msg) {
-        return new JsonResult<T>(JsonCode.NOT_FOUND, msg);
-    }
-
-    public static <T> JsonResult<T> serviceFail(String msg) {
-        // return new JsonResult<T>(JsonCode.SERVICE_FAIL, msg);
-        return new JsonResult<T>(JsonCode.FAIL, msg);
-    }
-
-    public static <T> JsonResult<T> fail(String msg) {
-        return new JsonResult<T>(JsonCode.FAIL, msg);
+        return new JsonResult<T>(msg, data);
     }
 }
