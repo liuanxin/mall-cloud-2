@@ -77,7 +77,7 @@
         <mybatis-page.version>1.2.4</mybatis-page.version>
         <mybatis-redis-cache.version>1.2.5</mybatis-redis-cache.version>
 
-        <api-document.version>0.3.6</api-document.version>
+        <api-document.version>0.3.7</api-document.version>
     </properties>
 
     <dependencyManagement>
