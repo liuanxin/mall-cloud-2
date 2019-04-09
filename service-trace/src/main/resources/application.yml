@@ -4,7 +4,7 @@ server.port: 9411
 #zipkin.storage.type: mysql
 #spring.datasource:
 #  driver-class-name: com.mysql.jdbc.Driver
-#  url: jdbc:mysql://127.0.0.1:3306/zipkin?useSSL=false&useUnicode=true&characterEncoding=utf8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&transformedBitIsBoolean=true&statementInterceptors=com.github.common.sql.ShowSqlInterceptor
+#  url: jdbc:mysql://127.0.0.1:3306/zipkin?useSSL=false&useUnicode=true&characterEncoding=utf8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&transformedBitIsBoolean=true&useLegacyDatetimeCode=false&useJDBCCompliantTimezoneShift=true&serverTimezone=UTC&statementInterceptors=com.github.common.sql.ShowSqlInterceptor
 #  username: root
 #  password: root
 #  schema: classpath:/mysql.sql
