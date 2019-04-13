@@ -1,8 +1,8 @@
 package com.github.common.page;
 
+import com.github.common.util.A;
 import com.github.liuanxin.page.model.PageBounds;
 import com.github.liuanxin.page.model.PageList;
-import com.github.common.util.A;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,10 +36,17 @@ public final class Pages {
 
     /**
      * 在 service 的实现类中调用 --> 在 repository 方法上的参数是 PageBounds, service 上的参数是 Page, 使用此方法进行转换.
-     * 此方法会自动基于当前请求是 pc 还是手机来忽略当前页码
+     * 此方法会自动基于当前请求是 pc 还是手机来忽略请求总条数(select count(*) ...), 手机上不需要构建页码只需要上下刷, 因此不需要.
+     * 手机上也是不需要页面的, 只需要头尾两条数据的信息(比如 > 最下面记录的 id 或者 < 最上面记录的 id)
      */
     public static PageBounds autoParam(Page page) {
-        return page.isWasMobile() ? new PageBounds(page.getLimit()) : param(page);
+        if (page.isWasMobile()) {
+            PageBounds bounds = new PageBounds(page.getLimit());
+            bounds.setQueryTotal(false);
+            return bounds;
+        } else {
+            return param(page);
+        }
     }
 
     /** 在 service 的实现类中调用 --> 在 repository 方法上的返回类型是 List, service 上的返回类型是 PageInfo, 使用此方法进行转换 */
