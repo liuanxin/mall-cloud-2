@@ -88,22 +88,28 @@ public class GlobalException {
 
     @ExceptionHandler(NoHandlerFoundException.class)
     public ResponseEntity<String> noHandler(NoHandlerFoundException e) {
-        String msg = String.format("没找到(%s %s)", e.getHttpMethod(), e.getRequestURL());
+        String msg = online
+                ? "404"
+                : String.format("没找到(%s %s)", e.getHttpMethod(), e.getRequestURL());
+
         bindAndPrintLog(msg, e);
         return ResponseEntity.status(JsonCode.NOT_FOUND.getFlag()).body(msg);
     }
     @ExceptionHandler(MissingServletRequestParameterException.class)
     public ResponseEntity<String> missParam(MissingServletRequestParameterException e) {
-        String msg = String.format("缺少必须的参数(%s), 类型(%s)", e.getParameterName(), e.getParameterType());
+        String msg = online
+                ? "无法响应此请求"
+                : String.format("缺少必须的参数(%s), 类型(%s)", e.getParameterName(), e.getParameterType());
+
         bindAndPrintLog(msg, e);
         return ResponseEntity.status(JsonCode.BAD_REQUEST.getFlag()).body(msg);
     }
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public ResponseEntity<String> notSupported(HttpRequestMethodNotSupportedException e) {
-        String msg = "不支持此种请求方式.";
-        if (!online) {
-            msg += String.format(" 当前(%s), 支持(%s)", e.getMethod(), A.toStr(e.getSupportedMethods()));
-        }
+        String msg = online
+                ? "无法处理此请求"
+                : String.format("不支持此种请求方式: 当前(%s), 支持(%s)", e.getMethod(), A.toStr(e.getSupportedMethods()));
+
         bindAndPrintLog(msg, e);
         return ResponseEntity.status(JsonCode.FAIL.getFlag()).body(msg);
     }
