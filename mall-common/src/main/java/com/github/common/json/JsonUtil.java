@@ -3,12 +3,18 @@ package com.github.common.json;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.github.common.util.A;
 import com.github.common.util.LogUtil;
+import com.github.common.util.U;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.List;
 
 public class JsonUtil {
@@ -50,15 +56,15 @@ public class JsonUtil {
 
     /** 对象转换, 失败将会返回 null */
     public static <S,T> T convert(S source, Class<T> clazz) {
-        return toObjectNil(toJson(source), clazz);
+        return U.isBlank(source) ? null : toObjectNil(toJson(source), clazz);
     }
     /** 集合转换, 失败将会返回 null */
     public static <S,T> List<T> convertList(List<S> sourceList, Class<T> clazz) {
-        return toListNil(toJson(sourceList), clazz);
+        return A.isEmpty(sourceList) ? Collections.emptyList() : toListNil(toJson(sourceList), clazz);
     }
 
     public static <T,S> T convert(S source, TypeReference<?> type) {
-        return toObjectNil(toJson(source), type);
+        return U.isBlank(source) ? null : toObjectNil(toJson(source), type);
     }
 
     /** 对象转换成 json 字符串 */
@@ -72,6 +78,9 @@ public class JsonUtil {
 
     /** 将 json 字符串转换为对象 */
     public static <T> T toObject(String json, Class<T> clazz) {
+        if (U.isBlank(json)) {
+            return null;
+        }
         try {
             return RENDER.readValue(json, clazz);
         } catch (Exception e) {
@@ -80,6 +89,9 @@ public class JsonUtil {
     }
     /** 将 json 字符串转换为对象, 当转换异常时, 返回 null */
     public static <T> T toObjectNil(String json, Class<T> clazz) {
+        if (U.isBlank(json)) {
+            return null;
+        }
         try {
             return RENDER.readValue(json, clazz);
         } catch (Exception e) {
@@ -91,6 +103,9 @@ public class JsonUtil {
     }
     /** 将 json 字符串转换为泛型对象 */
     public static <T> T toObjectNil(String json, TypeReference<?> type) {
+        if (U.isBlank(json)) {
+            return null;
+        }
         try {
             return RENDER.readValue(json, type);
         } catch (IOException e) {
@@ -103,6 +118,9 @@ public class JsonUtil {
 
     /** 将 json 字符串转换为指定的数组列表 */
     public static <T> List<T> toList(String json, Class<T> clazz) {
+        if (U.isBlank(json)) {
+            return Collections.emptyList();
+        }
         try {
             return RENDER.readValue(json, RENDER.getTypeFactory().constructCollectionType(List.class, clazz));
         } catch (Exception e) {
@@ -111,6 +129,9 @@ public class JsonUtil {
     }
     /** 将 json 字符串转换为指定的数组列表 */
     public static <T> List<T> toListNil(String json, Class<T> clazz) {
+        if (U.isBlank(json)) {
+            return Collections.emptyList();
+        }
         try {
             return RENDER.readValue(json, RENDER.getTypeFactory().constructCollectionType(List.class, clazz));
         } catch (Exception e) {
