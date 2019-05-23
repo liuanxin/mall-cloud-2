@@ -214,18 +214,16 @@ public class HttpOkClientUtil {
 
         Date start = DateUtil.now();
         try (Response response = HTTP_CLIENT.newCall(request).execute()) {
-            if (response != null) {
-                ResponseBody body = response.body();
-                if (body != null) {
-                    String result = body.string();
-                    if (LogUtil.ROOT_LOG.isInfoEnabled()) {
-                        Headers requestHeaders = request.headers();
-                        Headers responseHeaders = response.headers();
-                        String log = collectContext(online, start, method, url, params, requestHeaders, responseHeaders, result);
-                        LogUtil.ROOT_LOG.info(log);
-                    }
-                    return result;
+            ResponseBody body = response.body();
+            if (body != null) {
+                String result = body.string();
+                if (LogUtil.ROOT_LOG.isInfoEnabled()) {
+                    Headers requestHeaders = request.headers();
+                    Headers responseHeaders = response.headers();
+                    String log = collectContext(online, start, method, url, params, requestHeaders, responseHeaders, result);
+                    LogUtil.ROOT_LOG.info(log);
                 }
+                return result;
             }
         } catch (IOException e) {
             if (LogUtil.ROOT_LOG.isInfoEnabled()) {
@@ -247,14 +245,12 @@ public class HttpOkClientUtil {
 
         long start = System.currentTimeMillis();
         try (Response response = HTTP_CLIENT.newCall(request).execute()) {
-            if (response != null) {
-                ResponseBody body = response.body();
-                if (body != null) {
-                    Files.write(body.bytes(), new File(file));
-                    if (LogUtil.ROOT_LOG.isInfoEnabled()) {
-                        long ms = (System.currentTimeMillis() - start);
-                        LogUtil.ROOT_LOG.info("download ({}) to file({}) success, time({}ms)", url, file, ms);
-                    }
+            ResponseBody body = response.body();
+            if (body != null) {
+                Files.write(body.bytes(), new File(file));
+                if (LogUtil.ROOT_LOG.isInfoEnabled()) {
+                    long ms = (System.currentTimeMillis() - start);
+                    LogUtil.ROOT_LOG.info("download ({}) to file({}) success, time({}ms)", url, file, ms);
                 }
             }
         } catch (IOException e) {
