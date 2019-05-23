@@ -114,38 +114,26 @@ public class HttpClientUtil {
 
 
     /** 向指定 url 进行 get 请求 */
-    public static String get(String url) {
+    public static String get(String url, boolean online) {
         if (U.isBlank(url)) {
             return null;
         }
 
         url = handleEmptyScheme(url);
-        return handleRequest(new HttpGet(url), null);
-    }
-    @SuppressWarnings("unchecked")
-    public static <T> String get(String url, T param) {
-        if (U.isBlank(url)) {
-            return null;
-        }
-
-        Map<String, Object> params = Collections.emptyMap();
-        if (U.isNotBlank(param)) {
-            params = JsonUtil.convert(param, Map.class);
-        }
-        return get(url, params);
+        return handleRequest(new HttpGet(url), null, online);
     }
     /** 向指定 url 进行 get 请求. 有参数 */
-    public static String get(String url, Map<String, Object> params) {
+    public static String get(String url, Map<String, Object> params, boolean online) {
         if (U.isBlank(url)) {
             return null;
         }
 
         url = handleEmptyScheme(url);
         url = handleGetParams(url, params);
-        return handleRequest(new HttpGet(url), U.formatParam(params));
+        return handleRequest(new HttpGet(url), U.formatParam(params), online);
     }
     /** 向指定 url 进行 get 请求. 有参数和头 */
-    public static String getWithHeader(String url, Map<String, Object> params, Map<String, Object> headerMap) {
+    public static String getWithHeader(String url, Map<String, Object> params, Map<String, Object> headerMap, boolean online) {
         if (U.isBlank(url)) {
             return null;
         }
@@ -155,12 +143,12 @@ public class HttpClientUtil {
 
         HttpGet request = new HttpGet(url);
         handleHeader(request, headerMap);
-        return handleRequest(request, U.formatParam(params));
+        return handleRequest(request, U.formatParam(params), online);
     }
 
 
     @SuppressWarnings("unchecked")
-    public static <T> String post(String url, T param) {
+    public static <T> String post(String url, T param, boolean online) {
         if (U.isBlank(url)) {
             return null;
         }
@@ -169,20 +157,20 @@ public class HttpClientUtil {
         if (U.isNotBlank(param)) {
             params = JsonUtil.convert(param, Map.class);
         }
-        return post(url, params);
+        return post(url, params, online);
     }
     /** 向指定的 url 进行 post 请求. 有参数 */
-    public static String post(String url, Map<String, Object> params) {
+    public static String post(String url, Map<String, Object> params, boolean online) {
         if (U.isBlank(url)) {
             return null;
         }
 
         url = handleEmptyScheme(url);
         HttpPost request = handlePostParams(url, params);
-        return handleRequest(request, U.formatParam(params));
+        return handleRequest(request, U.formatParam(params), online);
     }
     /** 向指定的 url 进行 post 请求. 参数以 json 的方式一次传递 */
-    public static String post(String url, String json) {
+    public static String post(String url, String json, boolean online) {
         if (U.isBlank(url)) {
             return null;
         }
@@ -190,10 +178,10 @@ public class HttpClientUtil {
         url = handleEmptyScheme(url);
         HttpPost request = new HttpPost(url);
         request.setEntity(new ByteArrayEntity(json.getBytes(StandardCharsets.UTF_8)));
-        return handleRequest(request, json);
+        return handleRequest(request, json, online);
     }
     /** 向指定的 url 进行 post 请求. 有参数和头 */
-    public static String postWithHeader(String url, Map<String, Object> params, Map<String, Object> headers) {
+    public static String postWithHeader(String url, Map<String, Object> params, Map<String, Object> headers, boolean online) {
         if (U.isBlank(url)) {
             return null;
         }
@@ -201,12 +189,12 @@ public class HttpClientUtil {
         url = handleEmptyScheme(url);
         HttpPost request = handlePostParams(url, params);
         handleHeader(request, headers);
-        return handleRequest(request, U.formatParam(params));
+        return handleRequest(request, U.formatParam(params), online);
     }
 
 
     /** 向指定的 url 进行 post 操作, 有参数和文件 */
-    public static String postFile(String url, Map<String, Object> params, Map<String, File> files) {
+    public static String postFile(String url, Map<String, Object> params, Map<String, File> files, boolean online) {
         if (U.isBlank(url)) {
             return null;
         }
@@ -227,7 +215,7 @@ public class HttpClientUtil {
             }
             request.setEntity(entityBuilder.build());
         }
-        return handleRequest(request, U.formatParam(params));
+        return handleRequest(request, U.formatParam(params), online);
     }
 
 
@@ -280,18 +268,21 @@ public class HttpClientUtil {
         }
     }
     /** 收集上下文中的数据, 以便记录日志 */
-    private static String collectContext(Date start, String method, String url, String params,
+    private static String collectContext(boolean online, Date start, String method, String url, String params,
                                          Header[] requestHeaders, Header[] responseHeaders, String result) {
         StringBuilder sbd = new StringBuilder();
         sbd.append("HttpClient4.5 => [")
                 .append(DateUtil.formatMs(start)).append(" -> ").append(DateUtil.nowTimeMs())
                 .append("] (").append(method).append(" ").append(url).append(")");
         if (U.isNotBlank(params)) {
-            // 请求参数长度大于 1000 就只输出前后 200 个字符
-            if (params.length() > 1000) {
-                params = params.substring(0, 200) + " ... " + params.substring(params.length() - 200);
+            // 请求参数长度大于 500 就只输出前后 200 个字符
+            int len = params.length();
+            if (len > 500) {
+                sbd.append(params, 0, 200).append(" ... ").append(params, len - 200, len);
+            } else {
+                sbd.append(params);
             }
-            sbd.append(" params(").append(params).append(")");
+            sbd.append(")");
         }
         if (A.isNotEmpty(requestHeaders)) {
             sbd.append(" request headers(");
@@ -307,19 +298,21 @@ public class HttpClientUtil {
             }
             sbd.append(")");
         }
+        sbd.append(", return(");
         if (U.isNotBlank(result)) {
-            // 返回结果长度大于 1000 就只输出前后 200 个字符
-            if (result.length() > 1000) {
-                result = result.substring(0, 200) + " ... " + result.substring(result.length() - 200);
+            // 返回结果长度大于 500 就只输出前后 200 个字符
+            int len = result.length();
+            if (online && len > 500) {
+                sbd.append(result, 0, 200).append(" ... ").append(result, len - 200, len);
+            } else {
+                sbd.append(result);
             }
-            sbd.append(", return(").append(result).append(")");
-        } else {
-            sbd.append(", return nil");
         }
+        sbd.append(")");
         return sbd.toString();
     }
     /** 发起 http 请求 */
-    private static String handleRequest(HttpRequestBase request, String params) {
+    private static String handleRequest(HttpRequestBase request, String params, boolean online) {
         String method = request.getMethod();
         String url = request.getURI().toString();
 
@@ -332,7 +325,7 @@ public class HttpClientUtil {
                 if (LogUtil.ROOT_LOG.isInfoEnabled()) {
                     Header[] requestHeaders = request.getAllHeaders();
                     Header[] responseHeaders = response.getAllHeaders();
-                    String log = collectContext(start, method, url, params, requestHeaders, responseHeaders, result);
+                    String log = collectContext(online, start, method, url, params, requestHeaders, responseHeaders, result);
                     LogUtil.ROOT_LOG.info(log);
                 }
                 EntityUtils.consume(entity);

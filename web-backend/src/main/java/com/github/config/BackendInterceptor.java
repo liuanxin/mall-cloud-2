@@ -15,6 +15,11 @@ import java.lang.annotation.Annotation;
 
 public class BackendInterceptor implements HandlerInterceptor {
 
+    private boolean online;
+    public BackendInterceptor(boolean online) {
+        this.online = online;
+    }
+
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response,
                              Object handler) throws Exception {
@@ -44,7 +49,7 @@ public class BackendInterceptor implements HandlerInterceptor {
         LogUtil.RequestLogContext logContextInfo = RequestUtils.logContextInfo()
                 .setId(String.valueOf(BackendSessionUtil.getUserId()))
                 .setName(BackendSessionUtil.getUserName());
-        LogUtil.bind(logContextInfo);
+        LogUtil.bind(online, logContextInfo);
     }
 
     private void unbindParam() {
@@ -54,6 +59,9 @@ public class BackendInterceptor implements HandlerInterceptor {
 
     /** 检查登录 */
     private void checkLoginAndPermission(Object handler) {
+        if (!online) {
+            return;
+        }
         if (!handler.getClass().isAssignableFrom(HandlerMethod.class)) {
             return;
         }

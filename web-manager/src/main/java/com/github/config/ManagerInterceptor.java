@@ -21,7 +21,7 @@ public class ManagerInterceptor implements HandlerInterceptor {
     private static final List<String> LET_IT_GO = Lists.newArrayList("/error");
 
     private boolean online;
-    ManagerInterceptor(boolean online) {
+    public ManagerInterceptor(boolean online) {
         this.online = online;
     }
 
@@ -54,7 +54,7 @@ public class ManagerInterceptor implements HandlerInterceptor {
         LogUtil.RequestLogContext logContextInfo = RequestUtils.logContextInfo()
                 .setId(String.valueOf(ManagerSessionUtil.getUserId()))
                 .setName(ManagerSessionUtil.getUserName());
-        LogUtil.bind(logContextInfo);
+        LogUtil.bind(online, logContextInfo);
     }
 
     private void unbindParam() {

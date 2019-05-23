@@ -13,10 +13,15 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class ProductInterceptor implements HandlerInterceptor {
 
+    private boolean online;
+    public ProductInterceptor(boolean online) {
+        this.online = online;
+    }
+
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response,
                              Object handler) throws Exception {
-        LogUtil.bind(RequestUtils.logContextInfo());
+        LogUtil.bind(online, RequestUtils.logContextInfo());
         return true;
     }
 

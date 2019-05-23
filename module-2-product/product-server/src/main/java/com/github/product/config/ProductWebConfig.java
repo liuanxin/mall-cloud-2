@@ -2,6 +2,7 @@ package com.github.product.config;
 
 import com.github.common.mvc.SpringMvc;
 import com.github.common.mvc.VersionRequestMappingHandlerMapping;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -18,6 +19,9 @@ import java.util.List;
  */
 @Configuration
 public class ProductWebConfig extends WebMvcConfigurationSupport {
+
+    @Value("${online:false}")
+    private boolean online;
 
     @Override
     protected RequestMappingHandlerMapping createRequestMappingHandlerMapping() {
@@ -36,7 +40,7 @@ public class ProductWebConfig extends WebMvcConfigurationSupport {
 
     @Override
     public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
-        SpringMvc.handlerConvert(converters);
+        SpringMvc.handlerConvert(online, converters);
     }
 
     @Override
@@ -46,6 +50,6 @@ public class ProductWebConfig extends WebMvcConfigurationSupport {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(new ProductInterceptor()).addPathPatterns("/**");
+        registry.addInterceptor(new ProductInterceptor(online)).addPathPatterns("/**");
     }
 }

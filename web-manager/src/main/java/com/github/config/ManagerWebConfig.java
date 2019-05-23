@@ -42,7 +42,7 @@ public class ManagerWebConfig extends WebMvcConfigurationSupport {
 
     @Override
     public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
-        SpringMvc.handlerConvert(converters);
+        SpringMvc.handlerConvert(online, converters);
     }
 
     @Override
