@@ -2,7 +2,10 @@ package com.github.common.sql;
 
 import com.github.common.util.LogUtil;
 import com.github.common.util.U;
-import com.mysql.jdbc.*;
+import com.mysql.jdbc.Connection;
+import com.mysql.jdbc.ResultSetInternalMethods;
+import com.mysql.jdbc.Statement;
+import com.mysql.jdbc.StatementInterceptor;
 
 import java.sql.SQLException;
 import java.util.Properties;
@@ -26,26 +29,32 @@ public class ShowSqlInterceptor implements StatementInterceptor {
     public ResultSetInternalMethods postProcess(String sql, Statement statement,
                                                 ResultSetInternalMethods resultSetInternalMethods,
                                                 Connection connection) throws SQLException {
-        String showSql = null;
+        if (U.isBlank(sql) && U.isNotBlank(statement)) {
+            sql = statement.toString();
+            if (U.isNotBlank(sql)) {
+                int i = sql.indexOf(':');
+                if (i > 0 ) {
+                    sql = sql.substring(i + 1).trim();
+                }
+            }
+        }
+        /*
         if (statement != null) {
             if (statement instanceof PreparedStatement) {
                 try {
-                    showSql = ((PreparedStatement) statement).asSql();
+                    sql = ((PreparedStatement) statement).asSql();
                 } catch (SQLException sqlEx) {
                     if (LogUtil.SQL_LOG.isDebugEnabled()) {
                         LogUtil.SQL_LOG.debug("show sql exception", sqlEx);
                     }
                 }
-            } else {
-                showSql = sql;
             }
-        } else {
-            showSql = sql;
         }
-        if (U.isNotBlank(showSql)) {
+        */
+        if (U.isNotBlank(sql)) {
             if (LogUtil.SQL_LOG.isDebugEnabled()) {
                 // druid -> SQLUtils.formatMySql
-                String formatSql = SqlFormat.format(showSql);
+                String formatSql = SqlFormat.format(sql);
 
                 Long start = TIME.get();
                 if (start != null) {
