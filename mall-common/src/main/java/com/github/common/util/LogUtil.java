@@ -60,8 +60,8 @@ public final class LogUtil {
             this.ip = ip;
             this.method =method;
             this.url = url;
-            this.params = U.urlDecode(params);
-            this.heads = U.urlDecode(heads);
+            this.params = params;
+            this.heads = heads;
         }
 
         /** 输出 " [ip (id/name) (method url) params(...) headers(...)]" */

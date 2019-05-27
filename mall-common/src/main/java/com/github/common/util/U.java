@@ -540,15 +540,17 @@ public final class U {
 
 
     /** 字符转义. 主要针对 url 传递给后台前的操作. 如 ? 转换为 %3F, = 转换为 %3D, & 转换为 %26 等 */
-    public static String urlEncode(String url) {
-        if (isBlank(url)) {
+    public static String urlEncode(String src) {
+        if (isBlank(src)) {
             return EMPTY;
         }
         try {
             // java 中的 encode 是把空格变成 +, 转义后需要将 + 替换成 %2B
-            return URLEncoder.encode(url, StandardCharsets.UTF_8.displayName());//.replaceAll("\\+", "%2B");
+            return URLEncoder.encode(src, StandardCharsets.UTF_8.displayName());//.replaceAll("\\+", "%2B");
         } catch (UnsupportedEncodingException e) {
             return EMPTY;
+        } catch (IllegalArgumentException e) {
+            return src;
         }
     }
     /** 字符反转义, 主要针对 url 传递到后台后的操作 */
@@ -561,6 +563,8 @@ public final class U {
             return URLDecoder.decode(src/*.replaceAll("%2B", "\\+")*/, StandardCharsets.UTF_8.displayName());
         } catch (UnsupportedEncodingException e) {
             return EMPTY;
+        } catch (IllegalArgumentException e) {
+            return src;
         }
     }
 
