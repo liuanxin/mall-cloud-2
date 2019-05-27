@@ -34,7 +34,7 @@ public final class SpringMvc {
         registry.addConverter(new String2MoneyConverter());
     }
 
-    public static void handlerConvert(boolean online, List<HttpMessageConverter<?>> converters) {
+    public static void handlerConvert(List<HttpMessageConverter<?>> converters) {
         int i = 0, json = 0, string = 0;
         if (A.isNotEmpty(converters)) {
             Iterator<HttpMessageConverter<?>> iterator = converters.iterator();
@@ -53,32 +53,21 @@ public final class SpringMvc {
         }
         // 放到它们原来在的位置
         if (string > json) {
-            converters.add(json, new CustomizeJacksonConverter(online));
+            converters.add(json, new CustomizeJacksonConverter());
             converters.add(string, new StringHttpMessageConverter(StandardCharsets.UTF_8));
         } else {
             converters.add(string, new StringHttpMessageConverter(StandardCharsets.UTF_8));
-            converters.add(json, new CustomizeJacksonConverter(online));
+            converters.add(json, new CustomizeJacksonConverter());
         }
     }
 
     public static class CustomizeJacksonConverter extends MappingJackson2HttpMessageConverter {
-        private boolean online;
-        CustomizeJacksonConverter(boolean online) {
-            super(JsonUtil.RENDER);
-            this.online = online;
-        }
         @Override
         protected void writeSuffix(JsonGenerator generator, Object object) throws IOException {
             super.writeSuffix(generator, object);
 
             if (LogUtil.ROOT_LOG.isInfoEnabled()) {
-                String toRender = JsonUtil.toJson(object);
-                // 返回结果长度大于 500 就只输出前后 200 个字符
-                int len = toRender.length();
-                if (online && len > 500) {
-                    toRender = toRender.substring(0, 200) + " ... " + toRender.substring(len - 200);
-                }
-                LogUtil.ROOT_LOG.info("return json: ({})", toRender);
+                LogUtil.ROOT_LOG.info("return json: ({})", JsonUtil.toJson(object));
             }
         }
     }

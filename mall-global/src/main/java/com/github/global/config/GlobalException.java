@@ -140,7 +140,7 @@ public class GlobalException {
     private void bindAndPrintLog(String msg, Exception e) {
         if (LogUtil.ROOT_LOG.isDebugEnabled()) {
             // 当没有进到全局拦截器就抛出的异常, 需要这么处理才能在日志中输出整个上下文信息
-            LogUtil.bind(online, RequestUtils.logContextInfo());
+            LogUtil.bind(RequestUtils.logContextInfo());
             try {
                 LogUtil.ROOT_LOG.debug(msg, e);
             } finally {

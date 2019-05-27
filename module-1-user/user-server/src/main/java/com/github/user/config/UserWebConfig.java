@@ -2,7 +2,6 @@ package com.github.user.config;
 
 import com.github.common.mvc.SpringMvc;
 import com.github.common.mvc.VersionRequestMappingHandlerMapping;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -19,9 +18,6 @@ import java.util.List;
  */
 @Configuration
 public class UserWebConfig extends WebMvcConfigurationSupport {
-
-    @Value("${online:false}")
-    private boolean online;
 
     @Override
     protected RequestMappingHandlerMapping createRequestMappingHandlerMapping() {
@@ -40,7 +36,7 @@ public class UserWebConfig extends WebMvcConfigurationSupport {
 
     @Override
     public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
-        SpringMvc.handlerConvert(online, converters);
+        SpringMvc.handlerConvert(converters);
     }
 
     @Override
@@ -50,6 +46,6 @@ public class UserWebConfig extends WebMvcConfigurationSupport {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(new UserInterceptor(online)).addPathPatterns("/**");
+        registry.addInterceptor(new UserInterceptor()).addPathPatterns("/**");
     }
 }

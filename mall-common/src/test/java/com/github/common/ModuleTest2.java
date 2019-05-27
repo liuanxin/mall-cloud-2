@@ -715,15 +715,10 @@ class Server {
             " */\n" +
             "public class %sInterceptor implements HandlerInterceptor {\n" +
             "\n" +
-            "    private boolean online;\n" +
-            "    public %sInterceptor(boolean online) {\n" +
-            "        this.online = online;\n" +
-            "    }\n" +
-            "\n" +
             "    @Override\n" +
             "    public boolean preHandle(HttpServletRequest request, HttpServletResponse response,\n" +
             "                             Object handler) throws Exception {\n" +
-            "        LogUtil.bind(online, RequestUtils.logContextInfo());\n" +
+            "        LogUtil.bind(RequestUtils.logContextInfo());\n" +
             "        return true;\n" +
             "    }\n" +
             "\n" +
@@ -747,7 +742,6 @@ class Server {
             "\n" +
             "import " + PACKAGE + ".common.mvc.SpringMvc;\n" +
             "import " + PACKAGE + ".common.mvc.VersionRequestMappingHandlerMapping;\n" +
-            "import org.springframework.beans.factory.annotation.Value;\n" +
             "import org.springframework.context.annotation.Configuration;\n" +
             "import org.springframework.format.FormatterRegistry;\n" +
             "import org.springframework.http.converter.HttpMessageConverter;\n" +
@@ -765,10 +759,6 @@ class Server {
             " */\n" +
             "@Configuration\n" +
             "public class %sWebConfig extends WebMvcConfigurationSupport {\n" +
-            "\n" +
-            "    @Value(\"${online:false}\")\n" +
-            "    private boolean online;\n" +
-            "\n" +
             "    @Override\n" +
             "    protected RequestMappingHandlerMapping createRequestMappingHandlerMapping() {\n" +
             "        return new VersionRequestMappingHandlerMapping();\n" +
@@ -787,7 +777,7 @@ class Server {
             "\n" +
             "    @Override\n" +
             "    public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {\n" +
-            "        SpringMvc.handlerConvert(online, converters);\n" +
+            "        SpringMvc.handlerConvert(converters);\n" +
             "    }\n" +
             "\n" +
             "    @Override\n" +
@@ -797,7 +787,7 @@ class Server {
             "\n" +
             "    @Override\n" +
             "    public void addInterceptors(InterceptorRegistry registry) {\n" +
-            "        registry.addInterceptor(new %sInterceptor(online)).addPathPatterns(\"/**\");\n" +
+            "        registry.addInterceptor(new %sInterceptor()).addPathPatterns(\"/**\");\n" +
             "    }\n" +
             "}\n";
 

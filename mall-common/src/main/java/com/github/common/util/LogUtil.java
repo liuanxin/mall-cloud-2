@@ -25,9 +25,9 @@ public final class LogUtil {
     private static final String REQUEST_INFO = "requestInfo";
 
     /** 将当前请求的上下文信息放进日志 */
-    public static void bind(boolean online, RequestLogContext logContextInfo) {
+    public static void bind(RequestLogContext logContextInfo) {
         recordTime();
-        MDC.put(REQUEST_INFO, logContextInfo.requestInfo(online));
+        MDC.put(REQUEST_INFO, logContextInfo.requestInfo());
     }
     public static void unbind() {
         MDC.clear();
@@ -65,7 +65,7 @@ public final class LogUtil {
         }
 
         /** 输出 " [ip (id/name) (method url) params(...) headers(...)]" */
-        private String requestInfo(boolean online) {
+        private String requestInfo() {
             StringBuilder sbd = new StringBuilder();
             sbd.append(" [");
             sbd.append(ip);
@@ -77,15 +77,7 @@ public final class LogUtil {
                 sbd.append(")");
             }
             sbd.append(" (").append(method).append(" ").append(url).append(")");
-            sbd.append(" params(");
-            // 请求参数长度大于 500 就只输出前后 200 个字符
-            int len = params.length();
-            if (online && len > 500) {
-                sbd.append(params, 0, 200).append(" ... ").append(params, len - 200, len);
-            } else {
-                sbd.append(params);
-            }
-            sbd.append(")");
+            sbd.append(" params(").append(params).append(")");
             sbd.append(" headers(").append(heads).append(")");
             sbd.append("]");
             return sbd.toString();

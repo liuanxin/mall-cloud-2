@@ -54,7 +54,7 @@ public class ManagerInterceptor implements HandlerInterceptor {
         LogUtil.RequestLogContext logContextInfo = RequestUtils.logContextInfo()
                 .setId(String.valueOf(ManagerSessionUtil.getUserId()))
                 .setName(ManagerSessionUtil.getUserName());
-        LogUtil.bind(online, logContextInfo);
+        LogUtil.bind(logContextInfo);
     }
 
     private void unbindParam() {
