@@ -69,10 +69,28 @@ public class JsonUtil {
 
     /** 对象转换成 json 字符串 */
     public static String toJson(Object obj) {
+        if (U.isBlank(obj)) {
+            return "";
+        }
         try {
             return RENDER.writeValueAsString(obj);
         } catch (Exception e) {
             throw new RuntimeException("object(" + obj + ") to json exception.", e);
+        }
+    }
+
+    /** 对象转换成 json 字符串 */
+    public static String toJsonNil(Object obj) {
+        if (U.isBlank(obj)) {
+            return "";
+        }
+        try {
+            return RENDER.writeValueAsString(obj);
+        } catch (Exception e) {
+            if (LogUtil.ROOT_LOG.isInfoEnabled()) {
+                LogUtil.ROOT_LOG.info("Object to json exception", e);
+            }
+            return null;
         }
     }
 

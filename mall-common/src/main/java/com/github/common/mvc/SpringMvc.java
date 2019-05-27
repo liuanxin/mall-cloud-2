@@ -10,6 +10,7 @@ import com.github.common.page.Page;
 import com.github.common.util.A;
 import com.github.common.util.LogUtil;
 import com.github.common.util.RequestUtils;
+import com.github.common.util.U;
 import org.springframework.core.MethodParameter;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -67,7 +68,17 @@ public final class SpringMvc {
             super.writeSuffix(generator, object);
 
             if (LogUtil.ROOT_LOG.isInfoEnabled()) {
-                LogUtil.ROOT_LOG.info("return json: ({})", JsonUtil.toJson(object));
+                String json = JsonUtil.toJsonNil(object);
+                if (U.isNotBlank(json)) {
+                    // 长度如果超过 1100 就只输出前后 500 个字符
+                    int maxLen = 1100, headTail = 500;
+
+                    int len = json.length();
+                    if (len > maxLen) {
+                        json = json.substring(0, headTail) + " ... " + json.substring(len - headTail, len);
+                    }
+                    LogUtil.ROOT_LOG.info("return json: ({})", json);
+                }
             }
         }
     }

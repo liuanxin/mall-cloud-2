@@ -168,16 +168,20 @@ public class HttpOkClientUtil {
         sbd.append("OkHttp3 => (")
                 .append(DateUtil.formatMs(start)).append(" -> ").append(DateUtil.nowTimeMs())
                 .append("] (").append(method).append(" ").append(url).append(")");
+
+        // 参数 及 头 的长度如果超过 1100 就只输出前后 500 个字符
+        int maxLen = 1100, headTail = 500;
+
         if (U.isNotBlank(params)) {
             sbd.append(" params(");
-            // 请求参数长度大于 400 就只输出前后 180 个字符
+            sbd.append(" param(");
             int len = params.length();
-            if (online && len > 400) {
-                sbd.append(params, 0, 180).append(" ... ").append(params, len - 180, len);
+            if (len > maxLen) {
+                sbd.append(params, 0, headTail).append(" <.> ").append(params, len - headTail, len);
             } else {
                 sbd.append(params);
             }
-            sbd.append(")");
+            sbd.append(") ");
         }
         if (U.isNotBlank(requestHeaders)) {
             sbd.append(" request headers(");
@@ -186,19 +190,21 @@ public class HttpOkClientUtil {
             }
             sbd.append(")");
         }
+
+        sbd.append(",");
+
         if (U.isNotBlank(responseHeaders)) {
-            sbd.append(", response headers(");
+            sbd.append(" response headers(");
             for (String name : responseHeaders.names()) {
                 sbd.append("<").append(name).append(" : ").append(responseHeaders.get(name)).append(">");
             }
             sbd.append(")");
         }
-        sbd.append(", return(");
+        sbd.append(" return(");
         if (U.isNotBlank(result)) {
-            // 返回结果长度大于 400 就只输出前后 180 个字符
             int len = result.length();
-            if (online && len > 400) {
-                sbd.append(result, 0, 180).append(" ... ").append(result, len - 180, len);
+            if (len > maxLen) {
+                sbd.append(result, 0, headTail).append(" ... ").append(result, len - headTail, len);
             } else {
                 sbd.append(result);
             }
