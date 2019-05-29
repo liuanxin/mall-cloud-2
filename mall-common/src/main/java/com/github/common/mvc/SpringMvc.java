@@ -74,8 +74,9 @@ public final class SpringMvc {
                     int maxLen = 1100, headTail = 500;
 
                     int len = json.length();
+                    StringBuilder sbd = new StringBuilder();
                     if (len > maxLen) {
-                        json = json.substring(0, headTail) + " ... " + json.substring(len - headTail, len);
+                        sbd.append(json, 0, headTail).append(" ... ").append(json, len - headTail, len);
                     }
 
                     boolean notRequestInfo = LogUtil.hasNotRequestInfo();
@@ -83,7 +84,7 @@ public final class SpringMvc {
                         if (notRequestInfo) {
                             LogUtil.bind(RequestUtils.logContextInfo());
                         }
-                        LogUtil.ROOT_LOG.info("return json: ({})", json);
+                        LogUtil.ROOT_LOG.info("return json: ({})", (sbd.length() > 0 ? sbd.toString() : json));
                     } finally {
                         if (notRequestInfo) {
                             LogUtil.unbind();

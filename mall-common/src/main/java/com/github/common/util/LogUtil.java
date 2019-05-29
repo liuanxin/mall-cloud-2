@@ -83,23 +83,27 @@ public final class LogUtil {
             }
             sbd.append(" (").append(method).append(" ").append(url).append(")");
 
-            sbd.append(" params(");
-            int paramLen = params.length();
-            if (paramLen > maxLen) {
-                sbd.append(params, 0, headTail).append(" ... ").append(params, paramLen - headTail, paramLen);
-            } else {
-                sbd.append(params);
+            if (U.isNotBlank(params)) {
+                sbd.append(" params(");
+                int paramLen = params.length();
+                if (paramLen > maxLen) {
+                    sbd.append(params, 0, headTail).append(" ... ").append(params, paramLen - headTail, paramLen);
+                } else {
+                    sbd.append(params);
+                }
+                sbd.append(")");
             }
-            sbd.append(")");
 
-            sbd.append(" headers(");
-            int headLen = heads.length();
-            if (headLen > maxLen) {
-                sbd.append(heads, 0, headTail).append(" ... ").append(heads, headLen - headTail, headLen);
-            } else {
-                sbd.append(heads);
+            if (U.isNotBlank(heads)) {
+                sbd.append(" headers(");
+                int headLen = heads.length();
+                if (headLen > maxLen) {
+                    sbd.append(heads, 0, headTail).append(" ... ").append(heads, headLen - headTail, headLen);
+                } else {
+                    sbd.append(heads);
+                }
+                sbd.append(")");
             }
-            sbd.append(")");
 
             sbd.append("]");
             return sbd.toString();
