@@ -32,6 +32,9 @@ public final class LogUtil {
     public static void unbind() {
         MDC.clear();
     }
+    public static boolean hasNotRequestInfo() {
+        return U.isBlank(MDC.get(REQUEST_INFO));
+    }
 
     public static void recordTime() {
         MDC.put(RECEIVE_TIME, DateUtil.nowTimeMs() + " -> ");

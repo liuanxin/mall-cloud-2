@@ -77,7 +77,18 @@ public final class SpringMvc {
                     if (len > maxLen) {
                         json = json.substring(0, headTail) + " ... " + json.substring(len - headTail, len);
                     }
-                    LogUtil.ROOT_LOG.info("return json: ({})", json);
+
+                    boolean notRequestInfo = LogUtil.hasNotRequestInfo();
+                    try {
+                        if (notRequestInfo) {
+                            LogUtil.bind(RequestUtils.logContextInfo());
+                        }
+                        LogUtil.ROOT_LOG.info("return json: ({})", json);
+                    } finally {
+                        if (notRequestInfo) {
+                            LogUtil.unbind();
+                        }
+                    }
                 }
             }
         }
