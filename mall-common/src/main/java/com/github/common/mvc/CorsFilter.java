@@ -56,11 +56,9 @@ public class CorsFilter implements Filter {
 
         String scheme = request.getScheme();
         int port = request.getServerPort();
-        boolean http = ("http".equals(scheme) && port != 80);
-        boolean https = ("https".equals(scheme) && port != 443);
 
         domain.append(scheme).append("://").append(request.getServerName());
-        if (http || https) {
+        if (("http".equals(scheme) && port != 80) || ("https".equals(scheme) && port != 443)) {
             domain.append(':');
             domain.append(port);
         }
