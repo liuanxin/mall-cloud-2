@@ -1,6 +1,6 @@
 
 spring.datasource:
-  url: jdbc:mysql://db-user-test:3306/test_user_db?useSSL=false&useUnicode=true&characterEncoding=utf8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&transformedBitIsBoolean=true&useLegacyDatetimeCode=false&useJDBCCompliantTimezoneShift=true&serverTimezone=UTC&statementInterceptors=com.github.common.sql.ShowSqlInterceptor
+  url: jdbc:mysql://db-user-test:3306/test_user_db?useSSL=false&useUnicode=true&characterEncoding=utf8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&transformedBitIsBoolean=true&useLegacyDatetimeCode=false&useJDBCCompliantTimezoneShift=true&serverTimezone=UTC&statementInterceptors=com.github.common.sql.ShowSql8Interceptor
   username: test_user_user
   password: test_user_pass
   hikari:

@@ -29,15 +29,21 @@ final class ExportExcel {
     /** 行高. 要比上面的字体大一点! */
     private static final short ROW_HEIGHT = 15;
 
+    static Workbook handle(boolean excel07, LinkedHashMap<String, String> titleMap,
+                           LinkedHashMap<String, List<?>> dataMap) {
+        return handle(excel07, titleMap, dataMap, false);
+    }
+
     /**
      * 返回一个 excel 工作簿
      *
      * @param excel07  是否返回 microsoft excel 2007 的版本
      * @param titleMap 属性名为 key, 对应的标题为 value, 为了处理显示时的顺序, 因此使用 linkedHashMap
      * @param dataMap  以「sheet 名」为 key, 对应的数据为 value(每一行的数据为一个 Object)
+     * @param rightChineseFont  是否能正确中文字体的大小
      */
     static Workbook handle(boolean excel07, LinkedHashMap<String, String> titleMap,
-                           LinkedHashMap<String, List<?>> dataMap) {
+                           LinkedHashMap<String, List<?>> dataMap, boolean rightChineseFont) {
         // 声明一个工作薄. HSSFWorkbook 是 Office 2003 的版本, XSSFWorkbook 是 2007
         Workbook workbook = excel07 ? new XSSFWorkbook() : new HSSFWorkbook();
         // 没有标题直接返回
@@ -74,8 +80,6 @@ final class ExportExcel {
 
         // 标题头, 这里跟数据中的属性相对应
         Set<Map.Entry<String, String>> titleEntry = titleMap.entrySet();
-        // 是否能正确中文字体的大小
-        boolean rightChineseFont = false;
 
         // 单个列的数据
         String cellData;
@@ -136,7 +140,7 @@ final class ExportExcel {
 
                                 cellData = U.getField(data, titleMapEntry.getKey());
                                 if (NumberUtils.isCreatable(cellData)) {
-                                    cell.setCellType(CellType.NUMERIC);
+                                    //cell.setCellType(CellType.NUMERIC);
                                     cell.setCellValue(NumberUtils.toDouble(cellData));
 
                                     titleValues = titleMapEntry.getValue().split("\\|");
@@ -148,7 +152,7 @@ final class ExportExcel {
                                         cellTmpStyle = numberStyle;
                                     }
                                 } else {
-                                    cell.setCellType(CellType.STRING);
+                                    //cell.setCellType(CellType.STRING);
                                     cell.setCellValue(cellData);
                                     // 给字符串设置样式意义并不大, 忽略样式. 此处并不每次都生成一个
                                     cellTmpStyle = contentStyle;
