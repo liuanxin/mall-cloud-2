@@ -29,6 +29,13 @@ final class ExportExcel {
     /** 行高. 要比上面的字体大一点! */
     private static final short ROW_HEIGHT = 15;
 
+    /**
+     * 返回一个 excel 工作簿
+     *
+     * @param excel07  是否返回 microsoft excel 2007 的版本
+     * @param titleMap 属性名为 key, 对应的标题为 value, 为了处理显示时的顺序, 因此使用 linkedHashMap
+     * @param dataMap  以「sheet 名」为 key, 对应的数据为 value(每一行的数据为一个 Object)
+     */
     static Workbook handle(boolean excel07, LinkedHashMap<String, String> titleMap,
                            LinkedHashMap<String, List<?>> dataMap) {
         return handle(excel07, titleMap, dataMap, false);
