@@ -70,7 +70,7 @@ public class JsonUtil {
     /** 对象转换成 json 字符串 */
     public static String toJson(Object obj) {
         if (U.isBlank(obj)) {
-            return "";
+            return null;
         }
         try {
             return RENDER.writeValueAsString(obj);
@@ -82,7 +82,7 @@ public class JsonUtil {
     /** 对象转换成 json 字符串 */
     public static String toJsonNil(Object obj) {
         if (U.isBlank(obj)) {
-            return "";
+            return null;
         }
         try {
             return RENDER.writeValueAsString(obj);
@@ -137,7 +137,7 @@ public class JsonUtil {
     /** 将 json 字符串转换为指定的数组列表 */
     public static <T> List<T> toList(String json, Class<T> clazz) {
         if (U.isBlank(json)) {
-            return Collections.emptyList();
+            return null;
         }
         try {
             return RENDER.readValue(json, RENDER.getTypeFactory().constructCollectionType(List.class, clazz));
@@ -148,7 +148,7 @@ public class JsonUtil {
     /** 将 json 字符串转换为指定的数组列表 */
     public static <T> List<T> toListNil(String json, Class<T> clazz) {
         if (U.isBlank(json)) {
-            return Collections.emptyList();
+            return null;
         }
         try {
             return RENDER.readValue(json, RENDER.getTypeFactory().constructCollectionType(List.class, clazz));
