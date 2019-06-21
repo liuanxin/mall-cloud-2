@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
@@ -28,6 +29,12 @@ public class ManagerWebConfig extends WebMvcConfigurationSupport {
     @Override
     protected RequestMappingHandlerMapping createRequestMappingHandlerMapping() {
         return new VersionRequestMappingHandlerMapping();
+    }
+
+    @Override
+    public void configureContentNegotiation(ContentNegotiationConfigurer configurer) {
+        // 默认情况下, 如果请求是 .html 后缀将会返回视图, 关闭这项扩展
+        configurer.favorPathExtension(false);
     }
 
     @Override
