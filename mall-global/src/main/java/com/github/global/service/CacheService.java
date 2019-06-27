@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit;
 public class CacheService {
 
     private final StringRedisTemplate stringRedisTemplate;
-    public final RedisTemplate<Object, Object> redisTemplate;
+    private final RedisTemplate<Object, Object> redisTemplate;
 
     @Autowired
     public CacheService(StringRedisTemplate stringRedisTemplate, RedisTemplate<Object, Object> redisTemplate) {
