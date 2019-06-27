@@ -62,15 +62,6 @@ public class CacheService {
      * @param value 值
      */
     public boolean tryLock(String key, String value) {
-        /*Boolean flag = stringRedisTemplate.execute((RedisCallback<Boolean>) connection -> {
-            byte[] byteKey = SafeEncoder.encode(key);
-            byte[] byteValue = SafeEncoder.encode(value);
-            Expiration expiration = Expiration.from(time, unit);
-            RedisStringCommands.SetOption option = RedisStringCommands.SetOption.ifAbsent();
-
-            return connection.set(byteKey, byteValue, expiration, RedisStringCommands.SetOption.ifAbsent());
-        });
-        return U.isNotBlank(flag) && flag;*/
         return tryLock(key, value, 10, TimeUnit.SECONDS, 1, 10);
     }
     /**
@@ -142,11 +133,6 @@ public class CacheService {
      */
     public void unlock(String key, String value) {
         // 释放锁的时候先去缓存中取, 如果值跟之前存进去的一样才进行删除操作, 避免当前线程执行太长, 超时后其他线程又设置了值在处理
-        /*String val = get(key);
-        if (value.equals(val)) {
-            delete(key);
-        }*/
-
         String script = "if redis.call('get', KEYS[1]) == KEYS[2] then return redis.call('del', KEYS[1]); else return 0; end";
         DefaultRedisScript<Long> redisScript = new DefaultRedisScript<>(script, Long.class);
         List<String> keys = Arrays.asList(key, value);
