@@ -1,6 +1,5 @@
 package com.github.global.service;
 
-import com.github.common.date.DateUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.annotation.Configuration;
@@ -38,9 +37,11 @@ public class CacheService {
     }
     /** 往 redis 放值, 并设定超时时间 */
     public void set(String key, String value, Date expireTime) {
-        Date now = DateUtil.now();
-        if (expireTime.after(now)) {
-            set(key, value, DateUtil.betweenSecond(now, expireTime), TimeUnit.SECONDS);
+        if (expireTime != null) {
+            Date now = new Date();
+            if (expireTime.after(now)) {
+                set(key, value, now.getTime() - expireTime.getTime(), TimeUnit.MILLISECONDS);
+            }
         }
     }
 
