@@ -1,7 +1,6 @@
 package com.github.global.service;
 
 import com.github.common.date.DateUtil;
-import com.github.common.util.U;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.annotation.Configuration;
@@ -185,12 +184,12 @@ public class CacheService {
     /** 获取指定 set 的长度: scard key */
     public long setSize(String key) {
         Long size = stringRedisTemplate.opsForSet().size(key);
-        return U.greater0(size) ? size : 0L;
+        return size != null ? size : 0L;
     }
     /** 将指定的 set 存进 redis 的 set 并返回成功条数: sadd key v1 v2 v3 ... */
     public long setAdd(String key, String[] set) {
         Long add = stringRedisTemplate.opsForSet().add(key, set);
-        return U.greater0(add) ? add : 0L;
+        return add != null ? add : 0L;
     }
     /** 从指定的 set 中随机取一个值: spop key */
     public Object setPop(String key) {
