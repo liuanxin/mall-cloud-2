@@ -2,32 +2,32 @@ package com.github.global.service;
 
 import com.github.common.date.DateUtil;
 import com.github.common.util.U;
-import com.google.common.collect.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.data.redis.core.script.RedisScript;
-import redis.clients.jedis.Jedis;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+/** @see org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration */
 @Configuration
-@ConditionalOnClass({ Jedis.class, RedisTemplate.class })
-@ConditionalOnBean({ RedisTemplate.class, StringRedisTemplate.class })
+@ConditionalOnClass({ RedisTemplate.class, StringRedisTemplate.class })
 public class CacheService {
 
-    /** @see org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration */
-    @Autowired
-    private StringRedisTemplate stringRedisTemplate;
+    private final StringRedisTemplate stringRedisTemplate;
+    public final RedisTemplate<Object, Object> redisTemplate;
 
     @Autowired
-    public RedisTemplate<Object, Object> redisTemplate;
+    public CacheService(StringRedisTemplate stringRedisTemplate, RedisTemplate<Object, Object> redisTemplate) {
+        this.stringRedisTemplate = stringRedisTemplate;
+        this.redisTemplate = redisTemplate;
+    }
 
     /** 往 redis 中放值 */
     public void set(String key, String value) {
@@ -44,14 +44,13 @@ public class CacheService {
             set(key, value, DateUtil.betweenSecond(now, expireTime), TimeUnit.SECONDS);
         }
     }
+
     /**
      * <pre>
-     * 用 redis 获取分布式锁, 获取成功则返回 true. 想要操作分布式锁, 可以像下面这样操作
+     * 用 redis 获取分布式锁, 获取成功则返回 true
      *
      * String key = "xxx", value = uuid(); // value 用 uuid 确保每个线程都不一样
-     * boolean lock = tryLock(key, value);
-     * // 如果获取失败这里会是 false
-     * if (lock) {
+     * if (tryLock(key, value)) {
      *   try {
      *     // 获取到锁之后的业务处理
      *   } finally {
@@ -60,10 +59,8 @@ public class CacheService {
      *   }
      * }
      * </pre>
-     *
      * @param key 键
      * @param value 值
-     * @return 返回 true 则表示获取到了锁
      */
     public boolean tryLock(String key, String value) {
         /*Boolean flag = stringRedisTemplate.execute((RedisCallback<Boolean>) connection -> {
@@ -78,6 +75,23 @@ public class CacheService {
         return tryLock(key, value, 10, TimeUnit.SECONDS, 1, 10);
     }
     /**
+     * <pre>
+     * 用 redis 获取分布式锁, 获取成功则返回 true
+     *
+     * String key = "xxx", value = uuid(); // value 用 uuid 确保每个线程都不一样
+     * int time = 3;
+     * if (tryLock(key, value, 10, TimeUnit.SECONDS, time, 10)) {
+     *   try {
+     *     // 获取到锁之后的业务处理
+     *   } finally {
+     *     // 解锁时 key 和 value 都需要
+     *     unlock(key, value);
+     *   }
+     * } else {
+     *   LOG.info("操作了 {} 次依然没有获得锁", time);
+     * }
+     * </pre>
+     *
      * @param key 键
      * @param value 值
      * @param time 超时时间
@@ -95,11 +109,11 @@ public class CacheService {
         }
 
         String script = "if redis.call('set', KEYS[1], KEYS[2], 'PX', KEYS[3], 'NX') then return 1; else return 0; end";
-        RedisScript<Integer> redisScript = new DefaultRedisScript<>(script, Integer.class);
-        List<Object> keys = Lists.newArrayList(key, value, unit.toMillis(time));
+        RedisScript<Long> redisScript = new DefaultRedisScript<>(script, Long.class);
+        List<String> keys = Arrays.asList(key, value, String.valueOf(unit.toMillis(time)));
         for (int i = 0; i < retryTime; i++) {
-            Integer flag = redisTemplate.execute(redisScript, keys);
-            if (flag != null && flag == 1) {
+            Long flag = stringRedisTemplate.execute(redisScript, keys);
+            if (flag != null && flag == 1L) {
                 return true;
             } else {
                 try {
@@ -112,12 +126,10 @@ public class CacheService {
     }
     /**
      * <pre>
-     * 用 redis 解分布式锁. 想要操作分布式锁, 可以像下面这样操作
+     * 用 redis 获取分布式锁, 获取成功则返回 true
      *
      * String key = "xxx", value = uuid(); // value 用 uuid 确保每个线程都不一样
-     * boolean lock = tryLock(key, value, 10L, TimeUnit.SECONDS);
-     * // 如果获取失败这里会是 false
-     * if (lock) {
+     * if (tryLock(key, value)) {
      *   try {
      *     // 获取到锁之后的业务处理
      *   } finally {
@@ -126,7 +138,6 @@ public class CacheService {
      *   }
      * }
      * </pre>
-     *
      * @param key 键
      * @param value 值
      */
@@ -138,7 +149,9 @@ public class CacheService {
         }*/
 
         String script = "if redis.call('get', KEYS[1]) == KEYS[2] then return redis.call('del', KEYS[1]); else return 0; end";
-        redisTemplate.execute(new DefaultRedisScript<>(script, Integer.class), Lists.newArrayList(key, value));
+        DefaultRedisScript<Long> redisScript = new DefaultRedisScript<>(script, Long.class);
+        List<String> keys = Arrays.asList(key, value);
+        stringRedisTemplate.execute(redisScript, keys);
     }
 
     /** 设置超时 */
