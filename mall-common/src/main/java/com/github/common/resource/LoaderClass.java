@@ -1,9 +1,9 @@
 package com.github.common.resource;
 
-import com.google.common.collect.Lists;
 import com.github.common.util.A;
 import com.github.common.util.LogUtil;
 import com.github.common.util.U;
+import com.google.common.collect.Lists;
 
 import java.io.File;
 import java.io.IOException;

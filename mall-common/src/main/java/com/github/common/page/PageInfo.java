@@ -1,7 +1,7 @@
 package com.github.common.page;
 
-import com.github.liuanxin.api.annotation.ApiReturn;
 import com.github.common.util.U;
+import com.github.liuanxin.api.annotation.ApiReturn;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
