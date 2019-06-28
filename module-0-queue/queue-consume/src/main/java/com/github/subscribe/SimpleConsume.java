@@ -3,7 +3,6 @@ package com.github.subscribe;
 import com.github.common.util.LogUtil;
 import com.github.order.service.OrderService;
 import com.github.queue.constant.QueueConst;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Component;
 
@@ -12,8 +11,11 @@ import javax.jms.JMSException;
 @Component
 public class SimpleConsume {
 
-    @Autowired
-    private OrderService orderService;
+    private final OrderService orderService;
+
+    public SimpleConsume(OrderService orderService) {
+        this.orderService = orderService;
+    }
 
     @JmsListener(destination = QueueConst.SIMPLE_MQ_NAME)
     public void receiveMessage(final String message) throws JMSException {

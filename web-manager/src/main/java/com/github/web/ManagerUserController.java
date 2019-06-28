@@ -10,7 +10,6 @@ import com.github.liuanxin.api.annotation.ApiParam;
 import com.github.user.constant.UserConst;
 import com.github.user.service.UserService;
 import com.github.vo.DemoVo;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -20,8 +19,11 @@ import org.springframework.web.bind.annotation.RestController;
 @ApiGroup(UserConst.MODULE_INFO)
 public class ManagerUserController {
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
+
+    public ManagerUserController(UserService userService) {
+        this.userService = userService;
+    }
 
     @GetMapping("/demo")
     @ApiMethod(title = "示例", develop = "liuanxin")

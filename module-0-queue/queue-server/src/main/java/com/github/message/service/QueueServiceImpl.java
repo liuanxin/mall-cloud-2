@@ -2,7 +2,6 @@ package com.github.message.service;
 
 import com.github.queue.constant.QueueConst;
 import com.github.queue.service.QueueService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.web.bind.annotation.RestController;
@@ -20,12 +19,14 @@ import javax.jms.Queue;
 @RestController
 public class QueueServiceImpl implements QueueService {
 
-    @Autowired
-    private JmsTemplate jmsTemplate;
+    private final JmsTemplate jmsTemplate;
+    private final Queue simpleQueue;
 
-    @Autowired
-    @Qualifier(QueueConst.SIMPLE_MQ_NAME)
-    private Queue simpleQueue;
+    public QueueServiceImpl(JmsTemplate jmsTemplate,
+                            @Qualifier(QueueConst.SIMPLE_MQ_NAME) Queue simpleQueue) {
+        this.jmsTemplate = jmsTemplate;
+        this.simpleQueue = simpleQueue;
+    }
 
     @Override
     public void submitSimple(String simpleInfo) {

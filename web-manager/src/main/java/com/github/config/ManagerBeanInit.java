@@ -3,7 +3,6 @@ package com.github.config;
 import com.github.common.RenderViewResolver;
 import com.github.util.ManagerDataCollectUtil;
 import com.github.util.ManagerSessionUtil;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.freemarker.FreeMarkerProperties;
@@ -19,8 +18,11 @@ public class ManagerBeanInit {
     private boolean online;
 
     /** freemarker 的默认配置 */
-    @Autowired
-    private FreeMarkerProperties properties;
+    private final FreeMarkerProperties properties;
+
+    public ManagerBeanInit(FreeMarkerProperties properties) {
+        this.properties = properties;
+    }
 
     /**
      * 覆盖默认的 viewResolver<br>
