@@ -4,14 +4,14 @@ import com.github.common.RenderViewResolver;
 import com.github.util.ManagerDataCollectUtil;
 import com.github.util.ManagerSessionUtil;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.freemarker.FreeMarkerProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /** 项目中需要额外加载的类 */
 @Configuration
-@ConditionalOnBean({ FreeMarkerProperties.class })
+@ConditionalOnClass({ FreeMarkerProperties.class })
 public class ManagerBeanInit {
 
     @Value("${online:false}")
