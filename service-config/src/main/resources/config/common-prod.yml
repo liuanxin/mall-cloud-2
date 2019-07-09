@@ -5,7 +5,7 @@ spring.datasource:
   password: prod_common_pass
   hikari:
     minimumIdle: 10
-    maximumPoolSize: 30
+    maximumPoolSize: 20
     dataSourceProperties:
       prepStmtCacheSize: 250
       prepStmtCacheSqlLimit: 2048
