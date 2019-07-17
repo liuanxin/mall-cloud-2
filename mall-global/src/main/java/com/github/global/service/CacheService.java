@@ -61,7 +61,7 @@ public class CacheService {
      * @param value 值
      */
     public boolean tryLock(String key, String value) {
-        return tryLock(key, value, 10, TimeUnit.SECONDS, 1, 10);
+        return tryLock(key, value, 10, TimeUnit.SECONDS, 1, 1);
     }
     /**
      * <pre>
@@ -90,23 +90,19 @@ public class CacheService {
      * @return 返回 true 则表示获取到了锁
      */
     public boolean tryLock(String key, String value, long time, TimeUnit unit, int retryTime, long sleepTime) {
-        if (retryTime <= 0 || retryTime > 10) {
-            retryTime = 1;
-        }
-        if (sleepTime <= 0 || sleepTime > 1000) {
-            sleepTime = 10;
-        }
+        int retry = (retryTime <= 0 || retryTime > 10) ? 1 : retryTime;
+        long sleep = (sleepTime <= 0 || sleepTime > 1000) ? 10L : sleepTime;
 
         String script = "if redis.call('set', KEYS[1], KEYS[2], 'PX', KEYS[3], 'NX') then return 1; else return 0; end";
         RedisScript<Long> redisScript = new DefaultRedisScript<>(script, Long.class);
         List<String> keys = Arrays.asList(key, value, String.valueOf(unit.toMillis(time)));
-        for (int i = 0; i < retryTime; i++) {
+        for (int i = 0; i < retry; i++) {
             Long flag = stringRedisTemplate.execute(redisScript, keys);
             if (flag != null && flag == 1L) {
                 return true;
             } else {
                 try {
-                    Thread.sleep(sleepTime);
+                    Thread.sleep(sleep);
                 } catch (InterruptedException ignore) {
                 }
             }
