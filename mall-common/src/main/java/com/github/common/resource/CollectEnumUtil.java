@@ -95,7 +95,7 @@ public final class CollectEnumUtil {
                 }
             }
         }
-        return set.toArray(new Class[set.size()]);
+        return set.toArray(new Class[0]);
     }
 
     /**

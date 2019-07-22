@@ -34,7 +34,7 @@ public final class CollectTypeHandlerUtil {
         if (LogUtil.ROOT_LOG.isDebugEnabled()) {
             LogUtil.ROOT_LOG.debug("mybatis load type handle:({})", A.toStr(handlerList));
         }
-        return handlerList.toArray(new TypeHandler[handlerList.size()]);
+        return handlerList.toArray(new TypeHandler[0]);
     }
 
     /** 基于指定的类(用来获取 ClassLoader), 在指定的包名下获取 mybatis 的类型处理器 */
