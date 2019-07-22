@@ -30,7 +30,7 @@ public final class CollectResourceUtil {
         if (LogUtil.ROOT_LOG.isDebugEnabled()) {
             LogUtil.ROOT_LOG.debug("mybatis load xml:({})", A.toStr(resourceList));
         }
-        return resourceList.toArray(new Resource[resourceList.size()]);
+        return resourceList.toArray(new Resource[0]);
     }
 
     /** 从单个类所在的加载器下获取 mybatis 要加载的 xml 文件 */
