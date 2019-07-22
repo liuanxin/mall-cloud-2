@@ -442,7 +442,7 @@ class Server {
             "    private List<DocumentResponse> globalResponse() {\n" +
             "        List<DocumentResponse> responseList = Lists.newArrayList();\n" +
             "        for (JsonCode code : JsonCode.values()) {\n" +
-            "            responseList.add(new DocumentResponse(code.getFlag(), code.getMsg()));\n" +
+            "            responseList.add(new DocumentResponse(code.getCode(), code.getValue()));\n" +
             "        }\n" +
             "        return responseList;\n" +
             "    }\n" +

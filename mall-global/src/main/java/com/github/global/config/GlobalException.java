@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -39,8 +40,7 @@ public class GlobalException {
         if (LogUtil.ROOT_LOG.isDebugEnabled()) {
             LogUtil.ROOT_LOG.debug(msg);
         }
-
-        return ResponseEntity.status(JsonCode.FAIL.getFlag()).body(msg);
+        return ResponseEntity.status(JsonCode.FAIL.getCode()).body(msg);
     }
     /** 未登录 */
     @ExceptionHandler(NotLoginException.class)
@@ -49,8 +49,7 @@ public class GlobalException {
         if (LogUtil.ROOT_LOG.isDebugEnabled()) {
             LogUtil.ROOT_LOG.debug(msg);
         }
-
-        return ResponseEntity.status(JsonCode.NOT_LOGIN.getFlag()).body(msg);
+        return ResponseEntity.status(JsonCode.NOT_LOGIN.getCode()).body(msg);
     }
     /** 无权限 */
     @ExceptionHandler(ForbiddenException.class)
@@ -59,8 +58,8 @@ public class GlobalException {
         if (LogUtil.ROOT_LOG.isDebugEnabled()) {
             LogUtil.ROOT_LOG.debug(msg);
         }
-
-        return ResponseEntity.status(JsonCode.NOT_PERMISSION.getFlag()).body(msg);
+        return ResponseEntity.status(JsonCode.FAIL.getCode()).body(msg);
+        // return ResponseEntity.status(JsonCode.NOT_PERMISSION.getCode()).body(msg);
     }
     /** 404 */
     @ExceptionHandler(NotFoundException.class)
@@ -69,8 +68,8 @@ public class GlobalException {
         if (LogUtil.ROOT_LOG.isDebugEnabled()) {
             LogUtil.ROOT_LOG.debug(msg);
         }
-
-        return ResponseEntity.status(JsonCode.NOT_FOUND.getFlag()).body(msg);
+        return ResponseEntity.status(JsonCode.FAIL.getCode()).body(msg);
+        // return ResponseEntity.status(JsonCode.NOT_FOUND.getCode()).body(msg);
     }
     /** 错误的请求 */
     @ExceptionHandler(BadRequestException.class)
@@ -79,8 +78,8 @@ public class GlobalException {
         if (LogUtil.ROOT_LOG.isDebugEnabled()) {
             LogUtil.ROOT_LOG.debug(msg);
         }
-
-        return ResponseEntity.status(JsonCode.BAD_REQUEST.getFlag()).body(msg);
+        return ResponseEntity.status(JsonCode.FAIL.getCode()).body(msg);
+        // return ResponseEntity.status(JsonCode.BAD_REQUEST.getCode()).body(msg);
     }
 
 
@@ -88,37 +87,42 @@ public class GlobalException {
 
     @ExceptionHandler(NoHandlerFoundException.class)
     public ResponseEntity<String> noHandler(NoHandlerFoundException e) {
-        String msg = online
-                ? "404"
-                : String.format("没找到(%s %s)", e.getHttpMethod(), e.getRequestURL());
+        String msg = online ? "404" : String.format("没找到(%s %s)", e.getHttpMethod(), e.getRequestURL());
 
         bindAndPrintLog(msg, e);
-        return ResponseEntity.status(JsonCode.NOT_FOUND.getFlag()).body(msg);
+        return ResponseEntity.status(JsonCode.FAIL.getCode()).body(msg);
+        // return ResponseEntity.status(JsonCode.NOT_FOUND.getCode()).body(msg);
     }
     @ExceptionHandler(MissingServletRequestParameterException.class)
     public ResponseEntity<String> missParam(MissingServletRequestParameterException e) {
-        String msg = online
-                ? "无法响应此请求"
-                : String.format("缺少必须的参数(%s), 类型(%s)", e.getParameterName(), e.getParameterType());
+        String msg = online ? "无法响应此请求" : String.format("缺少必须的参数(%s), 类型(%s)", e.getParameterName(), e.getParameterType());
 
         bindAndPrintLog(msg, e);
-        return ResponseEntity.status(JsonCode.BAD_REQUEST.getFlag()).body(msg);
+        return ResponseEntity.status(JsonCode.FAIL.getCode()).body(msg);
+        // return ResponseEntity.status(JsonCode.BAD_REQUEST.getCode()).body(msg);
+    }
+    @ExceptionHandler(MissingRequestHeaderException.class)
+    public ResponseEntity<String> missHeader(MissingRequestHeaderException e) {
+        String msg = online ? "无法响应这个请求" : String.format("缺少头(%s)", e.getHeaderName());
+
+        bindAndPrintLog(msg, e);
+        return ResponseEntity.status(JsonCode.FAIL.getCode()).body(msg);
+        // return ResponseEntity.status(JsonCode.BAD_REQUEST.getCode()).body(msg);
     }
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public ResponseEntity<String> notSupported(HttpRequestMethodNotSupportedException e) {
-        String msg = online
-                ? "无法处理此请求"
-                : String.format("不支持此种请求方式: 当前(%s), 支持(%s)", e.getMethod(), A.toStr(e.getSupportedMethods()));
+        String msg = online  ? "无法处理此请求" : String.format("不支持此请求方式: 当前(%s), 支持(%s)", e.getMethod(), A.toStr(e.getSupportedMethods()));
 
         bindAndPrintLog(msg, e);
-        return ResponseEntity.status(JsonCode.FAIL.getFlag()).body(msg);
+        return ResponseEntity.status(JsonCode.FAIL.getCode()).body(msg);
+        // return ResponseEntity.status(JsonCode.BAD_REQUEST.getCode()).body(msg);
     }
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public ResponseEntity<String> uploadSizeExceeded(MaxUploadSizeExceededException e) {
         // 右移 20 位相当于除以两次 1024, 正好表示从字节到 Mb
         String msg = String.format("上传文件太大! 请保持在 %sM 以内", (e.getMaxUploadSize() >> 20));
         bindAndPrintLog(msg, e);
-        return ResponseEntity.status(JsonCode.FAIL.getFlag()).body(msg);
+        return ResponseEntity.status(JsonCode.FAIL.getCode()).body(msg);
     }
 
     // 以上是 spring 的内部异常
@@ -132,7 +136,7 @@ public class GlobalException {
         }
 
         String msg = U.returnMsg(e, online);
-        return ResponseEntity.status(JsonCode.FAIL.getFlag()).body(msg);
+        return ResponseEntity.status(JsonCode.FAIL.getCode()).body(msg);
     }
 
     // ==================================================

@@ -14,7 +14,7 @@ public class JsonResult<T> {
 
     // 应该只有响应编码就可以了, 当前实体表示处理成功后的返回, 200 以外的响应编码统一处理
     // @ApiReturn("返回码")
-    // private int code;
+    // private JsonCode code;
 
     /** 返回说明. 如: 用户名密码错误, 收货地址添加成功 等 */
     @ApiReturn("返回说明. 如: 用户名密码错误, 收货地址添加成功 等")
@@ -31,22 +31,47 @@ public class JsonResult<T> {
     private String token;
     */
 
-    private JsonResult(String msg) {
+    private JsonResult(JsonCode code, String msg) {
+        // this.code = code;
         this.msg = msg;
     }
-    private JsonResult(String msg, T data) {
-        this.msg = msg;
+    private JsonResult(JsonCode code, String msg, T data) {
+        this(code, msg);
         this.data = data;
     }
 
 
-    // --------------------
+    // ---------- 在 controller 中请只使用下面的静态方法就好了. 不要 new JsonResult()... 这样操作 ----------
 
     public static <T> JsonResult<T> success(String msg) {
-        return new JsonResult<T>(msg);
+        return new JsonResult<>(JsonCode.SUCCESS, msg);
     }
 
     public static <T> JsonResult<T> success(String msg, T data) {
-        return new JsonResult<T>(msg, data);
+        return new JsonResult<>(JsonCode.SUCCESS,msg, data);
+    }
+
+
+    public static <T> JsonResult<T> badRequest(String msg) {
+        // return new JsonResult<T>(JsonCode.BAD_REQUEST, msg);
+        return new JsonResult<T>(JsonCode.FAIL, msg);
+    }
+
+    public static <T> JsonResult<T> needLogin(String msg) {
+        return new JsonResult<T>(JsonCode.NOT_LOGIN, msg);
+    }
+
+    public static <T> JsonResult<T> needPermission(String msg) {
+        // return new JsonResult<T>(JsonCode.NOT_PERMISSION, msg);
+        return new JsonResult<T>(JsonCode.FAIL, msg);
+    }
+
+    public static <T> JsonResult<T> notFound(String msg) {
+        // return new JsonResult<T>(JsonCode.NOT_FOUND, msg);
+        return new JsonResult<T>(JsonCode.FAIL, msg);
+    }
+
+    public static <T> JsonResult<T> fail(String msg) {
+        return new JsonResult<T>(JsonCode.FAIL, msg);
     }
 }
