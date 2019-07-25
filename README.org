@@ -49,6 +49,68 @@
 #+END_SRC
 
 
+*** 分页示例
+
+在 controller 中这样
+#+BEGIN_SRC java
+// 如果不传 page 和 limit, 或者传的是 page=a&limit=-100 将会有默认值 page=1&limit=15
+@GetMapping("/demo")  // 如果参数不多的话, 不需要构建 dto, 直接写在这里就好了, 返回只有一个字段直接返回就好了, 也不用新建 vo
+public JsonResult<PageInfo<DemoVo>> demoList(DemoDto dto, Page page) {
+    // dto 中写方法来生成跟数据库对应的 model, 方法中可以先做 web 层的数据校验
+    PageInfo<Demo> demoPageInfo = demoService.pageList(dto.demo(), "abc", page);
+    XXX x = xxxService.xyz(dto.xxx()); // 不同的模块区分开
+    return JsonResult.success("用户列表", DemoVo.assemblyData(demoInfo, x));
+}
+#+END_SRC
+
+service 中的接口及实现类
+#+BEGIN_SRC java
+public interface DemoService {
+    /** 获取分页数据 */   // dto 和 vo 是 controller 层的对象, 在 service 层使用跟数据库对应的 model 实体 或者 包装类型 进行接收
+    PageInfo<Demo> pageList(Demo param, String name, Page page);
+}
+
+@Service
+public class DemoServiceImpl implements DemoService {
+
+    @Autowired
+    private DemoMapper demoMapper;
+
+    @Override
+    public PageInfo<Demo> pageList(Demo param, Page page) {
+        DemoExample example = new DemoExample();
+        if (U.isNotBlank(param)) {
+            DemoExample.Criteria criteria = example.or();
+            if (U.isNotBlank(param.getName())) {
+                criteria.andNameLike(name);
+            }
+            // 如果有其他的属性 -> 动态拼接
+        }
+        // 下面的查询会自动基于 Page 对象中的 page 和 limit 值拼到 sql 语句中去, 也会自动添加 select count(*) 的查询
+        List<Demo> demoList = demoMapper.selectByExample(example, Pages.param(page));
+        // 上面的 List 包含了 select count(*) 的值
+        return Pages.returnList(demoList);
+    }
+}
+#+END_SRC
+
+在 dao(repository) 中只需要在查询的地方加多一个方法即可
+#+BEGIN_SRC java
+public interface DemoMapper {
+
+    // ...
+
+    // 这是原先有的方法
+    List<Demo> selectByExample(DemoExample example);
+
+    // 加上这个方法(多一个 PageBounds 参数)会自动基于数据库发起 count(*) 和 limit 查询
+    List<Demo> selectByExample(DemoExample example, PageBounds pageBounds);
+
+    // ...
+}
+#+END_SRC
+
+
 *** 通过 Example 简化查询
 
 如果我们想要生成如下的 sql 语句:
@@ -106,6 +168,99 @@ PS: 尽量不要使用 join 来联表, 尽量由应用程序来组装数据并�
 而且应用程序还可以在这里加上二级缓存, 将大部分的压力由 db 的 io 操作转移到了应用程序的内部运算和网卡的数据库连接上,
 java 做内部运算本就是强项, 这一块成为瓶颈可能性很低且易重构, 数据库连接可以由 druid 连接池来达到高性能操作.
 
-阿里在 17 年初出的开发手册中也明确说明: 超级三个表禁止 join, 是有其原因的.
+阿里的开发手册中提到: 超过三个表禁止 join
 
-btw: 在 ide 中安装 lombok 和 mybatis 插件
+
+*** 枚举映射
+不管是在实体(数据库对应的 model), 还是前端过来的传输对象(dto), 或者返回给前端的显示对象(vo), 都可以直接用枚举来做为字段的类型
+
+比如有这样一个 性别 的枚举
+#+BEGIN_SRC java
+/** 用户性别 */
+public enum Gender {
+
+    Male(1, "男"), Female(2, "女");
+
+    int code;
+    String value;
+    Gender(int code, String value) {
+        this.code = code;
+        this.value = value;
+    }
+
+    /** 显示用 */
+    public String getValue() {
+        return value;
+    }
+    /** 数据关联用 */
+    public int getCode() {
+        return code;
+    }
+
+    /** 序列化给前端时, 如果只想给前端返回数值, 去掉此方法并把注解挪到 getCode 方法上即可 */
+    @JsonValue
+    public Map<String, String> serializer() {
+        return U.serializerEnum(code, value);
+    }
+    /** 数据反序列化. 如 male、0、男、{"code": 0, "value": "男"} 都可以反序列化为 Gender.Male 值 */
+    @JsonCreator
+    public static Gender deserializer(Object obj) {
+        return U.enumDeserializer(obj, Gender.class);
+    }
+}
+#+END_SRC
+其中 code 和 value 都要有, 分别用来存入数据库和显示, 每个模块的 test 中有 xxxGenerateEnumHandler 这个测试类,
+运行后会在当前模块的 handler 包中生成对应的枚举处理类, 就像下面这样
+#+BEGIN_SRC java
+/**
+* 当前 handle 是自动生成的
+*
+* @see org.apache.ibatis.type.TypeHandlerRegistry
+* @see org.apache.ibatis.type.EnumTypeHandler
+* @see org.apache.ibatis.type.EnumOrdinalTypeHandler
+*/
+public class GenderHandler extends BaseTypeHandler<Gender> {
+
+    @Override
+    public void setNonNullParameter(PreparedStatement ps, int i, Gender parameter, JdbcType jdbcType) throws SQLException {
+        ps.setInt(i, parameter.getCode());
+    }
+
+    @Override
+    public Gender getNullableResult(ResultSet rs, String columnName) throws SQLException {
+        return U.toEnum(Gender.class, rs.getObject(columnName));
+    }
+
+    @Override
+    public Gender getNullableResult(ResultSet rs, int columnIndex) throws SQLException {
+        return U.toEnum(Gender.class, rs.getObject(columnIndex));
+    }
+
+    @Override
+    public Gender getNullableResult(CallableStatement cs, int columnIndex) throws SQLException {
+        return U.toEnum(Gender.class, cs.getObject(columnIndex));
+    }
+}
+#+END_SRC
+这个包下的所有类会被装载到 mybatis 的上下文中去, 这样在整个项目过程中, 任意地方都可以直接使用枚举而不需要基于数值转来转去
+
+
+*** 数据库相关的规范
+
+1. 表名全部小写, 以 t_ 开头, 单词间用下划线隔开, 模块要包含在表名中, 如: 用户表 t_user, 用户信息表 t_user_info(一个库也很好区分模块)
+2. 表要加上注释, 字符集用 utf8mb4, 使用 innodb 引擎, 如:  comment='xx' engine=InnoDB default charset=utf8mb4;
+3. 字段要加上注释, 不允许为 null, 业务上可以为空的字段给定默认值, 如: \`type\` int not null default 0 comment 'xxx'
+4. 会用到 text 字段的尽量抽成一个单表
+5. 用这几种类型就可以了, 相关的表字段类型对应如下
+
+| java 类型     | 数据库字段类型                                                                                  |
+|---------------+-------------------------------------------------------------------------------------------------|
+| Long          | 主键或外键或存到分的金额: bigint(20) unsigned not null default '0' comment '商品最低价(存到分)' |
+| Integer、Enum | int not null default '0' comment '1 表示 x, 2 表示 x, 3 表示x'                                  |
+| Boolean       | tinyint(1) not null default '0' comment '1 表示已删除'                                          |
+| String        | varchar(16) not null default '' comment 'xx'  长度为 2 的幂次, 如 32 128 1024 等                |
+| BigDecimal    | decimal(10,2) not null default '0' comment 'xxxx 金额'                                          |
+| Date          | datetime not null default '1970-01-01 00:00:00' comment 'xxxxx 时间'                            |
+
+~
+
