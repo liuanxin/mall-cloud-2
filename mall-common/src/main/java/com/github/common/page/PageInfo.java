@@ -38,10 +38,10 @@ import java.util.List;
 public class PageInfo<T> implements Serializable {
     private static final long serialVersionUID = 0L;
 
-    @ApiReturn("总条数. 根据此值和 page limit 构建分页按钮")
+    @ApiReturn("SELECT COUNT(*) FROM ... 的结果")
     private int total;
 
-    @ApiReturn("当前页的数据")
+    @ApiReturn("SELECT ... FROM ... LIMIT ?,? 的结果")
     private List<T> list;
 
     public static <T> PageInfo<T> emptyReturn() {
