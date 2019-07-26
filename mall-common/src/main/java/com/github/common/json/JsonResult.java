@@ -12,7 +12,7 @@ import lombok.Setter;
 @NoArgsConstructor
 public class JsonResult<T> {
 
-    // 应该只有响应编码就可以了, 当前实体表示处理成功后的返回, 200 以外的响应编码统一处理
+    // 只有响应编码就可以了, 当前实体表示处理成功后的返回. 说明: 这里是有争议的, 确定后使用一种即可
     // @ApiReturn("返回码")
     // private JsonCode code;
 
@@ -26,6 +26,7 @@ public class JsonResult<T> {
     private T data;
 
     /*
+    // 这里只在登录接口那里返回
     @ApiReturn("需要 app 保存到本地的值(pc 无视), 每次请求都带上, key 是" + Const.TOKEN + ", header 或 param 都可")
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private String token;
