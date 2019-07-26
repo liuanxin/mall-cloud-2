@@ -92,9 +92,10 @@ public final class SecurityCodeUtil {
      * @param style  图片上的文字: 英文, 数字(num), 英文加数字(n)还是中文(cn), 传空值或传的值不是 num n cn 则会默认是英文
      * @param width  生成的图片宽度, 最小 100. 传空值或传小于 100 的值会使用最小值
      * @param height 生成的图片高度, 最小 30. 传空值或传小于 30 的值会使用最小值
+     * @param grb 生成的图片的颜色, 不传则默认是 57,66,108
      * @return 图像
      */
-    public static Code generateCode(String count, String style, String width, String height) {
+    public static Code generateCode(String count, String style, String width, String height, String grb) {
         int loop = toInt(count);
         if (loop < LEAST_COUNT) {
             loop = LEAST_COUNT;
@@ -105,9 +106,9 @@ public final class SecurityCodeUtil {
             str = WORD;
         } else if ("wn".equalsIgnoreCase(style)) {
             str = WORD + NUMBER;
-        }/* else if ("cn".equalsIgnoreCase(style)) {
+        } else if ("cn".equalsIgnoreCase(style)) {
             str = CHINESE;
-        }*/ else {
+        } else {
             str = NUMBER;
         }
 
@@ -120,6 +121,18 @@ public final class SecurityCodeUtil {
         if (heightCount < LEAST_HEIGHT) {
             heightCount = LEAST_HEIGHT;
         }
+        int r = 0, g = 0, b = 0;
+        if (U.isNotBlank(grb)) {
+            String[] s = grb.split(",");
+            if (s.length == 3) {
+                r = U.toInt(s[0]);
+                g = U.toInt(s[1]);
+                b = U.toInt(s[2]);
+            }
+        }
+        if (r < 0 || r > 255) { r = 57; }
+        if (g < 0 || g > 255) { g = 66; }
+        if (b < 0 || b > 255) { b = 108; }
 
         // ========== 上面处理参数的默认值 ==========
 
@@ -137,7 +150,7 @@ public final class SecurityCodeUtil {
                     RANDOM.nextInt(widthCount), RANDOM.nextInt(heightCount));
         }
         // graphics.setColor(Color.BLUE);
-        graphics.setColor(new Color(57, 66, 108));
+        graphics.setColor(new Color(r, g, b));
 
         int x = (widthCount - 8) / (loop + 1);
         int y = heightCount - 5;
