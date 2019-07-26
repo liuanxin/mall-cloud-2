@@ -60,7 +60,7 @@ public class BackendInterceptor implements HandlerInterceptor {
 
         NeedLogin needLogin = getAnnotation((HandlerMethod) handler, NeedLogin.class);
         // 标注了 @NeedLogin 且 flag 为 true(默认就是 true)则表示当前请求需要登录
-        if (needLogin != null && needLogin.flag()) {
+        if (needLogin != null && needLogin.value()) {
             BackendSessionUtil.checkLogin();
         }
     }

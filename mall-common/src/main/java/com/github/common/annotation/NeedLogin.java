@@ -13,5 +13,5 @@ import java.lang.annotation.*;
 @Documented
 public @interface NeedLogin {
 
-    boolean flag() default true;
+    boolean value() default true;
 }

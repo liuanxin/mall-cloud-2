@@ -17,5 +17,5 @@ import java.lang.annotation.*;
 @Documented
 public @interface NotNeedLogin {
 
-    boolean flag() default true;
+    boolean value() default true;
 }

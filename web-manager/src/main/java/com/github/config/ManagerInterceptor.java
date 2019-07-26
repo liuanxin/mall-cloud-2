@@ -79,7 +79,7 @@ public class ManagerInterceptor implements HandlerInterceptor {
         // 在不需要登录的 url 上标注 @NotNeedLogin
         NotNeedLogin notNeedLogin = getAnnotation(handlerMethod, NotNeedLogin.class);
         // 标注了 NotNeedLogin 且 flag 为 true(默认就是 true)则表示当前的请求不需要验证登录
-        if (notNeedLogin != null && notNeedLogin.flag()) {
+        if (notNeedLogin != null && notNeedLogin.value()) {
             return;
         }
         // 检查登录
@@ -88,7 +88,7 @@ public class ManagerInterceptor implements HandlerInterceptor {
         // 在不需要验证权限的 url 上标注 @NotNeedPermission
         NotNeedPermission notNeedPermission = getAnnotation(handlerMethod, NotNeedPermission.class);
         // 标注了 NotNeedPermission 且 flag 为 true(默认就是 true)则表示当前的请求不需要验证权限
-        if (notNeedPermission != null && notNeedPermission.flag()) {
+        if (notNeedPermission != null && notNeedPermission.value()) {
             return;
         }
         // 检查权限

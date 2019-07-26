@@ -18,5 +18,5 @@ import java.lang.annotation.*;
 @Documented
 public @interface NotNeedPermission {
 
-    boolean flag() default true;
+    boolean value() default true;
 }
