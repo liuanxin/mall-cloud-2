@@ -13,6 +13,8 @@ import lombok.Setter;
 public class JsonResult<T> {
 
     // 只有响应编码就可以了, 当前实体表示处理成功后的返回. 说明: 这里是有争议的, 确定后使用一种即可
+    // 如果确定后给所有的接口都返回了 200, 在接口内返回 code
+    //  则将下面 和 最下面 public static <T> JsonResult<T> 段解开, 使用 GlobalException2, 去掉 GlobalException
     // @ApiReturn("返回码")
     // private JsonCode code;
 
@@ -52,7 +54,7 @@ public class JsonResult<T> {
         return new JsonResult<>(JsonCode.SUCCESS,msg, data);
     }
 
-
+    /*
     public static <T> JsonResult<T> badRequest(String msg) {
         // return new JsonResult<T>(JsonCode.BAD_REQUEST, msg);
         return new JsonResult<T>(JsonCode.FAIL, msg);
@@ -75,4 +77,5 @@ public class JsonResult<T> {
     public static <T> JsonResult<T> fail(String msg) {
         return new JsonResult<T>(JsonCode.FAIL, msg);
     }
+    */
 }

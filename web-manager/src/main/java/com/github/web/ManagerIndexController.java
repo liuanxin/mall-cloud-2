@@ -41,8 +41,8 @@ public class ManagerIndexController {
 
     @GetMapping("/code")
     public void code(HttpServletResponse response, String width, String height,
-                     String count, String style) throws IOException {
-        SecurityCodeUtil.Code code = SecurityCodeUtil.generateCode(count, style, width, height);
+                     String count, String style, String rgb) throws IOException {
+        SecurityCodeUtil.Code code = SecurityCodeUtil.generateCode(count, style, width, height, rgb);
 
         // 往 session 里面丢值
         ManagerSessionUtil.putImageCode(code.getContent());

@@ -92,7 +92,9 @@
 //    }
 //    @ExceptionHandler(MissingServletRequestParameterException.class)
 //    public JsonResult missParam(MissingServletRequestParameterException e) {
-//        String msg = online ? "无法响应此请求" : String.format("缺少必须的参数(%s), 类型(%s)", e.getParameterName(), e.getParameterType());
+//        String msg = online
+//                ? "无法响应此请求"
+//                : String.format("缺少必须的参数(%s), 类型(%s)", e.getParameterName(), e.getParameterType());
 //
 //        bindAndPrintLog(msg, e);
 //        return JsonResult.badRequest(msg);
@@ -106,7 +108,9 @@
 //    }
 //    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
 //    public JsonResult notSupported(HttpRequestMethodNotSupportedException e) {
-//        String msg = online  ? "无法处理此请求" : String.format("不支持此请求方式: 当前(%s), 支持(%s)", e.getMethod(), A.toStr(e.getSupportedMethods()));
+//        String msg = online
+//                ? "无法处理此请求"
+//                : String.format("不支持此请求方式: 当前(%s), 支持(%s)", e.getMethod(), A.toStr(e.getSupportedMethods()));
 //
 //        bindAndPrintLog(msg, e);
 //        return JsonResult.fail(msg);
