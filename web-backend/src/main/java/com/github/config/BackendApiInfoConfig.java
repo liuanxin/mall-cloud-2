@@ -5,6 +5,7 @@ import com.github.common.json.JsonCode;
 import com.github.common.mvc.AppVersion;
 import com.github.global.constant.Develop;
 import com.github.liuanxin.api.annotation.EnableApiInfo;
+import com.github.liuanxin.api.annotation.ParamType;
 import com.github.liuanxin.api.model.DocumentCopyright;
 import com.github.liuanxin.api.model.DocumentParam;
 import com.github.liuanxin.api.model.DocumentResponse;
@@ -55,7 +56,7 @@ public class BackendApiInfoConfig {
     private List<DocumentParam> tokens() {
         return Arrays.asList(
                 DocumentParam.buildToken(Const.VERSION, "认证数据", "abc-xyz", true),
-                DocumentParam.buildToken(Const.VERSION, "接口版本", AppVersion.currentVersion(), false)
+                DocumentParam.buildToken(Const.VERSION, "接口版本", AppVersion.currentVersion(), false).setParamType(ParamType.Query.name())
         );
     }
 }
