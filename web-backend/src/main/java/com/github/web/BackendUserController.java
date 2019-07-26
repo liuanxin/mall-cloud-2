@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class BackendUserController {
 
     @NeedLogin
-    @ApiMethod(title = "刷新 token", develop = Develop.USER, desc = "每次打开 app 且本地有 token 值就请求此接口(pc 无视)", index = 0)
+    @ApiMethod(value = "刷新 token", develop = Develop.USER, desc = "每次打开 app 且本地有 token 值就请求此接口(pc 无视)", index = 0)
     @GetMapping("/refresh-token")
     public JsonResult<String> index() {
         String refreshToken = AppTokenHandler.resetTokenExpireTime();
