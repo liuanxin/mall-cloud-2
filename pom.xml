@@ -64,16 +64,17 @@
         <spring-admin.version>2.1.5</spring-admin.version>
 
         <zipkin.version>2.12.9</zipkin.version>
-        <guava.version>27.1-jre</guava.version>
+        <guava.version>28.0-jre</guava.version>
+        <okhttp.version>4.0.1</okhttp.version>
         <commons-lang3.version>3.9</commons-lang3.version>
         <commons-fileupload.version>1.4</commons-fileupload.version>
         <poi-ooxml.version>4.1.0</poi-ooxml.version>
 
-        <jedis.version>3.0.1</jedis.version>
+        <jedis.version>3.1.0</jedis.version>
         <elasticsearch.version>6.3.2</elasticsearch.version>
         <hikaricp.version>3.3.1</hikaricp.version>
-        <mybatis.version>3.5.1</mybatis.version>
-        <mybatis-spring.version>2.0.1</mybatis-spring.version>
+        <mybatis.version>3.5.2</mybatis.version>
+        <mybatis-spring.version>2.0.2</mybatis-spring.version>
         <mybatis-page.version>1.2.5</mybatis-page.version>
         <mybatis-redis-cache.version>1.2.5</mybatis-redis-cache.version>
 
