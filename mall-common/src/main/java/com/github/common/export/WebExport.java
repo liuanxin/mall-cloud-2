@@ -23,7 +23,7 @@ import java.util.List;
  *     private String name;
  *
  *     &#064;ExportColumn("金额|0.00|20")
- *     private Integer num; // 说明/样式/列宽
+ *     private Integer num; // 说明/样式/列宽(1 ~ 255)
  *
  *     &#064;ExportColumn("数量")
  *     private Integer num;
