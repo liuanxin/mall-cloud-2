@@ -304,7 +304,6 @@ public class HttpClientUtil {
             }
             sbd.append(")");
         }
-        //noinspection DuplicatedCode
         sbd.append(" return(");
         if (U.isNotBlank(result)) {
             int len = result.length();
