@@ -74,7 +74,7 @@
         <hikaricp.version>3.3.1</hikaricp.version>
         <mybatis.version>3.5.1</mybatis.version>
         <mybatis-spring.version>2.0.1</mybatis-spring.version>
-        <mybatis-page.version>1.2.4</mybatis-page.version>
+        <mybatis-page.version>1.2.5</mybatis-page.version>
         <mybatis-redis-cache.version>1.2.5</mybatis-redis-cache.version>
 
         <api-document.version>0.4.8</api-document.version>
