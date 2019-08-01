@@ -69,7 +69,6 @@
         <commons-fileupload.version>1.4</commons-fileupload.version>
         <poi-ooxml.version>4.1.0</poi-ooxml.version>
 
-        <jedis.version>3.0.1</jedis.version>
         <elasticsearch.version>6.3.2</elasticsearch.version>
         <hikaricp.version>3.3.1</hikaricp.version>
         <mybatis.version>3.5.1</mybatis.version>
@@ -300,11 +299,6 @@
                 <version>${poi-ooxml.version}</version>
             </dependency>
 
-            <dependency>
-                <groupId>redis.clients</groupId>
-                <artifactId>jedis</artifactId>
-                <version>${jedis.version}</version>
-            </dependency>
             <dependency>
                 <groupId>org.elasticsearch.client</groupId>
                 <artifactId>transport</artifactId>
