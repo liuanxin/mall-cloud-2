@@ -14,7 +14,7 @@ import java.util.List;
 
 /**
  * <pre>
- * 保存到文件. 当需要定时保存文件时用到. 如下示例
+ * 保存到文件. 如下示例
  *
  * &#064;Getter
  * &#064;Setter
@@ -46,7 +46,7 @@ import java.util.List;
 public final class FileExport {
 
     /**
-     * 保存文件!
+     * 保存文件
      *
      * @param type 文件类型, 现在有 xls03、xls07、csv 三种, 不在这三种中则默认是 xls07
      * @param name 导出时的文件名
@@ -59,7 +59,7 @@ public final class FileExport {
     }
 
     /**
-     * 保存文件!
+     * 保存文件
      *
      * @param type 文件类型, 现在有 xls03、xls07、csv 三种, 不在这三种中则默认是 xls07
      * @param name 导出时的文件名
@@ -84,7 +84,8 @@ public final class FileExport {
      * @param titleMap 标题(key 为英文, value 为标题内容)
      * @param dataList 导出的数据(数组中的每个 object 都是一行, object 中的属性名与标题中的 key 相对)
      */
-    private static void saveCsv(String name, LinkedHashMap<String, String> titleMap, List<?> dataList, String directory) {
+    private static void saveCsv(String name, LinkedHashMap<String, String> titleMap,
+                                List<?> dataList, String directory) {
         String fileName = encodeName(name) + ".csv";
 
         // 没有数据或没有标题, 返回一个内容为空的文件
