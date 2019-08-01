@@ -174,7 +174,6 @@ public class HttpOkClientUtil {
 
         if (U.isNotBlank(params)) {
             sbd.append(" params(");
-            sbd.append(" param(");
             int len = params.length();
             if (len > maxLen) {
                 sbd.append(params, 0, headTail).append(" <.> ").append(params, len - headTail, len);
@@ -190,7 +189,6 @@ public class HttpOkClientUtil {
             }
             sbd.append(")");
         }
-
         sbd.append(",");
 
         if (U.isNotBlank(responseHeaders)) {
@@ -200,6 +198,7 @@ public class HttpOkClientUtil {
             }
             sbd.append(")");
         }
+        //noinspection DuplicatedCode
         sbd.append(" return(");
         if (U.isNotBlank(result)) {
             int len = result.length();

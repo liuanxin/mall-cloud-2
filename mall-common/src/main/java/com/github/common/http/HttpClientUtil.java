@@ -295,7 +295,6 @@ public class HttpClientUtil {
             }
             sbd.append(")");
         }
-
         sbd.append(",");
 
         if (A.isNotEmpty(responseHeaders)) {
@@ -305,6 +304,7 @@ public class HttpClientUtil {
             }
             sbd.append(")");
         }
+        //noinspection DuplicatedCode
         sbd.append(" return(");
         if (U.isNotBlank(result)) {
             int len = result.length();
