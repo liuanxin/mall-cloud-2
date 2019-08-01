@@ -43,7 +43,7 @@ public final class CollectEnumUtil {
         if (loadEnum) {
             enumClassMap = getEnumMap(enumClassMap);
         }
-        Class enumClass = enumClassMap.get(type.toLowerCase());
+        Class enumClass = enumClassMap.get(convert(type));
         if (enumClass == null || !enumClass.isEnum()) {
             return Collections.emptyMap();
         }
@@ -110,10 +110,14 @@ public final class CollectEnumUtil {
             for (Class anEnum : enums) {
                 if (U.isNotBlank(anEnum) && anEnum.isEnum()) {
                     // 将每个模块里面的枚举都收集起来供请求接口使用
-                    returnMap.put(CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_HYPHEN, anEnum.getSimpleName()), anEnum);
+                    returnMap.put(convert(anEnum.getSimpleName()), anEnum);
                 }
             }
         }
         return returnMap;
+    }
+
+    private static String convert(String enumName) {
+        return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_HYPHEN, enumName);
     }
 }
