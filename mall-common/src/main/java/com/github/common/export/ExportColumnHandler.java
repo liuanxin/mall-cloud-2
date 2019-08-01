@@ -26,9 +26,8 @@ final class ExportColumnHandler {
                             value = columnValue;
                         }
 
-                        String dateFormat = column.dateFormat().getValue();
                         if (Date.class.isAssignableFrom(field.getType())) {
-                            name += "|" + dateFormat;
+                            name += "|" + column.dateFormat().getValue();
                         }
                     }
                     titleMap.put(name, value);

@@ -191,7 +191,7 @@ final class ExportExcel {
                         titleValues = titleMapEntry.getValue().split("\\|");
                         if (titleValues.length > 2) {
                             int width = NumberUtils.toInt(titleValues[2]);
-                            if (width > 0) {
+                            if (width > 0 && width < 256) {
                                 // 左移 8 相当于 * 256
                                 sheet.setColumnWidth(cellIndex, width << 8);
                             }

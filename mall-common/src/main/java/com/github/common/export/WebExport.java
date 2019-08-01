@@ -22,11 +22,14 @@ import java.util.List;
  *     &#064;ExportColumn("名称")
  *     private String name;
  *
+ *     &#064;ExportColumn("金额|0.00|20")
+ *     private Integer num; // 说明/样式/列宽
+ *
  *     &#064;ExportColumn("数量")
  *     private Integer num;
  *
- *     &#064;ExportColumn("时间")
- *     private Date time;   // 时间导出时会格式化成 yyyy-MM-dd HH:mm:ss
+ *     &#064;ExportColumn(value = "时间", dateFormat = DateFormatType.YYYY_MM_DD)
+ *     private Date time;   // 时间导出时不定义格式则默认是 yyyy-MM-dd HH:mm:ss
  *
  *     &#064;ExportColumn("类型")
  *     private XXType type; // 枚举导出时会调用其 getValue 方法, 没有值则使用枚举的 name
