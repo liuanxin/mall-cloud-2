@@ -6,8 +6,6 @@ import com.github.common.json.JsonUtil;
 
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -220,24 +218,6 @@ public final class U {
         return !greater0(obj);
     }
 
-    /** 数值在指定的数区间时(包含边界)返回 true */
-    public static boolean betweenBorder(Number num, Number min, Number max) {
-        return isNotBlank(num) && (num.doubleValue() >= min.doubleValue()) && (num.doubleValue() <= max.doubleValue());
-    }
-    /** 数值不在指定的数区间时(包含边界)返回 true */
-    public static boolean notBetweenBorder(Number num, Number min, Number max) {
-        return !betweenBorder(num, min, max);
-    }
-
-    /** 数值在指定的数区间时(不包含边界)返回 true */
-    public static boolean between(Number num, Number min, Number max) {
-        return isNotBlank(num) && (num.doubleValue() > min.doubleValue()) && (num.doubleValue() < max.doubleValue());
-    }
-    /** 数值不在指定的数区间时(不包含边界)返回 true */
-    public static boolean notBetween(Number num, Number min, Number max) {
-        return !between(num, min, max);
-    }
-
     public static int toInt(Object obj) {
         if (isBlank(obj)) {
             return 0;
@@ -294,6 +274,9 @@ public final class U {
         if (isBlank(obj)) {
             return false;
         }
+        if (obj instanceof Number) {
+            return true;
+        }
         try {
             Double.parseDouble(obj.toString());
             return true;
@@ -301,79 +284,8 @@ public final class U {
             return false;
         }
     }
-
-    /** 比例, 主要是指小数点后面的位数 */
-    private static final int SCALE = 2;
-
-    /** 设置金额的精度 */
-    public static BigDecimal setPrecision(BigDecimal money) {
-        return U.isBlank(money) ? money : money.setScale(SCALE, RoundingMode.HALF_EVEN);
-    }
-
-    // + ==> add
-    // - ==> subtract
-    // * ==> multiply
-    // / ==> divide
-
-    /** num1 + num2 */
-    public static BigDecimal add(BigDecimal num1, BigDecimal num2) {
-        if (isNotBlank(num1)) {
-            if (isNotBlank(num2)) {
-                return num1.add(num2);
-            } else {
-                return num1;
-            }
-        } else {
-            if (isNotBlank(num2)) {
-                return num2;
-            } else {
-                return BigDecimal.ZERO;
-            }
-        }
-    }
-    /** num1 - num2 */
-    public static BigDecimal subtract(BigDecimal num1, BigDecimal num2) {
-        if (isNotBlank(num1)) {
-            if (isNotBlank(num2)) {
-                return num1.subtract(num2);
-            } else {
-                return num1;
-            }
-        } else {
-            if (isNotBlank(num2)) {
-                return BigDecimal.valueOf(-num2.doubleValue());
-            } else {
-                return BigDecimal.ZERO;
-            }
-        }
-    }
-    /** num1 * num2 */
-    public static BigDecimal multiply(BigDecimal num1, Integer num2) {
-        if (isNotBlank(num1)) {
-            if (greater0(num2)) {
-                return num1.multiply(new BigDecimal(num2));
-            } else {
-                return num1;
-            }
-        } else {
-            return BigDecimal.ZERO;
-        }
-    }
-    /** num1 / num2. 返回有 2 位小数点精度的结果 */
-    public static BigDecimal divide(BigDecimal num1, Integer num2) {
-        return divide(num1, num2, SCALE);
-    }
-    /** num1 / num2. 返回有指定位小数点精度的结果 */
-    public static BigDecimal divide(BigDecimal num1, Integer num2, int scale) {
-        if (isNotBlank(num1)) {
-            if (greater0(num2)) {
-                return num1.divide(new BigDecimal(num2), scale, RoundingMode.UP);
-            } else {
-                return num1;
-            }
-        } else {
-            return BigDecimal.ZERO;
-        }
+    public static boolean isNotNumber(Object obj) {
+        return !isNumber(obj);
     }
     // ========== number ==========
 
@@ -763,74 +675,75 @@ public final class U {
     /** 对象为 null、空白符、"null" 字符串时, 则抛出异常 */
     public static void assertNil(Object obj, String msg) {
         if (isBlank(obj)) {
-            serviceException(msg);
+            assertException(msg);
         }
     }
 
     /** 数组为 null 或 长度为 0 时则抛出异常 */
     public static <T> void assertEmpty(T[] array, String msg) {
         if (A.isEmpty(array)) {
-            serviceException(msg);
+            assertException(msg);
         }
     }
 
     /** 列表为 null 或 长度为 0 时则抛出异常 */
     public static <T> void assertEmpty(Collection<T> list, String msg) {
         if (A.isEmpty(list)) {
-            serviceException(msg);
+            assertException(msg);
         }
     }
 
     /** map 为 null 或 长度为 0 时则抛出异常 */
     public static <K,V> void assertEmpty(Map<K,V> map, String msg) {
         if (A.isEmpty(map)) {
-            serviceException(msg);
+            assertException(msg);
         }
     }
 
     /** 数值为空或小于等于 0 则抛出异常 */
     public static void assert0(Number number, String msg) {
         if (less0(number)) {
-            serviceException(msg);
+            assertException(msg);
         }
     }
 
     /** 条件为 true 则抛出业务异常 */
     public static void assertException(Boolean flag, String msg) {
         if (flag != null && flag) {
-            serviceException(msg);
+            assertException(msg);
         }
     }
 
+    public static void assertException(String msg) {
+        serviceException(msg);
+    }
 
     /** 错误的请求 */
     public static void badRequestException(String msg) {
         throw new BadRequestException(msg);
     }
-
     /** 需要权限 */
     public static void forbiddenException(String msg) {
         throw new ForbiddenException(msg);
     }
-
     /** 404 */
     public static void notFoundException(String msg) {
         throw new NotFoundException(msg);
     }
-
     /** 未登录 */
     public static void notLoginException() {
         throw new NotLoginException();
     }
-
     /** 业务异常 */
     public static void serviceException(String msg) {
         throw new ServiceException(msg);
     }
 
-    /** 必须处理的异常 */
-    public static void assertMustHandleException(String msg) throws ServiceMustHandleException {
-        throw new ServiceMustHandleException(msg);
+    /** 条件为 true 则抛出必须处理的异常 */
+    public static void assertMustHandleException(Boolean flag, String msg) throws ServiceMustHandleException {
+        if (flag != null && flag) {
+            throw new ServiceMustHandleException(msg);
+        }
     }
 
     public static String returnMsg(Throwable e, boolean online) {
