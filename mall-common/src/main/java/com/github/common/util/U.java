@@ -287,6 +287,28 @@ public final class U {
     public static boolean isNotNumber(Object obj) {
         return !isNumber(obj);
     }
+
+    public static String num2ip(long add) {
+        return ((add & 0xff000000) >> 24) + "." + ((add & 0xff0000) >> 16)
+                + "." + ((add & 0xff00) >> 8) + "." + ((add & 0xff));
+    }
+    public static long ip2num(String add) {
+        long result = 0;
+        try {
+            for (byte b : java.net.InetAddress.getByName(add).getAddress()) {
+                if ((b & 0x80L) != 0) {
+                    result += 256L + b;
+                } else {
+                    result += b;
+                }
+                result <<= 8;
+            }
+            result >>= 8;
+        } catch (java.net.UnknownHostException e) {
+            assertException("「" + add + "」不是有效的 ip 地址");
+        }
+        return result;
+    }
     // ========== number ==========
 
 
