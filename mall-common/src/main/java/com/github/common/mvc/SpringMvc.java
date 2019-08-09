@@ -84,7 +84,7 @@ public final class SpringMvc {
                         if (notRequestInfo) {
                             LogUtil.bind(RequestUtils.logContextInfo());
                         }
-                        LogUtil.ROOT_LOG.info("return json: ({})", (sbd.length() > 0 ? sbd.toString() : json));
+                        LogUtil.ROOT_LOG.info("return: ({})", (sbd.length() > 0 ? sbd.toString() : json));
                     } finally {
                         if (notRequestInfo) {
                             LogUtil.unbind();
