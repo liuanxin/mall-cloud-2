@@ -3,12 +3,14 @@ package com.github.util;
 import com.github.common.constant.CommonConst;
 import com.github.common.resource.CollectEnumUtil;
 import com.github.common.util.A;
+import com.github.common.util.U;
 import com.github.global.constant.GlobalConst;
 import com.github.order.constant.OrderConst;
 import com.github.product.constant.ProductConst;
 import com.github.queue.constant.QueueConst;
 import com.github.search.constant.SearchConst;
 import com.github.user.constant.UserConst;
+import com.google.common.collect.Maps;
 
 import java.util.Map;
 
@@ -33,6 +35,15 @@ public final class ManagerDataCollectUtil {
     public static final Map<String, Map<Object, Object>> ALL_ENUM_INFO = CollectEnumUtil.enumMap(ENUM_MAP);
     /** 提供接口出去的 单个 枚举信息 */
     public static Map<Object, Object> singleEnumInfo(String type) {
-        return CollectEnumUtil.enumInfo(type, ENUM_MAP, true);
+        Map<Object, Object> returnMap = Maps.newHashMap();
+        for (String s : type.split(",")) {
+            if (U.isNotBlank(s)) {
+                Map<Object, Object> map = CollectEnumUtil.enumInfo(s, ENUM_MAP, true);
+                if (A.isNotEmpty(map)) {
+                    returnMap.put(s, map);
+                }
+            }
+        }
+        return returnMap;
     }
 }
