@@ -34,13 +34,14 @@ public final class BackendDataCollectUtil {
     /** 提供接口出去的 所有 枚举信息 */
     public static final Map<String, Map<Object, Object>> ALL_ENUM_INFO = CollectEnumUtil.enumMap(ENUM_MAP);
     /** 提供接口出去的 单个 枚举信息 */
-    public static Map<Object, Object> singleEnumInfo(String type) {
-        Map<Object, Object> returnMap = Maps.newHashMap();
-        for (String s : type.split(",")) {
-            if (U.isNotBlank(s)) {
-                Map<Object, Object> map = CollectEnumUtil.enumInfo(s, ENUM_MAP, true);
+    public static Map<String, Map<Object, Object>> singleEnumInfo(String type) {
+        Map<String, Map<Object, Object>> returnMap = Maps.newHashMap();
+        for (String anEnum : type.split(",")) {
+            if (U.isNotBlank(anEnum)) {
+                anEnum = anEnum.trim();
+                Map<Object, Object> map = ALL_ENUM_INFO.get(anEnum);
                 if (A.isNotEmpty(map)) {
-                    returnMap.put(s, map);
+                    returnMap.put(anEnum, map);
                 }
             }
         }
