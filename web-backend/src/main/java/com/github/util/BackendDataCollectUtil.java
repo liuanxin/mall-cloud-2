@@ -10,6 +10,7 @@ import com.github.product.constant.ProductConst;
 import com.github.queue.constant.QueueConst;
 import com.github.search.constant.SearchConst;
 import com.github.user.constant.UserConst;
+import com.google.common.base.CaseFormat;
 import com.google.common.collect.Maps;
 
 import java.util.Map;
@@ -39,7 +40,17 @@ public final class BackendDataCollectUtil {
         for (String anEnum : type.split(",")) {
             if (U.isNotBlank(anEnum)) {
                 anEnum = anEnum.trim();
-                Map<Object, Object> map = ALL_ENUM_INFO.get(anEnum);
+                String name;
+                if (anEnum.contains("-")) {
+                    name = CaseFormat.LOWER_HYPHEN.to(CaseFormat.UPPER_CAMEL, anEnum);
+                } else if (anEnum.contains("_")) {
+                    name = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, anEnum);
+                } else if (Character.isLowerCase(anEnum.charAt(0))) {
+                    name = anEnum.substring(0, 1).toUpperCase() + anEnum.substring(1);
+                } else {
+                    name = anEnum;
+                }
+                Map<Object, Object> map = ALL_ENUM_INFO.get(name.trim());
                 if (A.isNotEmpty(map)) {
                     returnMap.put(anEnum, map);
                 }

@@ -2,7 +2,6 @@ package com.github.common.resource;
 
 import com.github.common.Const;
 import com.github.common.util.U;
-import com.google.common.base.CaseFormat;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
@@ -47,7 +46,7 @@ public final class CollectEnumUtil {
             List<Class> enumList = LoaderClass.getEnumArray(entry.getValue(), Const.enumPath(entry.getKey()));
             for (Class anEnum : enumList) {
                 if (U.isNotBlank(anEnum) && anEnum.isEnum()) {
-                    returnMap.put(convert(anEnum.getSimpleName()), enumInfo(anEnum));
+                    returnMap.put(anEnum.getSimpleName(), enumInfo(anEnum));
                 }
             }
         }
@@ -86,9 +85,5 @@ public final class CollectEnumUtil {
             returnMap.put(key, value);
         }
         return returnMap;
-    }
-
-    private static String convert(String enumName) {
-        return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_HYPHEN, enumName);
     }
 }
