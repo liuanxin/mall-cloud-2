@@ -47,7 +47,7 @@ public class JsonUtil {
         return A.isEmpty(sourceList) ? Collections.emptyList() : toListNil(toJson(sourceList), clazz);
     }
 
-    public static <T,S> T convert(S source, TypeReference<?> type) {
+    public static <T,S> T convert(S source, TypeReference<T> type) {
         return U.isBlank(source) ? null : toObjectNil(toJson(source), type);
     }
 
@@ -103,7 +103,7 @@ public class JsonUtil {
         }
     }
     /** 将 json 字符串转换为泛型对象 */
-    public static <T> T toObjectNil(String json, TypeReference<?> type) {
+    public static <T> T toObjectNil(String json, TypeReference<T> type) {
         if (U.isBlank(json)) {
             return null;
         }
