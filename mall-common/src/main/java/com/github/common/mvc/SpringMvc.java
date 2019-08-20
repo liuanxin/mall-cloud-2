@@ -7,7 +7,6 @@ import com.github.common.converter.StringToEnumConverter;
 import com.github.common.converter.StringToNumberConverter;
 import com.github.common.json.JsonUtil;
 import com.github.common.page.Page;
-import com.github.common.util.A;
 import com.github.common.util.LogUtil;
 import com.github.common.util.RequestUtils;
 import com.github.common.util.U;
@@ -25,6 +24,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 
 public final class SpringMvc {
 
@@ -36,33 +36,26 @@ public final class SpringMvc {
     }
 
     public static void handlerConvert(List<HttpMessageConverter<?>> converters) {
-        int i = 0, json = 0, string = 0;
-        if (A.isNotEmpty(converters)) {
-            Iterator<HttpMessageConverter<?>> iterator = converters.iterator();
-            while (iterator.hasNext()) {
-                HttpMessageConverter<?> converter = iterator.next();
-                if (converter instanceof MappingJackson2HttpMessageConverter) {
-                    iterator.remove();
-                    json = i;
-                }
-                if (converter instanceof StringHttpMessageConverter) {
-                    iterator.remove();
-                    string = i;
-                }
-                i++;
+        handlerStringConvert(converters, StringHttpMessageConverter.class, new StringHttpMessageConverter(StandardCharsets.UTF_8));
+        handlerStringConvert(converters, MappingJackson2HttpMessageConverter.class, new CustomizeJacksonConverter());
+    }
+    private static void handlerStringConvert(List<HttpMessageConverter<?>> converters,
+                                             Class<? extends HttpMessageConverter> clazz,
+                                             HttpMessageConverter<?> httpMessageConverter) {
+        Iterator<HttpMessageConverter<?>> iterator = converters.iterator();
+        int i = 0;
+        for (; iterator.hasNext(); i++) {
+            HttpMessageConverter<?> converter = iterator.next();
+            if (Objects.equals(converter.getClass(), clazz)) {
+                iterator.remove();
+                break;
             }
         }
-        // 放到它们原来在的位置
-        if (string > json) {
-            converters.add(json, new CustomizeJacksonConverter());
-            converters.add(string, new StringHttpMessageConverter(StandardCharsets.UTF_8));
-        } else {
-            converters.add(string, new StringHttpMessageConverter(StandardCharsets.UTF_8));
-            converters.add(json, new CustomizeJacksonConverter());
-        }
+        // 先删再加, 删的时候记下索引, 保证还在原来的位置
+        converters.add(i, httpMessageConverter);
     }
-
     public static class CustomizeJacksonConverter extends MappingJackson2HttpMessageConverter {
+        private CustomizeJacksonConverter() { super(JsonUtil.RENDER); }
         @Override
         protected void writeSuffix(JsonGenerator generator, Object object) throws IOException {
             super.writeSuffix(generator, object);
