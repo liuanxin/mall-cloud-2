@@ -1,9 +1,9 @@
 package com.github.common.mvc;
 
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.github.common.converter.String2DateConverter;
-import com.github.common.converter.String2MoneyConverter;
+import com.github.common.converter.StringToDateConverter;
 import com.github.common.converter.StringToEnumConverter;
+import com.github.common.converter.StringToMoneyConverter;
 import com.github.common.converter.StringToNumberConverter;
 import com.github.common.json.JsonUtil;
 import com.github.common.page.Page;
@@ -31,8 +31,8 @@ public final class SpringMvc {
     public static void handlerFormatter(FormatterRegistry registry) {
         registry.addConverterFactory(new StringToNumberConverter());
         registry.addConverterFactory(new StringToEnumConverter());
-        registry.addConverter(new String2DateConverter());
-        registry.addConverter(new String2MoneyConverter());
+        registry.addConverter(new StringToDateConverter());
+        registry.addConverter(new StringToMoneyConverter());
     }
 
     public static void handlerConvert(List<HttpMessageConverter<?>> converters) {
