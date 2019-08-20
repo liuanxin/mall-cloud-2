@@ -55,7 +55,6 @@ public final class SpringMvc {
         converters.add(i, httpMessageConverter);
     }
     public static class CustomizeJacksonConverter extends MappingJackson2HttpMessageConverter {
-        private CustomizeJacksonConverter() { super(JsonUtil.RENDER); }
         @Override
         protected void writeSuffix(JsonGenerator generator, Object object) throws IOException {
             super.writeSuffix(generator, object);
