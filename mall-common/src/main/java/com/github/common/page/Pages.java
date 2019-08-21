@@ -51,10 +51,10 @@ public final class Pages {
 
     /** 在 service 的实现类中调用 --> 在 repository 方法上的返回类型是 List, service 上的返回类型是 PageInfo, 使用此方法进行转换 */
     public static <T> PageInfo<T> returnPage(List<T> list) {
-        if (A.isEmpty(list)) {
-            return PageInfo.emptyReturn();
-        } else if (list instanceof PageList) {
+        if (list instanceof PageList) {
             return PageInfo.returnPage(((PageList) list).getTotal(), new ArrayList<T>(list));
+        } else if (A.isEmpty(list)) {
+            return PageInfo.emptyReturn();
         } else {
             return PageInfo.returnPage(list.size(), list);
         }
