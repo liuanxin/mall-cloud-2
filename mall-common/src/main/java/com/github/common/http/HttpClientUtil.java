@@ -1,5 +1,6 @@
 package com.github.common.http;
 
+import com.github.common.date.DateUtil;
 import com.github.common.json.JsonUtil;
 import com.github.common.util.A;
 import com.github.common.util.LogUtil;
@@ -39,6 +40,7 @@ import java.io.InterruptedIOException;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -275,11 +277,22 @@ public class HttpClientUtil {
     /** 收集上下文中的数据, 以便记录日志 */
     private static String collectContext(long start, String method, String url, String params,
                                          Header[] requestHeaders, Header[] responseHeaders, String result) {
-        long ms = System.currentTimeMillis() - start;
         StringBuilder sbd = new StringBuilder();
-        sbd.append("HttpClient => (").append(method).append(" ").append(url).append(")");
+        sbd.append("HttpClient => [")
+                .append(DateUtil.formatMs(new Date(start))).append(" -> ").append(DateUtil.nowTimeMs())
+                .append("] (").append(method).append(" ").append(url).append(")");
+        // 参数 及 头 的长度如果超过 1100 就只输出前后 500 个字符
+        int maxLen = 1100, headTail = 500;
+
         if (U.isNotBlank(params)) {
-            sbd.append(" params(").append(params).append(")");
+            sbd.append(" param(");
+            int len = params.length();
+            if (len > maxLen) {
+                sbd.append(params, 0, headTail).append(" <.> ").append(params, len - headTail, len);
+            } else {
+                sbd.append(params);
+            }
+            sbd.append(") ");
         }
         if (A.isNotEmpty(requestHeaders)) {
             sbd.append(" request headers(");
@@ -288,24 +301,26 @@ public class HttpClientUtil {
             }
             sbd.append(")");
         }
-        sbd.append(" time(").append(ms).append("ms)");
+
+        sbd.append(",");
 
         if (A.isNotEmpty(responseHeaders)) {
-            sbd.append(", response headers(");
+            sbd.append(" response headers(");
             for (Header header : responseHeaders) {
                 sbd.append("<").append(header.getName()).append(" : ").append(header.getValue()).append(">");
             }
             sbd.append(")");
         }
+        sbd.append(" return(");
         if (U.isNotBlank(result)) {
-            // 如果长度大于 6000 就只输出前 200 个字符
-            if (result.length() > 6000) {
-                result = result.substring(0, 200) + " ...";
+            int len = result.length();
+            if (len > maxLen) {
+                sbd.append(result, 0, headTail).append(" ... ").append(result, len - headTail, len);
+            } else {
+                sbd.append(result);
             }
-            sbd.append(", return(").append(result).append(")");
-        } else {
-            sbd.append(" return nil");
         }
+        sbd.append(")");
         return sbd.toString();
     }
     /** 发起 http 请求 */

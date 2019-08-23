@@ -19,14 +19,32 @@ public final class A {
     }
 
     public static <T> boolean isEmpty(T[] array) {
-        return array == null || array.length == 0;
+        if (array == null || array.length == 0) {
+            return true;
+        }
+        // 如果每一项都是 null, 也返回 true
+        for (T t : array) {
+            if (t != null) {
+                return false;
+            }
+        }
+        return true;
     }
     public static <T> boolean isNotEmpty(T[] array) {
         return !isEmpty(array);
     }
 
     public static boolean isEmpty(Collection<?> collection) {
-        return collection == null || collection.size() == 0;
+        if (collection == null || collection.size() == 0) {
+            return true;
+        }
+        // 如果每一项都是 null, 也返回 true
+        for (Object t : collection) {
+            if (t != null) {
+                return false;
+            }
+        }
+        return true;
     }
     public static boolean isNotEmpty(Collection<?> collection) {
         return !isEmpty(collection);

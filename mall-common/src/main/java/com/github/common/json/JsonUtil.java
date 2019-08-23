@@ -1,14 +1,20 @@
 package com.github.common.json;
 
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.github.common.util.A;
 import com.github.common.util.LogUtil;
 import com.github.common.util.U;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Collections;
 import java.util.List;
 
@@ -25,16 +31,22 @@ public class JsonUtil {
             // 时间格式. 要想自定义在字段上标 @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd") 即可
             // setDateFormat(new SimpleDateFormat(DateFormatType.YYYY_MM_DD_HH_MM_SS.getValue()));
             // 不确定值的枚举返回 null
-            configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL, true);
+            super.configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL, true);
             // 不确定的属性项上不要失败
-            configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            super.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
             // 允许字符串中包含未加引号的控制字符(值小于 32 的 ASCII 字符, 包括制表符和换行字符)
             // json 标准要求所有控制符必须使用引号, 因此默认是 false, 遇到此类字符时会抛出异常
-            configure(JsonParser.Feature.ALLOW_UNQUOTED_CONTROL_CHARS, true);
-            // 提升序列化性能, null 值不序列化
-            // setSerializationInclusion(JsonInclude.Include.NON_NULL);
-            // null 空字符串 长度为 0 的 list map 等都不序列化
-            // setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+            super.configure(JsonParser.Feature.ALLOW_UNQUOTED_CONTROL_CHARS, true);
+            // NON_NULL: null 值不序列化, NON_EMPTY: null 空字符串、长度为 0 的 list、map 都不序列化
+            // super.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+
+            // 如果用 BigDecimal 表示金额时的处理: 保留两位小数的精度返回
+            super.registerModule(new SimpleModule().addSerializer(BigDecimal.class, new JsonSerializer<BigDecimal>() {
+                @Override
+                public void serialize(BigDecimal money, JsonGenerator gen, SerializerProvider ser) throws IOException {
+                    gen.writeObject(U.isBlank(money) ? BigDecimal.ZERO : money.setScale(2, RoundingMode.DOWN));
+                }
+            }));
         }
     }
 
@@ -47,7 +59,7 @@ public class JsonUtil {
         return A.isEmpty(sourceList) ? Collections.emptyList() : toListNil(toJson(sourceList), clazz);
     }
 
-    public static <T,S> T convert(S source, TypeReference<T> type) {
+    public static <T,S> T convert(S source, TypeReference<?> type) {
         return U.isBlank(source) ? null : toObjectNil(toJson(source), type);
     }
 
@@ -103,7 +115,7 @@ public class JsonUtil {
         }
     }
     /** 将 json 字符串转换为泛型对象 */
-    public static <T> T toObjectNil(String json, TypeReference<T> type) {
+    public static <T> T toObjectNil(String json, TypeReference<?> type) {
         if (U.isBlank(json)) {
             return null;
         }
