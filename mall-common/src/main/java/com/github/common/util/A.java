@@ -3,10 +3,13 @@ package com.github.common.util;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
+import java.lang.reflect.Array;
 import java.util.*;
 
 /** 集合相关的工具包 */
 public final class A {
+
+    private static final String SPLIT = ",";
 
     public static boolean isArray(Object obj) {
         return obj != null && (obj.getClass().isArray() || obj instanceof Collection);
@@ -16,34 +19,16 @@ public final class A {
     }
 
     public static <T> boolean isEmpty(T[] array) {
-        if (array == null || array.length == 0) {
-            return true;
-        }
-        // 如果每一项都是 null, 也返回 true
-        for (T t : array) {
-            if (t != null) {
-                return false;
-            }
-        }
-        return true;
+        return array == null || array.length == 0;
     }
     public static <T> boolean isNotEmpty(T[] array) {
         return !isEmpty(array);
     }
 
-    public static <T> boolean isEmpty(Collection<T> collection) {
-        if (collection == null || collection.size() == 0) {
-            return true;
-        }
-        // 如果每一项都是 null, 也返回 true
-        for (T t : collection) {
-            if (t != null) {
-                return false;
-            }
-        }
-        return true;
+    public static boolean isEmpty(Collection<?> collection) {
+        return collection == null || collection.size() == 0;
     }
-    public static <T> boolean isNotEmpty(Collection<T> collection) {
+    public static boolean isNotEmpty(Collection<?> collection) {
         return !isEmpty(collection);
     }
 
@@ -54,14 +39,48 @@ public final class A {
         return !isEmpty(map);
     }
 
-    public static <T> String toStr(Collection<T> collection) {
-        return toStr(collection, ",");
+    public static String toStr(Collection<?> collection) {
+        return toStr(collection, SPLIT);
     }
-    public static <T> String toStr(Collection<T> collection, String split) {
-        return toStr(collection.toArray(), split);
+    public static String toStr(Collection<?> collection, String split) {
+        StringBuilder sbd = new StringBuilder();
+        int i = 0;
+        for (Object obj : collection) {
+            if (i > 0) {
+                sbd.append(split);
+            }
+            sbd.append(obj);
+            i++;
+        }
+        return sbd.toString();
     }
+    public static String toStringWithArrayOrCollection(Object arrayOrCollection) {
+        return toStringWithArrayOrCollection(arrayOrCollection, SPLIT);
+    }
+    public static String toStringWithArrayOrCollection(Object arrayOrCollection, String split) {
+        if (arrayOrCollection != null) {
+            if (arrayOrCollection.getClass().isArray()) {
+                StringBuilder sbd = new StringBuilder();
+                int len = Array.getLength(arrayOrCollection);
+                for (int i = 0; i < len; i++) {
+                    if (i > 0) {
+                        sbd.append(split);
+                    }
+                    sbd.append(U.toStr(Array.get(arrayOrCollection, i)));
+                }
+                return sbd.toString();
+            } else if (arrayOrCollection instanceof Collection) {
+                return toStr((Collection<?>) arrayOrCollection, split);
+            } else {
+                return arrayOrCollection.toString();
+            }
+        } else {
+            return U.EMPTY;
+        }
+    }
+
     public static String toStr(Object[] array) {
-        return toStr(array, ",");
+        return toStr(array, SPLIT);
     }
     public static String toStr(Object[] array, String split) {
         if (isEmpty(array)) {
@@ -70,10 +89,10 @@ public final class A {
 
         StringBuilder sbd = new StringBuilder();
         for (int i = 0; i < array.length; i++) {
-            sbd.append(array[i]);
-            if (i + 1 != array.length) {
+            if (i > 0) {
                 sbd.append(split);
             }
+            sbd.append(array[i]);
         }
         return sbd.toString();
     }
@@ -112,6 +131,10 @@ public final class A {
         return (LinkedHashMap<K, V>) maps(Maps.newLinkedHashMap(), keysAndValues);
     }
 
+    /** 获取数组的第一个元素 */
+    public static <T> T first(T[] array) {
+        return isEmpty(array) ? null : array[0];
+    }
     /** 获取集合的第一个元素 */
     public static <T> T first(Collection<T> collection) {
         return isEmpty(collection) ? null : collection.iterator().next();

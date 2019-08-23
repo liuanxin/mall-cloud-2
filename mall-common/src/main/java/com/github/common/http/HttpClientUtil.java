@@ -1,6 +1,5 @@
 package com.github.common.http;
 
-import com.github.common.date.DateUtil;
 import com.github.common.json.JsonUtil;
 import com.github.common.util.A;
 import com.github.common.util.LogUtil;
@@ -32,18 +31,20 @@ import org.apache.http.util.EntityUtils;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLException;
+import javax.net.ssl.SSLHandshakeException;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 public class HttpClientUtil {
 
     private static final int TIME_OUT = 30 * 1000;
-    private static final String USER_AGENT = "Mozilla/5.0 (httpclient4.5; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36";
 
     private static final PoolingHttpClientConnectionManager CONNECTION_MANAGER;
     private static final HttpRequestRetryHandler HTTP_REQUEST_RETRY_HANDLER;
@@ -78,7 +79,7 @@ public class HttpClientUtil {
                     return true;
                 }
                 // SSL 握手异常时不重试
-                if (exception instanceof SSLException) {
+                if (exception instanceof SSLHandshakeException || exception instanceof SSLException) {
                     return false;
                 }
                 // 超时时不重试
@@ -99,7 +100,6 @@ public class HttpClientUtil {
 
     private static CloseableHttpClient createHttpClient() {
         return HttpClients.custom()
-                .setUserAgent(USER_AGENT)
                 .setConnectionManager(CONNECTION_MANAGER)
                 .setRetryHandler(HTTP_REQUEST_RETRY_HANDLER).build();
     }
@@ -121,6 +121,18 @@ public class HttpClientUtil {
 
         url = handleEmptyScheme(url);
         return handleRequest(new HttpGet(url), null);
+    }
+    @SuppressWarnings("unchecked")
+    public static <T> String get(String url, T param) {
+        if (U.isBlank(url)) {
+            return null;
+        }
+
+        Map<String, Object> params = Collections.emptyMap();
+        if (U.isNotBlank(param)) {
+            params = JsonUtil.convert(param, Map.class);
+        }
+        return get(url, params);
     }
     /** 向指定 url 进行 get 请求. 有参数 */
     public static String get(String url, Map<String, Object> params) {
@@ -239,17 +251,10 @@ public class HttpClientUtil {
         List<NameValuePair> nameValuePairs = Lists.newArrayList();
         if (A.isNotEmpty(params)) {
             for (Map.Entry<String, Object> entry : params.entrySet()) {
+                String key = entry.getKey();
                 Object value = entry.getValue();
-                if (U.isNotBlank(value)) {
-                    String str;
-                    if (value.getClass().isArray()) {
-                        str = A.toStr((Object[]) value);
-                    } else if (value instanceof Collection) {
-                        str = A.toStr((Collection<?>) value);
-                    } else {
-                        str = value.toString();
-                    }
-                    nameValuePairs.add(new BasicNameValuePair(entry.getKey(), str));
+                if (U.isNotBlank(key) && U.isNotBlank(value)) {
+                    nameValuePairs.add(new BasicNameValuePair(key, A.toStringWithArrayOrCollection(value)));
                 }
             }
             request.setEntity(new UrlEncodedFormEntity(nameValuePairs, StandardCharsets.UTF_8));
@@ -268,25 +273,13 @@ public class HttpClientUtil {
         }
     }
     /** 收集上下文中的数据, 以便记录日志 */
-    private static String collectContext(Date start, String method, String url, String params,
+    private static String collectContext(long start, String method, String url, String params,
                                          Header[] requestHeaders, Header[] responseHeaders, String result) {
+        long ms = System.currentTimeMillis() - start;
         StringBuilder sbd = new StringBuilder();
-        sbd.append("HttpClient4.5 => [")
-                .append(DateUtil.formatMs(start)).append(" -> ").append(DateUtil.nowTimeMs())
-                .append("] (").append(method).append(" ").append(url).append(")");
-
-        // 参数 及 头 的长度如果超过 1100 就只输出前后 500 个字符
-        int maxLen = 1100, headTail = 500;
-
+        sbd.append("HttpClient => (").append(method).append(" ").append(url).append(")");
         if (U.isNotBlank(params)) {
-            sbd.append(" param(");
-            int len = params.length();
-            if (len > maxLen) {
-                sbd.append(params, 0, headTail).append(" <.> ").append(params, len - headTail, len);
-            } else {
-                sbd.append(params);
-            }
-            sbd.append(") ");
+            sbd.append(" params(").append(params).append(")");
         }
         if (A.isNotEmpty(requestHeaders)) {
             sbd.append(" request headers(");
@@ -295,25 +288,24 @@ public class HttpClientUtil {
             }
             sbd.append(")");
         }
-        sbd.append(",");
+        sbd.append(" time(").append(ms).append("ms)");
 
         if (A.isNotEmpty(responseHeaders)) {
-            sbd.append(" response headers(");
+            sbd.append(", response headers(");
             for (Header header : responseHeaders) {
                 sbd.append("<").append(header.getName()).append(" : ").append(header.getValue()).append(">");
             }
             sbd.append(")");
         }
-        sbd.append(" return(");
         if (U.isNotBlank(result)) {
-            int len = result.length();
-            if (len > maxLen) {
-                sbd.append(result, 0, headTail).append(" ... ").append(result, len - headTail, len);
-            } else {
-                sbd.append(result);
+            // 如果长度大于 6000 就只输出前 200 个字符
+            if (result.length() > 6000) {
+                result = result.substring(0, 200) + " ...";
             }
+            sbd.append(", return(").append(result).append(")");
+        } else {
+            sbd.append(" return nil");
         }
-        sbd.append(")");
         return sbd.toString();
     }
     /** 发起 http 请求 */
@@ -322,7 +314,7 @@ public class HttpClientUtil {
         String url = request.getURI().toString();
 
         config(request);
-        Date start = DateUtil.now();
+        long start = System.currentTimeMillis();
         try (CloseableHttpResponse response = createHttpClient().execute(request, HttpClientContext.create())) {
             HttpEntity entity = response.getEntity();
             if (U.isNotBlank(entity)) {
@@ -343,6 +335,7 @@ public class HttpClientUtil {
         }
         return null;
     }
+
 
     /** 用 get 方式请求 url 并将响应结果保存指定的文件 */
     public static void download(String url, String file) {

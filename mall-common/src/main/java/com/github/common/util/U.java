@@ -641,39 +641,18 @@ public final class U {
         StringBuilder sbd = new StringBuilder();
         int i = 0;
         for (Map.Entry<String, ?> entry : params.entrySet()) {
+            String key = entry.getKey();
             Object value = entry.getValue();
-            if (isNotBlank(value)) {
-                String key = entry.getKey();
-                if (!"password".equalsIgnoreCase(key)) {
-                    if (value.getClass().isArray()) {
-                        for (Object obj : (Object[]) value) {
-                            i = appendParam(sbd, i, key, obj);
-                        }
-                    } else if (value instanceof Collection) {
-                        for (Object obj : (Collection) value) {
-                            i = appendParam(sbd, i, key, obj);
-                        }
-                    } else {
-                        if (i > 0) {
-                            sbd.append("&");
-                        }
-                        sbd.append(key).append("=").append(value.toString());
-                        i++;
-                    }
+            if (isNotBlank(key) && isNotBlank(value)) {
+                if (i > 0) {
+                    sbd.append("&");
                 }
+                String v = "password".equalsIgnoreCase(key) ? "***" : A.toStringWithArrayOrCollection(value);
+                sbd.append(key).append("=").append(v);
+                i++;
             }
         }
         return sbd.toString();
-    }
-    private static int appendParam(StringBuilder sbd, int i, String key, Object obj) {
-        if (isNotBlank(obj)) {
-            if (i > 0) {
-                sbd.append("&");
-            }
-            sbd.append(key).append("=").append(obj.toString());
-            i++;
-        }
-        return i;
     }
 
     /** 获取指定类所在 jar 包的地址 */
