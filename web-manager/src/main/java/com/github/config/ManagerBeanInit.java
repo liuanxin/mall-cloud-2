@@ -19,7 +19,6 @@ public class ManagerBeanInit {
 
     /** freemarker 的默认配置 */
     private final FreeMarkerProperties properties;
-
     public ManagerBeanInit(FreeMarkerProperties properties) {
         this.properties = properties;
     }
