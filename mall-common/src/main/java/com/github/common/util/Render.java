@@ -6,11 +6,11 @@ import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBui
 import java.util.regex.Pattern;
 
 /**
- * 在页面渲染时拼接 url 等的工具类/
+ * 在页面渲染时拼接 url 等的工具类
  */
 public final class Render {
 
-    private static final Pattern HTTP_PATTERN =  Pattern.compile("http(s?)://");
+    private static final Pattern HTTP_PATTERN =  Pattern.compile("(?i)^http(s?):");
     private static final Pattern RESOURCE_PATTERN = Pattern.compile("(?i)^.*\\.(css|js|ico|gif|bmp|png|jpg|jpeg)$");
 
     /** 去掉 html 和 js 注释, 基于正则表达式完成 */
@@ -23,6 +23,12 @@ public final class Render {
         return MvcUriComponentsBuilder.fromMappingName(name);
     }
 
+    public static String url(String url) {
+        // 前缀改成 // 开头(去掉 http 或 https)
+        // domain = domain.replaceFirst("(?i)^http(s?):", "");
+        return HTTP_PATTERN.matcher(url).replaceFirst("");
+    }
+
     /**
      * 如果 path 中包含了 #, 则从 spring mvc 的 controller 里面查找具体的 url. 找到后去掉相关类方法上的空参数.<br>
      * 将 domain 和 path 拼起来返回. 如果是资源文件(css js  ico gif png bmp jpg jpeg)则加上版本号
@@ -32,9 +38,7 @@ public final class Render {
      */
     public static String url(String domain, String path) {
         if (U.isNotBlank(domain)) {
-            // 前缀改成 // 开头(去掉 http 或 https)
-            // domain = domain.replaceFirst("http(s?)://", "//");
-            domain = HTTP_PATTERN.matcher(domain).replaceFirst("//");
+            domain = url(domain);
         }
         if (path.contains("#")) {
             // 从 mvc 中获取 url 时的参数类似于 IC#index ==> IC 表示 IndexController 的两个大写字母, index 表示类里的方法
