@@ -209,10 +209,10 @@ public class Money implements Serializable {
          * @return 大写
          */
         private static String upperCase(String money) {
-            // 必要的检查. 如果是 0 直接返回
             if (money == null || money.trim().length() == 0) {
-                return MONEY_NOT_EFFECTIVE;
+                return BLANK;
             }
+            // 必要的检查. 如果是 0 直接返回
             try {
                 if (Double.parseDouble(money) == 0) {
                     return NUM[0] + INTEGER[0] + WHOLE;
