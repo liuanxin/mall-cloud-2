@@ -212,7 +212,7 @@ public class Money implements Serializable {
             if (money == null || money.trim().length() == 0) {
                 return BLANK;
             }
-            // 必要的检查. 如果是 0 直接返回
+            // 如果是 0 直接返回
             try {
                 if (Double.parseDouble(money) == 0) {
                     return NUM[0] + INTEGER[0] + WHOLE;
