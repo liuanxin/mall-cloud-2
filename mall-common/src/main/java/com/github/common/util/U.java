@@ -496,6 +496,26 @@ public final class U {
             return src;
         }
     }
+    /** 给参数中的值转义 */
+    public static String urlEncodeValue(String src) {
+        if (isBlank(src)) {
+            return EMPTY;
+        }
+        StringBuilder sbd = new StringBuilder();
+        String[] sp = src.split("&");
+        for (int i = 0; i < sp.length; i++) {
+            String[] split = sp[i].split("=");
+
+            if (i > 0) {
+                sbd.append("&");
+            }
+            sbd.append(split[0]).append("=");
+            if (split.length == 2) {
+                sbd.append(urlEncode(split[1]));
+            }
+        }
+        return sbd.toString();
+    }
 
     /** 生成不带 - 的 uuid */
     public static String uuid() {
