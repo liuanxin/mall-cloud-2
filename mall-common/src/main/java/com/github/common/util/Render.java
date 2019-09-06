@@ -26,7 +26,7 @@ public final class Render {
     public static String url(String url) {
         // 前缀改成 // 开头(去掉 http 或 https)
         // domain = domain.replaceFirst("(?i)^http(s?):", "");
-        return HTTP_PATTERN.matcher(url).replaceFirst("");
+        return U.isBlank(url) ? U.EMPTY : HTTP_PATTERN.matcher(url).replaceFirst("");
     }
 
     /**
@@ -38,6 +38,8 @@ public final class Render {
      */
     public static String url(String domain, String path) {
         if (U.isNotBlank(domain)) {
+            // 前缀改成 // 开头(去掉 http 或 https)
+            // domain = domain.replaceFirst("(?i)^http(s?):", "");
             domain = url(domain);
         }
         if (path.contains("#")) {

@@ -501,6 +501,10 @@ public final class U {
         if (isBlank(src)) {
             return EMPTY;
         }
+
+        if (!src.contains("&")) {
+            return src;
+        }
         StringBuilder sbd = new StringBuilder();
         String[] sp = src.split("&");
         for (int i = 0; i < sp.length; i++) {
