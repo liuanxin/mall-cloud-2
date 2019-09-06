@@ -502,7 +502,7 @@ public final class U {
             return EMPTY;
         }
 
-        if (!src.contains("&")) {
+        if (!src.contains("=")) {
             return src;
         }
         StringBuilder sbd = new StringBuilder();
