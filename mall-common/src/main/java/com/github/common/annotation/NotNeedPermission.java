@@ -3,15 +3,19 @@ package com.github.common.annotation;
 import java.lang.annotation.*;
 
 /**
- * 在不需要验证用户是否有权限的类或方法上标注即可(后台通常都是需要权限的)<br/>
- * 当某些 url 只需要用户登录后就可以访问时, 标注此注解<br/>
- * <span style="color:red">优先级低于 NotNeedLogin</span>, 也就是如果两个注解都有标注时, 对应类或方法的 url 就不需要登录
- * <br><br>
+ * <pre>
+ * <span style="color:red">当前注解主要用在 B 类网站上 --> 标注后的接口需要登录, 但是不需要权限</span>
  *
- * 在 Controller 类上标注后, 这个类下面的方法都不会再验证权限.<br>
- * 想要在某个方法上再次验证权限, 可以在这个方法上再标注一下这个注解并设置 flag = false
+ * A 类网站: 大多数接口都是不需要登录的, 只有一些请求需要验证登录, 比如 weibo taobao 等
+ *    在需要验证登录的接口上标 {@link NeedLogin}, 如 下单、支付...
  *
- * @see NotNeedLogin
+ * B 类网站: 大多数接口都是需要登录的, 只有很少的请求不需要验证登录, 比如管理系统
+ *    在不需要验证登录的接口上标 {@link NotNeedLogin}, 如 登录...
+ *    在需要验证登录但是不需要验证权限的接口标 {@link NotNeedPermission}, 如 查询个人信息...
+ *
+ * 方法上标了则以方法上为准
+ * 如果类上标了 @NotNeedPermission, 里面一个具体的接口上标了 @NotNeedPermission(false) 则表示这个接口依然需要验证权限
+ * </pre>
  */
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)

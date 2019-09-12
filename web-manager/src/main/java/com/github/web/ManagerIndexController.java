@@ -34,7 +34,7 @@ public class ManagerIndexController {
     }
 
     @ApiIgnore(false)
-    @ApiTokens(false)
+    @ApiTokens
     @ApiMethod(value = "枚举信息", develop = Develop.COMMON)
     @GetMapping("/enum")
     @ResponseBody
