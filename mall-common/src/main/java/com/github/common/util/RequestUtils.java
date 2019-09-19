@@ -9,7 +9,6 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.Enumeration;
 import java.util.List;
@@ -196,22 +195,6 @@ public final class RequestUtils {
         return upload ? "uploading file" : U.formatParam(request.getParameterMap());
     }
 
-    public static String getRequestBody() {
-        try (BufferedReader reader = getRequest().getReader()) {
-            StringBuilder sbd = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                sbd.append(line);
-            }
-            return sbd.toString();
-        } catch (IOException e) {
-            if (LogUtil.ROOT_LOG.isDebugEnabled()) {
-                LogUtil.ROOT_LOG.debug("get RequestBody exception", e);
-            }
-            return U.EMPTY;
-        }
-    }
-
     /** 先从请求头中查, 为空再从参数中查 */
     public static String getHeaderOrParam(String param) {
         HttpServletRequest request = getRequest();
@@ -305,7 +288,7 @@ public final class RequestUtils {
 
         String ip = getRealIp();
         String method = request.getMethod();
-        String url = request.getRequestURL().toString();
+        String url = getRequestUrl();
         String param = formatParam();
         String headParam = formatHeadParam();
         return new LogUtil.RequestLogContext(ip, method, url, param, headParam);
