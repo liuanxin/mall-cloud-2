@@ -9,6 +9,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.Enumeration;
 import java.util.List;
@@ -122,17 +123,17 @@ public final class RequestUtils {
         StringBuilder sbd = new StringBuilder();
 
         HttpServletRequest request = getRequest();
-        String scheme = request.getHeader("X-Forwarded-Proto");
-        if (U.isNotBlank(scheme)) {
-            sbd.append(scheme);
-        } else {
-            sbd.append(request.getScheme());
-        }
-        sbd.append("://").append(request.getServerName());
+        String proxyScheme = request.getHeader("X-Forwarded-Proto");
+        String scheme = U.isNotBlank(proxyScheme) ? proxyScheme : request.getScheme();
 
         int port = request.getServerPort();
-        if (port != 80 && port != 443) {
-            sbd.append(':').append(port);
+        boolean http = ("http".equals(scheme) && port != 80);
+        boolean https = ("https".equals(scheme) && port != 443);
+
+        sbd.append(scheme).append("://").append(request.getServerName());
+        if (http || https) {
+            sbd.append(':');
+            sbd.append(port);
         }
         return sbd.toString();
     }
@@ -142,13 +143,14 @@ public final class RequestUtils {
         if (U.isBlank(url)) {
             return U.EMPTY;
         }
-        if (url.startsWith(HTTP)) {
+        String lowerUrl = url.toLowerCase();
+        if (lowerUrl.startsWith(HTTP)) {
             String tmp = url.substring(HTTP.length());
             return url.substring(0, HTTP.length() + tmp.indexOf(URL_SPLIT));
-        } else if (url.startsWith(HTTPS)) {
+        } else if (lowerUrl.startsWith(HTTPS)) {
             String tmp = url.substring(HTTPS.length());
             return url.substring(0, HTTPS.length() + tmp.indexOf(URL_SPLIT));
-        } else if (url.startsWith(SCHEME)) {
+        } else if (lowerUrl.startsWith(SCHEME)) {
             String tmp = url.substring(SCHEME.length());
             return url.substring(0, SCHEME.length() + tmp.indexOf(URL_SPLIT));
         }
@@ -156,21 +158,23 @@ public final class RequestUtils {
     }
 
     /** 检查 url 在不在指定的域名中(以根域名检查, 如 www.qq.com 是以 qq.com 为准), 将所在根域名返回, 不在指定域名中则返回空 */
-    public static String getRootDomainInUrl(String url, List<String> domainList) {
+    public static String getDomainInUrl(String url, List<String> domainList) {
         url = getDomain(url);
-        if (U.isNotBlank(url)) {
+        if (U.isNotBlank(url) && A.isNotEmpty(domainList)) {
             for (String domain : domainList) {
-                if (domain.startsWith(HTTP)) {
+                String lowerDomain = domain.toLowerCase();
+                if (lowerDomain.startsWith(HTTP)) {
                     domain = domain.substring(HTTP.length());
-                } else if (domain.startsWith(HTTPS)) {
+                } else if (lowerDomain.startsWith(HTTPS)) {
                     domain = domain.substring(HTTPS.length());
-                } else if (domain.startsWith(SCHEME)) {
+                } else if (lowerDomain.startsWith(SCHEME)) {
                     domain = domain.substring(SCHEME.length());
                 }
-                if (domain.startsWith(WWW)) {
+
+                if (domain.toLowerCase().startsWith(WWW)) {
                     domain = domain.substring(WWW.length());
                 }
-                if (url.endsWith("." + domain)) {
+                if (url.toLowerCase().endsWith("." + domain.toLowerCase())) {
                     return domain;
                 }
             }
@@ -192,6 +196,22 @@ public final class RequestUtils {
         return upload ? "uploading file" : U.formatParam(request.getParameterMap());
     }
 
+    public static String getRequestBody() {
+        try (BufferedReader reader = getRequest().getReader()) {
+            StringBuilder sbd = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                sbd.append(line);
+            }
+            return sbd.toString();
+        } catch (IOException e) {
+            if (LogUtil.ROOT_LOG.isDebugEnabled()) {
+                LogUtil.ROOT_LOG.debug("get RequestBody exception", e);
+            }
+            return U.EMPTY;
+        }
+    }
+
     /** 先从请求头中查, 为空再从参数中查 */
     public static String getHeaderOrParam(String param) {
         HttpServletRequest request = getRequest();
@@ -203,17 +223,40 @@ public final class RequestUtils {
     }
 
     /** 从 cookie 中获取值 */
-    public static String getCookie(String param) {
+    public static String getCookieValue(String name) {
+        Cookie cookie = getCookie(name);
+        return U.isBlank(cookie) ? U.EMPTY : cookie.getValue();
+    }
+    private static Cookie getCookie(String name) {
         HttpServletRequest request = getRequest();
         Cookie[] cookies = request.getCookies();
         if (A.isNotEmpty(cookies)) {
             for (Cookie cookie : cookies) {
-                if (cookie.getName().equals(param)) {
-                    return cookie.getValue();
+                if (cookie.getName().equals(name)) {
+                    return cookie;
                 }
             }
         }
-        return U.EMPTY;
+        return null;
+    }
+    /** 添加一个 http-only 的 cookie(浏览器环境中 js 用 document.cookie 获取时将会忽略) */
+    public static void addHttpOnlyCookie(String name, String value, int second, int extendSecond) {
+        HttpServletResponse response = getResponse();
+        Cookie cookie = getCookie(name);
+        if (U.isBlank(cookie)) {
+            Cookie add = new Cookie(name, value);
+            add.setPath("/");
+            add.setHttpOnly(true);
+            add.setMaxAge(second);
+            response.addCookie(add);
+        } else {
+            int maxAge = cookie.getMaxAge();
+            // 如果 cookie 中已经有值且过期时间在延长时间以内了, 则把 cookie 的过期时间延长到指定时间
+            if (maxAge > 0 && maxAge < extendSecond && second > extendSecond) {
+                cookie.setMaxAge(second);
+                response.addCookie(cookie);
+            }
+        }
     }
 
     /** 格式化头里的参数: 键值以冒号分隔 */
@@ -243,7 +286,7 @@ public final class RequestUtils {
         try {
             response.setCharacterEncoding("utf-8");
             response.setContentType(type + ";charset=utf-8;");
-            response.getWriter().write(result);
+            response.getWriter().write(U.toStr(result));
         } catch (IllegalStateException e) {
             // 基于 response 调用了 getOutputStream(), 又再调用 getWriter() 会被 web 容器拒绝
             if (LogUtil.ROOT_LOG.isDebugEnabled()) {
