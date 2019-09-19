@@ -131,8 +131,7 @@ public final class RequestUtils {
 
         sbd.append(scheme).append("://").append(request.getServerName());
         if (http || https) {
-            sbd.append(':');
-            sbd.append(port);
+            sbd.append(':').append(port);
         }
         return sbd.toString();
     }
