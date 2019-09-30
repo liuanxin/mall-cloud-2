@@ -60,6 +60,12 @@ final class ExportExcel {
      */
     static Workbook handle(boolean excel07, Map<String, LinkedHashMap<String, String>> titleMap,
                            LinkedHashMap<String, List<?>> dataMap) {
+        int maxColumn = getMaxColumn(excel07);
+        int columnSize = titleMap.size();
+        if (columnSize > maxColumn) {
+            throw new RuntimeException("Invalid column number " + columnSize + ", max " + maxColumn);
+        }
+
         // 声明一个工作薄. HSSFWorkbook 是 Office 2003 的版本, XSSFWorkbook 是 2007
         Workbook workbook = excel07 ? new XSSFWorkbook() : new HSSFWorkbook();
         // 没有标题直接返回
@@ -69,11 +75,6 @@ final class ExportExcel {
         // 如果数据为空, 构建一个空字典(确保导出的文件有标题头)
         if (dataMap == null) {
             dataMap = new LinkedHashMap<>();
-        }
-        int maxColumn = getMaxColumn(excel07);
-        int columnSize = titleMap.size();
-        if (columnSize > maxColumn) {
-            throw new RuntimeException("Invalid column number " + columnSize + ", max " + maxColumn);
         }
 
         // 头样式
@@ -107,7 +108,8 @@ final class ExportExcel {
         // 数字格式
         DataFormat dataFormat = workbook.createDataFormat();
 
-        int maxRow = getMaxRow(excel07);
+        // 每个 sheet 的最大行, 标题头也是一行
+        int maxRow = getMaxRow(excel07) - 1;
         for (Map.Entry<String, List<?>> entry : dataMap.entrySet()) {
             String sheetName = entry.getKey();
             // 标题头, 这里跟数据中的属性相对应

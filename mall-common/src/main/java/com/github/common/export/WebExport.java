@@ -103,12 +103,31 @@ public final class WebExport {
     }
 
     /**
-     * 导出 excel 文件(多 sheet)! 在 Controller 中调用!
+     * <pre>
+     * 返回一个 excel 工作簿
      *
-     * @param type 文件类型: xls03、xls07, 默认是 xls07
-     * @param name 导出时的文件名
-     * @param titleMap 标题(key 为 sheet 名, value 为每个 sheet 的标题头数据)
-     * @param dataList key 为 sheet 名, value 为每个 sheet 导出的数据(数据中的字段名 与 标题头数据 对应)
+     * excel07:  是否返回 microsoft excel 2007 的版本
+     *
+     * titleMap: key 是 sheet name, value 是这个 sheet 对应的标题映射, 标题映射 跟 下面数据的字段名 一一对应, 如
+     * {
+     *   "用户信息": { "name": "用户", "desc": "说明" },
+     *   "商品信息": { "name": "商品名称", "image": "图片" }
+     * }
+     *
+     * dataMap: key 是 sheet name, value 是这个 sheet 的数据, 单条数据的字段名 跟 上面的标题映射 一一对应, 如
+     * {
+     *   "用户信息": [ { "name": "张三", "desc": "三儿" }, { "name": "李四", "desc": "四儿" } ... ],
+     *   "商品信息": [ { "name": "苹果", "image": "xxx" }, { "name": "三星", "image": "yyy" } ]
+     * }
+     *
+     * 最终导出时大概是这样(假定用户信息的数据很多, 此时会有三个 sheet, 前两个是用户信息, 后一个是商品信息)
+     *
+     * | 用户    说明    |    用户    说明    |    商品名称    图片 |
+     * | 张三    三儿    |    王五    王儿    |    苹果       xxx  |
+     * | 李四    四儿    |    钱六    六儿    |    三星       yyy  |
+     * |                |                   |                   |
+     * | 用户信息-1      |    用户信息-2      |    商品信息        |
+     * </pre>
      */
     public static void exportExcel(String type, String name, Map<String, LinkedHashMap<String, String>> titleMap,
                                    LinkedHashMap<String, List<?>> dataList, HttpServletResponse response) throws IOException {
