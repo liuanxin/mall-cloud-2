@@ -1,9 +1,11 @@
 package com.github.common.util;
 
+import com.github.common.Money;
 import com.github.common.date.DateUtil;
 import com.github.common.exception.*;
 import com.github.common.json.JsonUtil;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.net.URLDecoder;
@@ -135,11 +137,11 @@ public final class U {
      *
      *   &#064;JsonValue
      *   public Map<String, String> serializer() {
-     *     return <span style="color:red">U.serializerEnum(code, value);</span>
+     *     return <span style="color:red">serializerEnum(code, value);</span>
      *   }
      *   &#064;JsonCreator
      *   public static Gender deserializer(Object obj) {
-     *     return U.enumDeserializer(obj, Gender.class);
+     *     return enumDeserializer(obj, Gender.class);
      *   }
      * }
      * </pre>
@@ -164,11 +166,11 @@ public final class U {
      *
      *   &#064;JsonValue
      *   public Map<String, String> serializer() {
-     *     return U.serializerEnum(code, value);
+     *     return serializerEnum(code, value);
      *   }
      *   &#064;JsonCreator
      *   public static Gender deserializer(Object obj) {
-     *     return <span style="color:red">U.enumDeserializer(obj, Gender.class);</span>
+     *     return <span style="color:red">enumDeserializer(obj, Gender.class);</span>
      *   }
      * }
      * </pre>
@@ -616,7 +618,8 @@ public final class U {
         }
 
         if (isBlank(value)) {
-            return EMPTY;
+            Class<?> fieldType = getFieldType(data, field);
+            return (isNotBlank(fieldType) && fieldType == Money.class) ? "0" : EMPTY;
         } else if (value.getClass().isEnum()) {
             // 如果是枚举, 则调用其 getValue 方法, getValue 没有值则使用枚举的 name
             Object enumValue = getMethod(value, "getValue");
@@ -638,14 +641,33 @@ public final class U {
         if (isNotBlank(method)) {
             try {
                 return obj.getClass().getDeclaredMethod(method).invoke(obj, param);
-            } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-                // ignore
+            } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException ignore) {
             }
             // getMethod 会将从父类继承过来的 public 方法也查询出来
             try {
                 return obj.getClass().getMethod(method).invoke(obj, param);
-            } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e1) {
-                // ignore
+            } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException ignore) {
+            }
+        }
+        return null;
+    }
+
+    public static Class<?> getFieldType(Object obj, String field) {
+        if (isNotBlank(field)) {
+            try {
+                Field f = obj.getClass().getDeclaredField(field);
+                if (isNotBlank(f)) {
+                    return f.getType();
+                }
+            } catch (NoSuchFieldException ignore) {
+            }
+            // getMethod 会将从父类继承过来的 public 方法也查询出来
+            try {
+                Field f = obj.getClass().getField(field);
+                if (isNotBlank(f)) {
+                    return f.getType();
+                }
+            } catch (NoSuchFieldException ignore) {
             }
         }
         return null;

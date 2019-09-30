@@ -168,24 +168,22 @@ final class ExportExcel {
                                 cell = row.createCell(cellIndex);
 
                                 cellData = U.getField(data, titleMapEntry.getKey());
-                                if (NumberUtils.isCreatable(cellData)) {
-                                    //cell.setCellType(CellType.NUMERIC);
-                                    cell.setCellValue(NumberUtils.toDouble(cellData));
+                                titleValues = titleMapEntry.getValue().split("\\|");
 
-                                    titleValues = titleMapEntry.getValue().split("\\|");
-                                    if (titleValues.length > 1) {
-                                        // 数字样式需要单独设置格式, 每次都生成一个
-                                        cellTmpStyle = createNumberStyle(workbook);
-                                        cellTmpStyle.setDataFormat(dataFormat.getFormat(titleValues[1]));
-                                    } else {
-                                        cellTmpStyle = numberStyle;
-                                    }
+                                boolean isNumber = NumberUtils.isCreatable(cellData);
+                                if (titleValues.length > 1) {
+                                    // 自定义格式
+                                    cellTmpStyle = createNumberStyle(workbook);
+                                    cellTmpStyle.setDataFormat(dataFormat.getFormat(titleValues[1]));
                                 } else {
-                                    //cell.setCellType(CellType.STRING);
-                                    cell.setCellValue(cellData);
-                                    // 给字符串设置样式意义并不大, 忽略样式. 此处并不每次都生成一个
-                                    cellTmpStyle = contentStyle;
+                                    cellTmpStyle = isNumber ? numberStyle : contentStyle;
                                 }
+                                if (isNumber) {
+                                    cell.setCellValue(NumberUtils.toDouble(cellData));
+                                } else {
+                                    cell.setCellValue(cellData);
+                                }
+
                                 cell.setCellStyle(cellTmpStyle);
                                 cellIndex++;
                             }
