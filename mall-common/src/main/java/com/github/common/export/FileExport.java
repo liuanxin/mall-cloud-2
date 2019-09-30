@@ -75,7 +75,7 @@ public final class FileExport {
                             List<?> dataList, String directory) {
         ExportType exportType = ExportType.to(type);
         if (exportType.isExcel()) {
-            saveExcel(exportType, name, A.linkedMaps(name, titleMap), A.linkedMaps(name, dataList), directory);
+            saveExcel(type, name, A.linkedMaps(name, titleMap), A.linkedMaps(name, dataList), directory);
         } else if (exportType.isCsv()) {
             saveCsv(name, titleMap, dataList, directory);
         }
@@ -105,14 +105,14 @@ public final class FileExport {
     /**
      * 导出 excel 文件(多 sheet)! 在 Controller 中调用!
      *
-     * @param exportType 文件类型: xls03、xls07, 默认是 xls07
+     * @param type 文件类型: xls03、xls07, 默认是 xls07
      * @param name 导出时的文件名
      * @param titleMap 标题(key 为 sheet 名, value 为每个 sheet 的标题头数据)
      * @param dataList key 为 sheet 名, value 为每个 sheet 导出的数据(数据中的字段名 与 标题头数据 对应)
      */
-    public static void saveExcel(ExportType exportType, String name, Map<String, LinkedHashMap<String, String>> titleMap,
-                                  LinkedHashMap<String, List<?>> dataList, String directory) {
-        boolean excel07 = exportType.is07();
+    public static void saveExcel(String type, String name, Map<String, LinkedHashMap<String, String>> titleMap,
+                                 LinkedHashMap<String, List<?>> dataList, String directory) {
+        boolean excel07 = !(ExportType.to(type).is03());
         String fileName = encodeName(name) + "." + (excel07 ? "xlsx" : "xls");
 
         try (
