@@ -32,27 +32,34 @@ final class ExportExcel {
     }
 
     /**
+     * <pre>
      * 返回一个 excel 工作簿
      *
-     * @param excel07  是否返回 microsoft excel 2007 的版本
-     * @param titleMap 属性名为 key, 对应的标题为 value, 为了处理显示时的顺序, 因此使用 linkedHashMap
-     * @param dataMap  以「sheet 名」为 key, 对应的数据为 value(每一行的数据为一个 Object)
+     * excel07:  是否返回 microsoft excel 2007 的版本
+     *
+     * titleMap: key 是 sheet name, value 是这个 sheet 对应的标题映射, 标题映射 跟 下面数据的字段名 一一对应, 如
+     * {
+     *   "用户信息": { "name": "用户", "desc": "说明" },
+     *   "商品信息": { "name": "商品名称", "image": "图片" }
+     * }
+     *
+     * dataMap: key 是 sheet name, value 是这个 sheet 的数据, 单条数据的字段名 跟 上面的标题映射 一一对应, 如
+     * {
+     *   "用户信息": [ { "name": "张三", "desc": "三儿" }, { "name": "李四", "desc": "四儿" } ... ],
+     *   "商品信息": [ { "name": "苹果", "image": "xxx" }, { "name": "三星", "image": "yyy" } ]
+     * }
+     *
+     * 最终导出时大概是这样(假定用户信息的数据很多, 此时会有三个 sheet, 前两个是用户信息, 后一个是商品信息)
+     *
+     * | 用户    说明    |    用户    说明    |    商品名称    图片 |
+     * | 张三    三儿    |    王五    王儿    |    苹果       xxx  |
+     * | 李四    四儿    |    钱六    六儿    |    三星       yyy  |
+     * |                |                   |                   |
+     * | 用户信息-1      |    用户信息-2      |    商品信息        |
+     * </pre>
      */
-    static Workbook handle(boolean excel07, LinkedHashMap<String, String> titleMap,
+    static Workbook handle(boolean excel07, Map<String, LinkedHashMap<String, String>> titleMap,
                            LinkedHashMap<String, List<?>> dataMap) {
-        return handle(excel07, titleMap, dataMap, false);
-    }
-
-    /**
-     * 返回一个 excel 工作簿
-     *
-     * @param excel07  是否返回 microsoft excel 2007 的版本
-     * @param titleMap 属性名为 key, 对应的标题为 value, 为了处理显示时的顺序, 因此使用 linkedHashMap
-     * @param dataMap  以「sheet 名」为 key, 对应的数据为 value(每一行的数据为一个 Object)
-     * @param rightChineseFont  是否能正确中文字体的大小
-     */
-    static Workbook handle(boolean excel07, LinkedHashMap<String, String> titleMap,
-                           LinkedHashMap<String, List<?>> dataMap, boolean rightChineseFont) {
         // 声明一个工作薄. HSSFWorkbook 是 Office 2003 的版本, XSSFWorkbook 是 2007
         Workbook workbook = excel07 ? new XSSFWorkbook() : new HSSFWorkbook();
         // 没有标题直接返回
@@ -92,8 +99,6 @@ final class ExportExcel {
         //      每个 sheet 的数据, 当数据量大, 有多个 sheet 时会用到
         List<?> sheetList;
 
-        // 标题头, 这里跟数据中的属性相对应
-        Set<Map.Entry<String, String>> titleEntry = titleMap.entrySet();
 
         // 单个列的数据
         String cellData;
@@ -104,24 +109,31 @@ final class ExportExcel {
 
         int maxRow = getMaxRow(excel07);
         for (Map.Entry<String, List<?>> entry : dataMap.entrySet()) {
+            String sheetName = entry.getKey();
+            // 标题头, 这里跟数据中的属性相对应
+            Set<Map.Entry<String, String>> titleEntry = titleMap.get(sheetName).entrySet();
+
             // 当前 sheet 的数据
             dataList = entry.getValue();
             size = A.isEmpty(dataList) ? 0 : dataList.size();
+
             // 一个 sheet 数据过多 excel 处理会出错, 分多个 sheet
             sheetCount = ((size % maxRow == 0) ? (size / maxRow) : (size / maxRow + 1));
             if (sheetCount == 0) {
                 // 如果没有记录时也至少构建一个(确保导出的文件有标题头)
                 sheetCount = 1;
             }
+
             for (int i = 0; i < sheetCount; i++) {
                 // 构建 sheet, 带名字
-                sheet = workbook.createSheet(entry.getKey() + (sheetCount > 1 ? ("-" + (i + 1)) : U.EMPTY));
+                sheet = workbook.createSheet(sheetName + (sheetCount > 1 ? ("-" + (i + 1)) : U.EMPTY));
 
                 // 每个 sheet 的标题行
                 rowIndex = 0;
                 cellIndex = 0;
                 row = sheet.createRow(rowIndex);
                 row.setHeightInPoints(ROW_HEIGHT);
+
                 // 每个 sheet 的标题行
                 for (Map.Entry<String, String> titleMapEntry : titleEntry) {
                     cell = row.createCell(cellIndex);
@@ -181,21 +193,19 @@ final class ExportExcel {
 
                 cellIndex = 0;
                 for (Map.Entry<String, String> titleMapEntry : titleEntry) {
-                    // 让列的宽度自适应. 缺少中文字体计算宽度时会有问题, 可以统一宽度并接受自定义列宽度(像下面), 或者复制字体文件到操作系统
-                    if (rightChineseFont) {
-                        sheet.autoSizeColumn(cellIndex, true);
-                    } else {
-                        // 左移 8 相当于 * 256
-                        sheet.setColumnWidth(cellIndex, 12 << 8);
-
-                        titleValues = titleMapEntry.getValue().split("\\|");
-                        if (titleValues.length > 2) {
-                            int width = NumberUtils.toInt(titleValues[2]);
-                            if (width > 0 && width < 256) {
-                                // 左移 8 相当于 * 256
-                                sheet.setColumnWidth(cellIndex, width << 8);
-                            }
+                    titleValues = titleMapEntry.getValue().split("\\|");
+                    if (titleValues.length > 2) {
+                        int width = U.toInt(titleValues[2]);
+                        if (width > 0 && width < 256) {
+                            // 左移 8 相当于 * 256
+                            sheet.setColumnWidth(cellIndex, width << 8);
+                        } else {
+                            // 左移 8 相当于 * 256
+                            sheet.setColumnWidth(cellIndex, 12 << 8);
                         }
+                    } else {
+                        // 让列的宽度自适应. 缺少中文字体计算宽度时会有问题, 需要复制中文字体文件到操作系统
+                        sheet.autoSizeColumn(cellIndex, true);
                     }
                     cellIndex++;
                 }

@@ -11,6 +11,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * <pre>
@@ -77,7 +78,7 @@ public final class WebExport {
                               List<?> dataList, HttpServletResponse response) throws IOException {
         ExportType exportType = ExportType.to(type);
         if (exportType.isExcel()) {
-            exportExcel(exportType.is07(), name, titleMap, dataList, response);
+            exportExcel(exportType, name, A.maps(name, titleMap), A.linkedMaps(name, dataList), response);
         } else if (exportType.isCsv()) {
             exportCsv(name, titleMap, dataList, response);
         }
@@ -101,13 +102,22 @@ public final class WebExport {
         response.getOutputStream().write(content.getBytes(StandardCharsets.UTF_8));
     }
 
-    private static void exportExcel(boolean excel07, String name, LinkedHashMap<String, String> titleMap,
-                                    List<?> dataList, HttpServletResponse response) throws IOException {
+    /**
+     * 导出 excel 文件(多 sheet)! 在 Controller 中调用!
+     *
+     * @param exportType 文件类型: xls03、xls07, 默认是 xls07
+     * @param name 导出时的文件名
+     * @param titleMap 标题(key 为 sheet 名, value 为每个 sheet 的标题头数据)
+     * @param dataList key 为 sheet 名, value 为每个 sheet 导出的数据(数据中的字段名 与 标题头数据 对应)
+     */
+    public static void exportExcel(ExportType exportType, String name, Map<String, LinkedHashMap<String, String>> titleMap,
+                                   LinkedHashMap<String, List<?>> dataList, HttpServletResponse response) throws IOException {
+        boolean excel07 = exportType.is07();
         // 导出的文件名
         String fileName = encodeName(name) + "." + (excel07 ? "xlsx" : "xls");
         typeAndHeader(response, "text/xls", fileName);
 
-        ExportExcel.handle(excel07, titleMap, A.linkedMaps(name, dataList)).write(response.getOutputStream());
+        ExportExcel.handle(excel07, titleMap, dataList).write(response.getOutputStream());
     }
 
     private static void typeAndHeader(HttpServletResponse response, String type, String fileName) {
