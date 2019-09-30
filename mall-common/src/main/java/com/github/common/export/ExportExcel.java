@@ -172,8 +172,7 @@ final class ExportExcel {
 
                                 boolean isNumber = NumberUtils.isCreatable(cellData);
                                 if (titleValues.length > 1) {
-                                    // 自定义格式
-                                    cellTmpStyle = createNumberStyle(workbook);
+                                    cellTmpStyle = isNumber ? createNumberStyle(workbook) : createContentStyle(workbook);
                                     cellTmpStyle.setDataFormat(dataFormat.getFormat(titleValues[1]));
                                 } else {
                                     cellTmpStyle = isNumber ? numberStyle : contentStyle;
