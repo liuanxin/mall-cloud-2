@@ -173,7 +173,11 @@ final class ExportExcel {
                                 boolean isNumber = NumberUtils.isCreatable(cellData);
                                 if (titleValues.length > 1) {
                                     cellTmpStyle = isNumber ? createNumberStyle(workbook) : createContentStyle(workbook);
-                                    cellTmpStyle.setDataFormat(dataFormat.getFormat(titleValues[1]));
+                                    String[] format = titleValues[1].split("~!~");
+                                    if (format.length > 1 && "r".equalsIgnoreCase(format[1])) {
+                                        cellTmpStyle.setAlignment(HorizontalAlignment.RIGHT);
+                                    }
+                                    cellTmpStyle.setDataFormat(dataFormat.getFormat(format[0]));
                                 } else {
                                     cellTmpStyle = isNumber ? numberStyle : contentStyle;
                                 }
