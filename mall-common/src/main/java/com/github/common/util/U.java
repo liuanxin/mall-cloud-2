@@ -315,6 +315,7 @@ public final class U {
 
     // ========== object & string ==========
     private static final Pattern THOUSANDS_REGEX = Pattern.compile("(\\d)(?=(?:\\d{3})+$)");
+    /** 1234567890.51 ==> 1,234,567,890.51 */
     public static String formatNumberToThousands(String number) {
         String left, right;
         if (number.contains(".")) {
