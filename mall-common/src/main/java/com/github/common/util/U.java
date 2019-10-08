@@ -314,6 +314,20 @@ public final class U {
 
 
     // ========== object & string ==========
+    private static final Pattern THOUSANDS_REGEX = Pattern.compile("(\\d)(?=(?:\\d{3})+$)");
+    public static String formatNumberToThousands(String number) {
+        String left, right;
+        if (number.contains(".")) {
+            int point = number.indexOf(".");
+            left = number.substring(0, point);
+            right = number.substring(point);
+        } else {
+            left = number;
+            right = EMPTY;
+        }
+        return THOUSANDS_REGEX.matcher(left).replaceAll("$1,") + right;
+    }
+
     public static boolean equals(Object obj1, Object obj2) {
         if (obj1 == obj2) {
             return true;
