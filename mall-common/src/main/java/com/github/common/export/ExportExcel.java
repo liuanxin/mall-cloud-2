@@ -204,13 +204,10 @@ final class ExportExcel {
                     titleValues = titleMapEntry.getValue().split("\\|");
                     if (titleValues.length > 2) {
                         int width = U.toInt(titleValues[2]);
-                        if (width > 0 && width < 256) {
-                            // 左移 8 相当于 * 256
-                            sheet.setColumnWidth(cellIndex, width << 8);
-                        } else {
-                            // 左移 8 相当于 * 256
-                            sheet.setColumnWidth(cellIndex, 12 << 8);
-                        }
+                        // 默认 12
+                        int w = (width > 0 && width < 256) ? width : 12;
+                        // 左移 8 相当于 * 256
+                        sheet.setColumnWidth(cellIndex, w << 8);
                     } else {
                         // 让列的宽度自适应. 缺少中文字体计算宽度时会有问题, 需要复制中文字体文件到操作系统
                         sheet.autoSizeColumn(cellIndex, true);
