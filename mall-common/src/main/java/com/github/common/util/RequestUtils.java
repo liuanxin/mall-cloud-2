@@ -125,11 +125,11 @@ public final class RequestUtils {
         String proxyScheme = request.getHeader("X-Forwarded-Proto");
         String scheme = U.isNotBlank(proxyScheme) ? proxyScheme : request.getScheme();
 
+        sbd.append(scheme).append("://").append(request.getServerName());
+
         int port = request.getServerPort();
         boolean http = ("http".equals(scheme) && port != 80);
-        boolean https = ("https".equals(scheme) && port != 443);
-
-        sbd.append(scheme).append("://").append(request.getServerName());
+        boolean https = ("https".equals(scheme) && port != 80 && port != 443);
         if (http || https) {
             sbd.append(':').append(port);
         }
