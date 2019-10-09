@@ -150,7 +150,7 @@ public final class WebExport {
     }
 
     private static String encodeName(String name) {
-        String fileName = name + "-" + (new SimpleDateFormat("yyMMdd-HHmmss").format(new Date()));
+        String fileName = name + "-" + (new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()));
         String userAgent = RequestUtils.userAgent();
         if (U.isNotBlank(userAgent) && userAgent.contains("Mozilla")) {
             // Chrome, Firefox, Safari etc...

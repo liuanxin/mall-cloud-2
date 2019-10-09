@@ -15,12 +15,15 @@ import java.util.Set;
 /** 如果想要将数据导成文件保持, 使用 {@link FileExport} 类, 如果要导出文件在 web 端下载, 使用 {@link WebExport} 类 */
 final class ExportExcel {
 
-    /** 标题行的字体大小 */
-    private static final short HEAD_FONT_SIZE = 11;
-    /** 其他内容的字体大小 */
+    /** 标题行字体大小 */
+    private static final short TITLE_FONT_SIZE = 12;
+    /** 行字体大小 */
     private static final short FONT_SIZE = 10;
-    /** 行高. 要比上面的字体大一点! */
-    private static final short ROW_HEIGHT = 15;
+
+    /** 标题行高 */
+    private static final short TITLE_ROW_HEIGHT = 20;
+    /** 行高 */
+    private static final short ROW_HEIGHT = 18;
 
     static int getMaxColumn(boolean excel07) {
         return excel07 ? 16384 : 256;
@@ -135,7 +138,7 @@ final class ExportExcel {
                 rowIndex = 0;
                 cellIndex = 0;
                 row = sheet.createRow(rowIndex);
-                row.setHeightInPoints(ROW_HEIGHT);
+                row.setHeightInPoints(TITLE_ROW_HEIGHT);
 
                 // 每个 sheet 的标题行
                 for (Map.Entry<String, String> titleMapEntry : titleEntry) {
@@ -230,7 +233,7 @@ final class ExportExcel {
         Font font = workbook.createFont();
         // 粗体
         font.setBold(true);
-        font.setFontHeightInPoints(HEAD_FONT_SIZE);
+        font.setFontHeightInPoints(TITLE_FONT_SIZE);
         style.setFont(font);
         return style;
     }

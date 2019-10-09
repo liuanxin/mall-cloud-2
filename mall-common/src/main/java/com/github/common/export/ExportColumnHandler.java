@@ -7,10 +7,10 @@ import com.google.common.collect.Maps;
 import java.lang.reflect.Field;
 import java.util.LinkedHashMap;
 
-final class ExportColumnHandler {
+public class ExportColumnHandler {
 
     /** 从类上收集导出的标题(在字段上标的 &#064;ExportColumn 注解) */
-    static LinkedHashMap<String, String> collectTitle(Class clazz) {
+    public static LinkedHashMap<String, String> collectTitle(Class clazz) {
         LinkedHashMap<String, String> titleMap = Maps.newLinkedHashMap();
         if (U.isNotBlank(clazz)) {
             Field[] fields = clazz.getDeclaredFields();

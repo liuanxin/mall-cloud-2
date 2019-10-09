@@ -127,6 +127,6 @@ public final class FileExport {
     }
 
     private static String encodeName(String name) {
-        return name + "-" + (new SimpleDateFormat("yyMMdd-HHmmss").format(new Date()));
+        return name + "-" + (new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()));
     }
 }
