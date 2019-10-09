@@ -134,14 +134,15 @@ public final class WebExport {
         boolean excel07 = !(ExportType.to(type).is03());
         // 导出的文件名
         String fileName = encodeName(name) + "." + (excel07 ? "xlsx" : "xls");
-        typeAndHeader(response, "text/xls", fileName);
+        typeAndHeader(response, "application/vnd.ms-excel", fileName);
 
         ExportExcel.handle(excel07, titleMap, dataList).write(response.getOutputStream());
     }
 
     private static void typeAndHeader(HttpServletResponse response, String type, String fileName) {
-        response.setContentType("application/octet-stream; charset=utf-8");
+        // response.setContentType("application/octet-stream; charset=utf-8");
         response.setContentType(type);
+        response.setCharacterEncoding("utf-8");
         response.setHeader("Content-Disposition", "attachment;filename=" + fileName);
     }
 

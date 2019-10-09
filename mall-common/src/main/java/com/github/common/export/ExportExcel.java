@@ -5,7 +5,7 @@ import com.github.common.util.U;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -67,7 +67,8 @@ final class ExportExcel {
         }
 
         // 声明一个工作薄. HSSFWorkbook 是 Office 2003 的版本, XSSFWorkbook 是 2007
-        Workbook workbook = excel07 ? new XSSFWorkbook() : new HSSFWorkbook();
+        //Workbook workbook = excel07 ? new XSSFWorkbook() : new HSSFWorkbook();
+        Workbook workbook = excel07 ? new SXSSFWorkbook() : new HSSFWorkbook();
         // 没有标题直接返回
         if (A.isEmpty(titleMap)) {
             return workbook;
@@ -173,11 +174,11 @@ final class ExportExcel {
                                 boolean isNumber = NumberUtils.isCreatable(cellData);
                                 if (titleValues.length > 1) {
                                     cellTmpStyle = isNumber ? createNumberStyle(workbook) : createContentStyle(workbook);
-                                    String[] format = titleValues[1].split("~!~");
-                                    if (format.length > 1 && "r".equalsIgnoreCase(format[1])) {
+                                    String[] format = titleValues[1].split("~");
+                                    if (format.length > 1 && "r".equalsIgnoreCase(format[1].trim())) {
                                         cellTmpStyle.setAlignment(HorizontalAlignment.RIGHT);
                                     }
-                                    cellTmpStyle.setDataFormat(dataFormat.getFormat(format[0]));
+                                    cellTmpStyle.setDataFormat(dataFormat.getFormat(format[0].trim()));
                                 } else {
                                     cellTmpStyle = isNumber ? numberStyle : contentStyle;
                                 }
@@ -194,6 +195,7 @@ final class ExportExcel {
                     }
                 }
 
+                // 在列上处理宽度
                 cellIndex = 0;
                 for (Map.Entry<String, String> titleMapEntry : titleEntry) {
                     titleValues = titleMapEntry.getValue().split("\\|");
