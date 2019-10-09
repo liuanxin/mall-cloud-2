@@ -6,6 +6,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -95,8 +96,8 @@ public final class FileExport {
         // 没有数据或没有标题, 返回一个内容为空的文件
         String content = ExportCsv.getContent(titleMap, dataList);
 
-        try (FileOutputStream outputStream = new FileOutputStream(U.addSuffix(directory) + fileName)) {
-            outputStream.write(content.getBytes(StandardCharsets.UTF_8));
+        try (OutputStream output = new FileOutputStream(U.addSuffix(directory) + fileName)) {
+            output.write(content.getBytes(StandardCharsets.UTF_8));
         } catch (IOException e) {
             throw new RuntimeException(String.format("保存文件(%s)到(%s)时异常", fileName, directory), e);
         }
@@ -116,10 +117,10 @@ public final class FileExport {
         String fileName = encodeName(name) + "." + (excel07 ? "xlsx" : "xls");
 
         try (
-                FileOutputStream outputStream = new FileOutputStream(U.addSuffix(directory) + fileName);
+                OutputStream output = new FileOutputStream(U.addSuffix(directory) + fileName);
                 Workbook workbook = ExportExcel.handle(excel07, titleMap, dataList);
         ) {
-            workbook.write(outputStream);
+            workbook.write(output);
         } catch (IOException e) {
             throw new RuntimeException(String.format("保存文件(%s)到(%s)时异常", fileName, directory), e);
         }

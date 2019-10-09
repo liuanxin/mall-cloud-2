@@ -3,6 +3,7 @@ package com.github.common.export;
 import com.github.common.util.A;
 import com.github.common.util.RequestUtils;
 import com.github.common.util.U;
+import org.apache.poi.ss.usermodel.Workbook;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -136,7 +137,9 @@ public final class WebExport {
         String fileName = encodeName(name) + "." + (excel07 ? "xlsx" : "xls");
         typeAndHeader(response, "application/vnd.ms-excel", fileName);
 
-        ExportExcel.handle(excel07, titleMap, dataList).write(response.getOutputStream());
+        try (Workbook workbook = ExportExcel.handle(excel07, titleMap, dataList)) {
+            workbook.write(response.getOutputStream());
+        }
     }
 
     private static void typeAndHeader(HttpServletResponse response, String type, String fileName) {
