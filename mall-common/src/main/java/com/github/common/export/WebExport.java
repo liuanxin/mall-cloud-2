@@ -139,6 +139,7 @@ public final class WebExport {
 
         try (Workbook workbook = ExportExcel.handle(excel07, titleMap, dataList)) {
             workbook.write(response.getOutputStream());
+            ExportExcel.dispose(workbook);
         }
     }
 

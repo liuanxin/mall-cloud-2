@@ -69,9 +69,7 @@ final class ExportExcel {
             throw new RuntimeException("Invalid column number " + columnSize + ", max " + maxColumn);
         }
 
-        // 声明一个工作薄. HSSFWorkbook 是 Office 2003 的版本, XSSFWorkbook 是 2007
-        //Workbook workbook = excel07 ? new XSSFWorkbook() : new HSSFWorkbook();
-        Workbook workbook = excel07 ? new SXSSFWorkbook() : new HSSFWorkbook();
+        Workbook workbook = create(excel07);
         // 没有标题直接返回
         if (A.isEmpty(titleMap)) {
             return workbook;
@@ -217,6 +215,26 @@ final class ExportExcel {
             }
         }
         return workbook;
+    }
+    private static Workbook create(boolean excel07) {
+        // 声明一个工作薄. HSSFWorkbook 是 Office 2003 的版本, XSSFWorkbook 是 2007
+        //Workbook workbook = excel07 ? new XSSFWorkbook() : new HSSFWorkbook();
+        if (excel07) {
+            // http://poi.apache.org/components/spreadsheet/how-to.html#sxssf
+            // sxssf 会把数据缓存到磁盘来完成 数据量比较大时 的输出
+            SXSSFWorkbook workbook = new SXSSFWorkbook();
+            // 启用压缩, 临时文件会变小, 但是会消耗 cpu 运算时间
+            workbook.setCompressTempFiles(true);
+            return workbook;
+        } else {
+            return new HSSFWorkbook();
+        }
+    }
+    /** 清除临时文件 */
+    static void dispose(Workbook workbook) {
+        if (U.isNotBlank(workbook) && workbook instanceof SXSSFWorkbook) {
+            ((SXSSFWorkbook) workbook).dispose();
+        }
     }
 
     /** 头样式 */

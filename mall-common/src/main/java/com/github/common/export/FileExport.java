@@ -121,6 +121,7 @@ public final class FileExport {
                 Workbook workbook = ExportExcel.handle(excel07, titleMap, dataList);
         ) {
             workbook.write(output);
+            ExportExcel.dispose(workbook);
         } catch (IOException e) {
             throw new RuntimeException(String.format("保存文件(%s)到(%s)时异常", fileName, directory), e);
         }
