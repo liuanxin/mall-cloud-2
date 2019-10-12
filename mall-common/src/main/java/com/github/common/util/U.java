@@ -369,9 +369,11 @@ public final class U {
         return isBlank(str) ? EMPTY : str.replace("\t", "").replace("\n", "");
     }
 
-    /** 对象为 null, 或者其字符串形态为 空白符, "null" 时返回 true */
+    /** 对象为 null, 或者其字符串形态为 空白符, "null", "undefined" 时返回 true */
     public static boolean isBlank(Object obj) {
-        return obj == null || EMPTY.equals(obj.toString().trim()) || "null".equalsIgnoreCase(obj.toString().trim());
+        return obj == null || EMPTY.equals(obj.toString().trim())
+                || "null".equalsIgnoreCase(obj.toString().trim())
+                || "undefined".equalsIgnoreCase(obj.toString().trim());
     }
     /** 对象非空时返回 true */
     public static boolean isNotBlank(Object obj) {
