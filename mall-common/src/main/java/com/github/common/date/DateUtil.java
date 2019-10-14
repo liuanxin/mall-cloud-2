@@ -13,6 +13,12 @@ import java.util.Locale;
 
 public class DateUtil {
 
+    private static final long SECOND = 1000L;
+    private static final long MINUTE = 60 * SECOND;
+    private static final long HOUR = 60 * MINUTE;
+    private static final long DAY = 24 * HOUR;
+    private static final long YEAR = 365 * DAY;
+
     /** 当前时间 */
     public static Date now() {
         return new Date();
@@ -99,6 +105,55 @@ public class DateUtil {
             }
         }
         return null;
+    }
+
+    /** 如: toHuman(36212711413L) ==> 1 年 54 天 3 小时 5 分 11 秒 413 毫秒 */
+    public static String toHuman(long intervalMs) {
+        if (intervalMs == 0) {
+            return U.EMPTY;
+        }
+
+        boolean flag = (intervalMs < 0);
+        long ms = flag ? -intervalMs : intervalMs;
+
+        long year = ms / YEAR;
+        long y = ms % YEAR;
+
+        long day = y / DAY;
+        long d = y % DAY;
+
+        long hour = d / HOUR;
+        long h = d % HOUR;
+
+        long minute = h / MINUTE;
+        long mi = h % MINUTE;
+
+        long second = mi / SECOND;
+        long m = mi % SECOND;
+
+        StringBuilder sbd = new StringBuilder();
+        if (flag) {
+            sbd.append("-");
+        }
+        if (year != 0) {
+            sbd.append(year).append(" 年 ");
+        }
+        if (day != 0) {
+            sbd.append(day).append(" 天 ");
+        }
+        if (hour != 0) {
+            sbd.append(hour).append(" 小时 ");
+        }
+        if (minute != 0) {
+            sbd.append(minute).append(" 分 ");
+        }
+        if (second != 0) {
+            sbd.append(second).append(" 秒 ");
+        }
+        if (m != 0) {
+            sbd.append(m).append(" 毫秒");
+        }
+        return sbd.toString().trim();
     }
 
     /** 获取一个日期所在天的最开始的时间(00:00:00 000), 对日期查询尤其有用 */
