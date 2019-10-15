@@ -1,5 +1,6 @@
 package com.github.common.json;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -31,20 +32,22 @@ public class JsonUtil {
             // 时间格式. 要想自定义在字段上标 @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd") 即可
             // setDateFormat(new SimpleDateFormat(DateFormatType.YYYY_MM_DD_HH_MM_SS.getValue()));
             // 不确定值的枚举返回 null
-            super.configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL, true);
+            configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL, true);
             // 不确定的属性项上不要失败
-            super.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
             // 允许字符串中包含未加引号的控制字符(值小于 32 的 ASCII 字符, 包括制表符和换行字符)
             // json 标准要求所有控制符必须使用引号, 因此默认是 false, 遇到此类字符时会抛出异常
-            super.configure(JsonParser.Feature.ALLOW_UNQUOTED_CONTROL_CHARS, true);
+            configure(JsonParser.Feature.ALLOW_UNQUOTED_CONTROL_CHARS, true);
             // NON_NULL: null 值不序列化, NON_EMPTY: null 空字符串、长度为 0 的 list、map 都不序列化
-            // super.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+            setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
 
             // 如果用 BigDecimal 表示金额时的处理: 保留两位小数的精度返回
-            super.registerModule(new SimpleModule().addSerializer(BigDecimal.class, new JsonSerializer<BigDecimal>() {
+            registerModule(new SimpleModule().addSerializer(BigDecimal.class, new JsonSerializer<BigDecimal>() {
                 @Override
                 public void serialize(BigDecimal money, JsonGenerator gen, SerializerProvider ser) throws IOException {
-                    gen.writeObject(U.isBlank(money) ? BigDecimal.ZERO : money.setScale(2, RoundingMode.DOWN));
+                    if (U.isNotBlank(money)) {
+                        gen.writeObject(money.setScale(2, RoundingMode.DOWN));
+                    }
                 }
             }));
         }
