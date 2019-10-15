@@ -11,9 +11,6 @@ import java.util.Map;
 public class WebNil {
 
     public static void main(String[] args) throws Exception {
-//        String str = "";
-//        System.out.println(Compressor.html(str));
-
         String path = "/home/admin/project/github/api-document/src/main/resources/static/";
         Map<String, String> files = A.maps(
                 "intact-api-info.html", "api-info.html",
