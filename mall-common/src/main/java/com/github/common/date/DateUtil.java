@@ -96,8 +96,7 @@ public class DateUtil {
                 if (date != null) {
                     return date;
                 }
-            } catch (ParseException | IllegalArgumentException e) {
-                // ignore
+            } catch (ParseException | IllegalArgumentException ignore) {
             }
         }
         return null;
@@ -110,8 +109,7 @@ public class DateUtil {
                 if (date != null) {
                     return date;
                 }
-            } catch (IllegalArgumentException e) {
-                // ignore
+            } catch (IllegalArgumentException ignore) {
             }
         }
         return null;

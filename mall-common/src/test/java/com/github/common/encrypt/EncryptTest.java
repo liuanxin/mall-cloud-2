@@ -95,8 +95,7 @@ public class EncryptTest {
 
         try {
             Thread.sleep(11L);
-        } catch (InterruptedException e) {
-            // ignore
+        } catch (InterruptedException ignore) {
         }
 
         decode = Encrypt.jwtDecode(encode);

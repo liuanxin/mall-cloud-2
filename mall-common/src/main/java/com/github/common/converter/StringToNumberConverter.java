@@ -30,8 +30,7 @@ public class StringToNumberConverter implements ConverterFactory<String, Number>
             if (U.isNotBlank(source)) {
                 try {
                     return NumberUtils.parseNumber(source.trim(), this.targetType);
-                } catch (IllegalArgumentException e) {
-                    // ignore exception
+                } catch (IllegalArgumentException ignore) {
                 }
             }
             return NumberUtils.parseNumber(DEFAULT_VALUE, this.targetType);
