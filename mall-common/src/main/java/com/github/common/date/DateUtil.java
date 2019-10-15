@@ -73,21 +73,31 @@ public class DateUtil {
      */
     public static Date parse(String source) {
         if (U.isNotBlank(source)) {
-            source = source.trim();
             for (DateFormatType type : DateFormatType.values()) {
-                if (type.isCst()) {
-                    try {
-                        // cst 单独处理
-                        return new SimpleDateFormat(type.getValue(), Locale.ENGLISH).parse(source);
-                    } catch (ParseException | IllegalArgumentException e) {
-                        // ignore
-                    }
-                } else {
-                    Date date = parse(type.getValue(), source);
-                    if (date != null) {
-                        return date;
-                    }
+                Date date = parse(source, type);
+                if (U.isNotBlank(date)) {
+                    return date;
                 }
+            }
+        }
+        return null;
+    }
+    public static Date parse(String source, DateFormatType type) {
+        if (U.isNotBlank(source)) {
+            source = source.trim();
+            try {
+                Date date;
+                if (type.isCst()) {
+                    // cst 单独处理
+                    date = new SimpleDateFormat(type.getValue(), Locale.ENGLISH).parse(source);
+                } else {
+                    date = parse(source, type.getValue());
+                }
+                if (date != null) {
+                    return date;
+                }
+            } catch (ParseException | IllegalArgumentException e) {
+                // ignore
             }
         }
         return null;
