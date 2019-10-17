@@ -61,15 +61,6 @@ public final class SecurityCodeUtil {
             "\u53d6\u5165\u5cb8\u6562\u6389\u5ffd\u79cd\u88c5\u9876\u6025\u6797\u505c" +
             "\u606f\u53e5\u533a\u8863\u822c\u62a5\u53f6\u538b\u6162\u53d4\u80cc\u7ec6";
 
-    /** 最小宽度 */
-    private static final int LEAST_WIDTH = 100;
-    /** 最小高度 */
-    private static final int LEAST_HEIGHT = 30;
-    /** 最少个数 */
-    private static final int LEAST_COUNT = 4;
-    /** 字体 */
-    private static final String FONT_STYLE = "consola,monospace,monaco,fixedsys,arial,serif,sans-serif";
-
     /**
      * <pre>
      * 生成验证码图像对象
@@ -97,8 +88,9 @@ public final class SecurityCodeUtil {
      */
     public static Code generateCode(String count, String style, String width, String height, String grb) {
         int loop = toInt(count);
-        if (loop < LEAST_COUNT) {
-            loop = LEAST_COUNT;
+        int maxCount = 4;
+        if (loop < maxCount) {
+            loop = maxCount;
         }
 
         String str;
@@ -113,15 +105,18 @@ public final class SecurityCodeUtil {
         }
 
         int widthCount = toInt(width);
-        if (widthCount < LEAST_WIDTH) {
-            widthCount = LEAST_WIDTH;
+        int minWidth = 100;
+        if (widthCount < minWidth) {
+            widthCount = minWidth;
         }
 
         int heightCount = toInt(height);
-        if (heightCount < LEAST_HEIGHT) {
-            heightCount = LEAST_HEIGHT;
+        int minHeight = 30;
+        if (heightCount < minHeight) {
+            heightCount = minHeight;
         }
-        int r = 0, g = 0, b = 0;
+
+        int r = -1, g = -1, b = -1;
         if (U.isNotBlank(grb)) {
             String[] s = grb.split(",");
             if (s.length == 3) {
@@ -136,34 +131,35 @@ public final class SecurityCodeUtil {
 
         // ========== 上面处理参数的默认值 ==========
 
-        BufferedImage buffImg = new BufferedImage(widthCount, heightCount, BufferedImage.TYPE_INT_RGB);
-        Graphics graphics = buffImg.createGraphics();
+        BufferedImage image = new BufferedImage(widthCount, heightCount, BufferedImage.TYPE_INT_RGB);
+        Graphics graphics = image.createGraphics();
         // 图像背景填充为灰色
         graphics.setColor(Color.LIGHT_GRAY);
         graphics.fillRect(0, 0, widthCount, heightCount);
 
         // 画一些干扰线
-        for (int i = 0; i < 16; i++) {
-            // graphics.setColor(new Color(138, 138, 138));
-            graphics.setColor(new Color(RANDOM.nextInt(255), RANDOM.nextInt(255), RANDOM.nextInt(255)));
+        int interferenceCount = loop * 10;
+        int maxRandom = 256;
+        for (int i = 0; i < interferenceCount; i++) {
+            graphics.setColor(new Color(RANDOM.nextInt(maxRandom), RANDOM.nextInt(maxRandom), RANDOM.nextInt(maxRandom)));
             graphics.drawLine(RANDOM.nextInt(widthCount), RANDOM.nextInt(heightCount),
                     RANDOM.nextInt(widthCount), RANDOM.nextInt(heightCount));
         }
-        // graphics.setColor(Color.BLUE);
         graphics.setColor(new Color(r, g, b));
 
         int x = (widthCount - 8) / (loop + 1);
         int y = heightCount - 5;
 
+        String font = "consola,monospace,monaco,Verdana,Helvetica,arial,serif,sans-serif,Times,fixedsys";
         StringBuilder sbd = new StringBuilder();
         for (int i = 0; i < loop; i++) {
             String value = String.valueOf(str.charAt(RANDOM.nextInt(str.length())));
             // 字体大小
-            graphics.setFont(new Font(FONT_STYLE, Font.BOLD, heightCount - RANDOM.nextInt(8)));
+            graphics.setFont(new Font(font, Font.BOLD, heightCount - RANDOM.nextInt(8)));
             graphics.drawString(value, (i + 1) * x, y);
             sbd.append(value);
         }
-        return new Code(sbd.toString(), buffImg);
+        return new Code(sbd.toString(), image);
     }
 
     private static int toInt(String str) {
