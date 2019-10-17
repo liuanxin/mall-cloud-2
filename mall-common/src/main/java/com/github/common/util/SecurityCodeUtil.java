@@ -21,7 +21,7 @@ public final class SecurityCodeUtil {
     /** 验证码库(数字 + 英文, 不包括小写 l、大写 I、小写 o 和 大写 O, 避免跟数字 1 和 0 相似) */
     private static final String WORD_NUMBER = "0123456789abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ";
     /** 字体 */
-    private static final String[] fonts = new String[] {
+    private static final String[] FONTS = new String[] {
             "consola",
             "monospace",
             "monaco",
@@ -124,7 +124,7 @@ public final class SecurityCodeUtil {
         for (int i = 0; i < loop; i++) {
             String value = String.valueOf(str.charAt(RANDOM.nextInt(str.length())));
             // 字体大小
-            graphics.setFont(new Font(fonts[RANDOM.nextInt(fonts.length)], Font.BOLD, heightCount - RANDOM.nextInt(8)));
+            graphics.setFont(new Font(FONTS[RANDOM.nextInt(FONTS.length)], Font.BOLD, heightCount - RANDOM.nextInt(8)));
             graphics.drawString(value, (i + 1) * x, y);
             sbd.append(value);
         }
