@@ -40,12 +40,12 @@ public class RenderViewResolver extends FreeMarkerViewResolver {
         // 把工具类放入渲染的上下文中
         putClass(CLASSES);
     }
-    /** 把「是否是线上环境 」放入渲染的全局上下文中. 只加载一次 */
+    /** 把「是否是线上环境 」放入渲染的全局上下文中 */
     public RenderViewResolver putVariable(boolean online) {
         setAttributesMap(A.maps("online", online));
         return this;
     }
-    /** 把类放入渲染的全局上下文中. 只加载一次 */
+    /** 把类放入渲染的全局上下文中 */
     public RenderViewResolver putClass(Class<?>... classes) {
         Map<String, Object> context = A.maps();
         if (A.isNotEmpty(classes)) {
@@ -65,7 +65,7 @@ public class RenderViewResolver extends FreeMarkerViewResolver {
     }
     /**
      * <pre>
-     * 把枚举放入渲染的上下文中. 只加载一次
+     * 把枚举放入渲染的上下文中
      *
      * 假定要渲染的页面上下文中有一个 user 对象, 并且里面有 gender 这个枚举. GenderEnum 可以直接拿过来用:
      * &lt;#list GenderEnum?values as gender&gt;
@@ -96,6 +96,7 @@ public class RenderViewResolver extends FreeMarkerViewResolver {
         return this;
     }
 
+    /** 跟上面只在初始化的时候加载不同, 每次渲染都会调用此方法, 一些会变化的数据就在这里放进上下文 */
     @Override
     protected AbstractUrlBasedView buildView(String viewName) throws Exception {
         setAttributesMap(A.maps("version", version));
@@ -109,5 +110,4 @@ public class RenderViewResolver extends FreeMarkerViewResolver {
     public static String getVersion() {
         return version;
     }
-
 }
