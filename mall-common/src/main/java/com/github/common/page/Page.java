@@ -43,15 +43,13 @@ public class Page implements Serializable {
     /** 分页默认页 */
     private static final int DEFAULT_PAGE_NO = 1;
     /** 分页默认的每页条数 */
-    private static final int DEFAULT_LIMIT = 15;
+    private static final int DEFAULT_LIMIT = 20;
     /** 最大分页条数 */
     private static final int MAX_LIMIT = 1000;
 
-    /** 当前页数. 不传或传入 0, 或负数, 或非数字则默认是 1 */
     @ApiParam("当前页数. 不传或传入 0, 或负数, 或非数字则默认是 1")
     private int page;
 
-    /** 每页条数. 不传或传入 0, 或负数, 或非数字, 或大于 1000 则默认是 15 */
     @ApiParam("每页条数. 不传或传入 0, 或负数, 或非数字, 或大于 " + MAX_LIMIT + " 则默认是 " + DEFAULT_LIMIT)
     private int limit;
 
