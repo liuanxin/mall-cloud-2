@@ -947,7 +947,7 @@ class Server {
                     "    <logger name=\"io.netty\" level=\"~LEVEL~\"/>\n" +
                     "    <logger name=\"reactor\" level=\"~LEVEL~\"/>\n";
 
-    private static final String LOG_XML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+    private static final String LOG_DEV_XML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
             "<configuration>\n" +
             "    <include resource=\"org/springframework/boot/logging/logback/defaults.xml\" />\n" +
             "    <property name=\"CONSOLE_LOG_PATTERN\" value=\"%n[%X{receiveTime}%d] [${PID:- } %t\\\\(%logger\\\\) : %p]%X{requestInfo}%n%class.%method\\\\(%file:%line\\\\)%n%m%n\"/>\n" +
@@ -963,8 +963,8 @@ class Server {
     private static final String LOG_TEST_XML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
             "<configuration>\n" +
             "    <property name=\"FILE_PATH\" value=\"${user.home}/logs/~MODULE_NAME~-test\"/>\n" +
-            "    <property name=\"SQL_PATTERN\" value=\"%n%d [${PID:- } %t\\\\(%logger\\\\) : %p]%n%class.%method\\\\(%file:%line\\\\)%n%m%n\"/>\n" +
-            "    <property name=\"LOG_PATTERN\" value=\"%n[%X{receiveTime}%d] [${PID:- } %t\\\\(%logger\\\\) : %p]%X{requestInfo} %class{30}#%method\\\\(%file:%line\\\\)%n%m%n\"/>\n" +
+            "    <property name=\"SQL_PATTERN\" value=\"%n[%d] [${PID:- } %t\\\\(%logger\\\\) : %p]%n%class.%method\\\\(%file:%line\\\\) %m%n\"/>\n" +
+            "    <property name=\"LOG_PATTERN\" value=\"%n[%X{receiveTime}%d] [${PID:- } %t\\\\(%logger\\\\) : %p]%X{requestInfo} %class{30}#%method\\\\(%file:%line\\\\) %m%n\"/>\n" +
             "\n" +
             "    <appender name=\"PROJECT\" class=\"ch.qos.logback.core.rolling.RollingFileAppender\">\n" +
             "        <file>${FILE_PATH}.log</file>\n" +
@@ -1229,7 +1229,7 @@ class Server {
 
         writeFile(new File(resourcePath, "config.properties"), CONFIG);
 
-        String logXml = LOG_XML.replaceAll("~MODULE_NAME~", parentPackageName);
+        String logXml = LOG_DEV_XML.replaceAll("~MODULE_NAME~", parentPackageName);
         writeFile(new File(resourcePath, "log-dev.xml"), logXml);
         String testXml = LOG_TEST_XML.replaceAll("~MODULE_NAME~", parentPackageName);
         writeFile(new File(resourcePath, "log-test.xml"), testXml);
