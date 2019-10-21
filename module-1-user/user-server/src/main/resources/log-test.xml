@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
     <property name="FILE_PATH" value="${user.home}/logs/user-test"/>
-    <property name="SQL_PATTERN" value="%d [${PID:- } %t\\(%logger\\) : %p]%n%class.%method\\(%file:%line\\)%n%m%n%n"/>
-    <property name="LOG_PATTERN" value="[%X{receiveTime}%d] [${PID:- } %t\\(%logger\\) : %p]%X{requestInfo} %class{30}#%method\\(%file:%line\\)%n%m%n%n"/>
+    <property name="SQL_PATTERN" value="%n%d [${PID:- } %t\\(%logger\\) : %p]%n%class.%method\\(%file:%line\\)%n%m%n"/>
+    <property name="LOG_PATTERN" value="%n[%X{receiveTime}%d] [${PID:- } %t\\(%logger\\) : %p]%X{requestInfo} %class{30}#%method\\(%file:%line\\)%n%m%n"/>
 
     <appender name="PROJECT" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${FILE_PATH}.log</file>

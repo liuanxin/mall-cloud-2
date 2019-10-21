@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
     <include resource="org/springframework/boot/logging/logback/defaults.xml" />
-    <property name="CONSOLE_LOG_PATTERN" value="[%X{receiveTime}%d] [${PID:- } %t\\(%logger\\) : %p]%n%X{requestInfo}%class.%method\\(%file:%line\\)%n%m%n%n"/>
+    <property name="CONSOLE_LOG_PATTERN" value="%n[%X{receiveTime}%d] [${PID:- } %t\\(%logger\\) : %p]%n%X{requestInfo}%class.%method\\(%file:%line\\)%n%m%n"/>
     <include resource="org/springframework/boot/logging/logback/console-appender.xml" />
 
 
