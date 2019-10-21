@@ -48,8 +48,8 @@ public final class SecurityCodeUtil {
      * response.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
      * response.addHeader("Cache-Control", "post-check=0, pre-check=0");
      * response.setHeader("Pragma", "no-cache");
-     * response.setContentType("image/jpeg");
-     * javax.imageio.ImageIO.write(code.getImage(), "jpeg", response.getOutputStream());
+     * response.setContentType("image/png");
+     * javax.imageio.ImageIO.write(code.getImage(), "png", response.getOutputStream());
      * </pre>
      *
      * @param count  验证码数字个数, 最少 4 个. 传空值或传小于 4 的值会使用最少值

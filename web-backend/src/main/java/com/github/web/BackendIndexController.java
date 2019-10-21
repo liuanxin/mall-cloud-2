@@ -51,7 +51,7 @@ public class BackendIndexController {
         response.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
         response.addHeader("Cache-Control", "post-check=0, pre-check=0");
         response.setHeader("Pragma", "no-cache");
-        response.setContentType("image/jpeg");
-        javax.imageio.ImageIO.write(code.getImage(), "jpeg", response.getOutputStream());
+        response.setContentType("image/png");
+        javax.imageio.ImageIO.write(code.getImage(), "png", response.getOutputStream());
     }
 }
