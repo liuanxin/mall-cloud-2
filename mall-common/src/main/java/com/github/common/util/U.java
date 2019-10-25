@@ -25,6 +25,8 @@ public final class U {
     public static final int PROCESSORS = Runtime.getRuntime().availableProcessors();
 
     public static final String EMPTY = "";
+    public static final String BLANK = " ";
+    private static final Pattern MULTI_SPACE_REGEX = Pattern.compile("\\s{2,}");
 
     private static final String LIKE = "%";
 
@@ -367,6 +369,10 @@ public final class U {
     /** 去掉所有的制表符 和 换行符 */
     public static String replaceTabAndWrap(String str) {
         return isBlank(str) ? EMPTY : str.replace("\t", "").replace("\n", "");
+    }
+    /** 将字符串中的多个空白符替换成一个 */
+    public static String replaceBlank(String str) {
+        return MULTI_SPACE_REGEX.matcher(str).replaceAll(BLANK);
     }
 
     /** 对象为 null, 或者其字符串形态为 空白符, "null", "undefined" 时返回 true */

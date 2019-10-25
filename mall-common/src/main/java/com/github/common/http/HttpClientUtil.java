@@ -27,22 +27,18 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLException;
-import javax.net.ssl.SSLHandshakeException;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InterruptedIOException;
+import java.net.ConnectException;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class HttpClientUtil {
 
@@ -66,37 +62,44 @@ public class HttpClientUtil {
                 .build();
 
         CONNECTION_MANAGER = new PoolingHttpClientConnectionManager(registry);
+        // CONNECTION_MANAGER.setDefaultMaxPerRoute(200);
         // 连接池中的最大连接数默认是 20
         // CONNECTION_MANAGER.setMaxTotal(20);
 
         // 重试策略
-        HTTP_REQUEST_RETRY_HANDLER = new HttpRequestRetryHandler() {
-            @Override
-            public boolean retryRequest(IOException exception, int executionCount, HttpContext context) {
-                if (executionCount > RETRY_COUNT) {
-                    return false;
-                }
-                // 服务器未响应时重试
-                if (exception instanceof NoHttpResponseException) {
+        HTTP_REQUEST_RETRY_HANDLER = (exception, executionCount, context) -> {
+            if (executionCount > RETRY_COUNT) {
+                return false;
+            }
+
+            Class<? extends IOException> methodThrowClass = exception.getClass();
+            // noinspection ArraysAsListWithZeroOrOneArgument
+            List<Class<? extends IOException>> retryClasses = Arrays.asList(
+                    NoHttpResponseException.class // 服务器未响应时
+            );
+            for (Class<? extends IOException> clazz : retryClasses) {
+                // parent.isAssignableFrom(child) ==> true, child.isAssignableFrom(parent) ==> false
+                if (clazz == methodThrowClass || methodThrowClass.isAssignableFrom(clazz)) {
                     return true;
                 }
-                // SSL 握手异常时不重试
-                if (exception instanceof SSLHandshakeException || exception instanceof SSLException) {
-                    return false;
-                }
-                // 超时时不重试
-                if (exception instanceof InterruptedIOException) {
-                    return false;
-                }
-                // 目标服务器不可达时不重试
-                if (exception instanceof UnknownHostException) {
-                    return false;
-                }
-
-                HttpRequest request = HttpClientContext.adapt(context).getRequest();
-                // 如果请求是幂等的就重试
-                return !(request instanceof HttpEntityEnclosingRequest);
             }
+
+            List<Class<? extends IOException>> noRetryClasses = Arrays.asList(
+                    SSLException.class, // SSL 异常
+                    InterruptedIOException.class, // 超时
+                    UnknownHostException.class, // 目标服务器不可达
+                    ConnectException.class // 连接异常
+            );
+            for (Class<? extends IOException> clazz : noRetryClasses) {
+                // parent.isAssignableFrom(child) ==> true, child.isAssignableFrom(parent) ==> false
+                if (clazz == methodThrowClass || methodThrowClass.isAssignableFrom(clazz)) {
+                    return false;
+                }
+            }
+
+            HttpRequest request = HttpClientContext.adapt(context).getRequest();
+            // 如果请求是幂等的就重试
+            return !(request instanceof HttpEntityEnclosingRequest);
         };
     }
 
@@ -301,9 +304,7 @@ public class HttpClientUtil {
             }
             sbd.append(")");
         }
-
         sbd.append(",");
-
         if (A.isNotEmpty(responseHeaders)) {
             sbd.append(" response headers(");
             for (Header header : responseHeaders) {
