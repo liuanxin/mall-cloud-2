@@ -368,7 +368,7 @@ public final class U {
 
     /** 去掉所有的制表符 和 换行符 */
     public static String replaceTabAndWrap(String str) {
-        return isBlank(str) ? EMPTY : str.replace("\t", "").replace("\n", "");
+        return isBlank(str) ? EMPTY : str.replace("\t", EMPTY).replace("\n", EMPTY);
     }
     /** 将字符串中的多个空白符替换成一个 */
     public static String replaceBlank(String str) {
@@ -550,7 +550,7 @@ public final class U {
 
     /** 生成不带 - 的 uuid */
     public static String uuid() {
-        return UUID.randomUUID().toString().replace("-", "");
+        return UUID.randomUUID().toString().replace("-", EMPTY);
     }
 
     /** 获取后缀(包含点 .) */
