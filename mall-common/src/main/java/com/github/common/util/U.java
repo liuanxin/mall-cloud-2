@@ -372,7 +372,9 @@ public final class U {
     }
     /** 将字符串中的多个空白符替换成一个 */
     public static String replaceBlank(String str) {
-        return MULTI_SPACE_REGEX.matcher(str).replaceAll(BLANK);
+        return U.isBlank(str)
+                ? U.EMPTY
+                : MULTI_SPACE_REGEX.matcher(str.replace("\r", EMPTY).replace("\n", BLANK)).replaceAll(BLANK);
     }
 
     /** 对象为 null, 或者其字符串形态为 空白符, "null", "undefined" 时返回 true */
