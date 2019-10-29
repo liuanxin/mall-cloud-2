@@ -372,8 +372,8 @@ public final class U {
     }
     /** 将字符串中的多个空白符替换成一个 */
     public static String replaceBlank(String str) {
-        return U.isBlank(str)
-                ? U.EMPTY
+        return isBlank(str)
+                ? EMPTY
                 : MULTI_SPACE_REGEX.matcher(str.replace("\r", EMPTY).replace("\n", BLANK)).replaceAll(BLANK).trim();
     }
 
