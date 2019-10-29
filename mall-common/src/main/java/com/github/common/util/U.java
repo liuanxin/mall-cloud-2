@@ -374,7 +374,7 @@ public final class U {
     public static String replaceBlank(String str) {
         return U.isBlank(str)
                 ? U.EMPTY
-                : MULTI_SPACE_REGEX.matcher(str.replace("\r", EMPTY).replace("\n", BLANK)).replaceAll(BLANK);
+                : MULTI_SPACE_REGEX.matcher(str.replace("\r", EMPTY).replace("\n", BLANK)).replaceAll(BLANK).trim();
     }
 
     /** 对象为 null, 或者其字符串形态为 空白符, "null", "undefined" 时返回 true */
