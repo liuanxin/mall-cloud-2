@@ -75,19 +75,13 @@ public class Page implements Serializable {
         return handlerPage(U.toInt(page));
     }
     public static int handlerPage(int page) {
-        if (page <= 0) {
-            page = DEFAULT_PAGE_NO;
-        }
-        return page;
+        return page <= 0 ? DEFAULT_PAGE_NO : page;
     }
 
     public static int handlerLimit(String limit) {
         return handlerLimit(U.toInt(limit));
     }
     public static int handlerLimit(int limit) {
-        if (limit <= 0 || limit > MAX_LIMIT) {
-            limit = DEFAULT_LIMIT;
-        }
-        return limit;
+        return (limit <= 0 || limit > MAX_LIMIT) ? DEFAULT_LIMIT : limit;
     }
 }
