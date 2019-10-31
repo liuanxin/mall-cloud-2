@@ -1,7 +1,7 @@
 
 spring:
   datasource:
-    url: jdbc:mysql://127.0.0.1:3306/db?useSSL=false&useUnicode=true&characterEncoding=utf8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&transformedBitIsBoolean=true&useLegacyDatetimeCode=false&useJDBCCompliantTimezoneShift=true&serverTimezone=UTC&queryInterceptors=com.github.common.sql.ShowSql8Interceptor
+    url: jdbc:mysql://127.0.0.1:3306/db?useAffectedRows=true&useSSL=false&useUnicode=true&characterEncoding=utf8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&transformedBitIsBoolean=true&useLegacyDatetimeCode=false&useJDBCCompliantTimezoneShift=true&serverTimezone=UTC&queryInterceptors=com.github.common.sql.ShowSql8Interceptor
     username: root
     password: root
     hikari:
