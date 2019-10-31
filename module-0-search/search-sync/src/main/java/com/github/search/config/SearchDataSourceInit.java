@@ -21,9 +21,9 @@ public class SearchDataSourceInit {
 
     @Value("${search.ip-port:127.0.0.1:9200}")
     private String ipAndPort;
-    @Value("${search.username}")
+    @Value("${search.username:}")
     private String username;
-    @Value("${search.password}")
+    @Value("${search.password:}")
     private String password;
 
     @Bean
