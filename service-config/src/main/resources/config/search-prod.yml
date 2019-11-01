@@ -1,2 +1,4 @@
 
-search.ip-port: 127.0.0.1:9200
+spring:
+  elasticsearch.rest:
+    uris: [ search1:9200, search2:9200 ]
