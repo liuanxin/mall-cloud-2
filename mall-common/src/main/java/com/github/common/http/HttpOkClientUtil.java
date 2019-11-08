@@ -168,19 +168,11 @@ public class HttpOkClientUtil {
         sbd.append("OkHttp3 => (")
                 .append(DateUtil.formatMs(start)).append(" -> ").append(DateUtil.nowTimeMs())
                 .append("] (").append(method).append(" ").append(url).append(")");
-
-        // 参数 及 头 的长度如果超过 1100 就只输出前后 500 个字符
-        int maxLen = 1100, headTail = 500;
+        // 太长就只输出前后, 不全部输出
+        int maxLen = 1000, headTail = 200;
 
         if (U.isNotBlank(params)) {
-            sbd.append(" params(");
-            int len = params.length();
-            if (len > maxLen) {
-                sbd.append(params, 0, headTail).append(" <.> ").append(params, len - headTail, len);
-            } else {
-                sbd.append(params);
-            }
-            sbd.append(") ");
+            sbd.append(" params(").append(U.toStr(params, maxLen, headTail)).append(") ");
         }
         if (U.isNotBlank(requestHeaders)) {
             sbd.append(" request headers(");
@@ -189,6 +181,7 @@ public class HttpOkClientUtil {
             }
             sbd.append(")");
         }
+
         sbd.append(",");
 
         if (U.isNotBlank(responseHeaders)) {
@@ -198,16 +191,7 @@ public class HttpOkClientUtil {
             }
             sbd.append(")");
         }
-        sbd.append(" return(");
-        if (U.isNotBlank(result)) {
-            int len = result.length();
-            if (len > maxLen) {
-                sbd.append(result, 0, headTail).append(" ... ").append(result, len - headTail, len);
-            } else {
-                sbd.append(result);
-            }
-        }
-        sbd.append(")");
+        sbd.append(" return(").append(U.toStr(result, maxLen, headTail)).append(")");
         return sbd.toString();
     }
     /** 发起 http 请求 */

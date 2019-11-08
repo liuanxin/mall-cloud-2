@@ -366,6 +366,23 @@ public final class U {
         return isBlank(obj) ? EMPTY : obj.toString();
     }
 
+    /** 如果字符长度大于指定长度, 则只输出头尾的固定字符 */
+    public static String toStr(Object obj, int maxLen, int leftRightLen) {
+        String str = toStr(obj);
+        if (isBlank(str)) {
+            return EMPTY;
+        } else {
+            int length = str.length();
+            if (length > maxLen) {
+                int returnLength = leftRightLen * 2 + 5;
+                if (maxLen > returnLength) {
+                    return str.substring(0, leftRightLen) + " ... " + str.substring(length - leftRightLen, length);
+                }
+            }
+            return str;
+        }
+    }
+
     /** 去掉所有的制表符 和 换行符 */
     public static String replaceTabAndWrap(String str) {
         return isBlank(str) ? EMPTY : str.replace("\t", EMPTY).replace("\n", EMPTY);
