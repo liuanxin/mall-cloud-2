@@ -160,4 +160,29 @@ public class EncryptTest {
         encode = Encrypt.toSha512(SOURCE);
         Assert.assertTrue(encode.length() == 128);
     }
+
+    @Test
+    public void hmacTest() {
+        String k = "192006250b4c09247ec02edce69f6a2d";
+        String p = "appid=wxd930ea5d5a258f4f&body=test&device_info=1000&mch_id=10000100&nonce_str=ibuaiVcKdpRxkhJA";
+        String str = p + "&key=" + k;
+
+        String encode = Encrypt.toHmacMd5(str, k);
+        Assert.assertTrue(encode.length() == 32);
+
+        encode = Encrypt.toHmacSha1(str, k);
+        Assert.assertTrue(encode.length() == 40);
+
+        encode = Encrypt.toHmacSha224(str, k);
+        Assert.assertTrue(encode.length() == 56);
+
+        encode = Encrypt.toHmacSha256(str, k);
+        Assert.assertTrue(encode.length() == 64);
+
+        encode = Encrypt.toHmacSha384(str, k);
+        Assert.assertTrue(encode.length() == 96);
+
+        encode = Encrypt.toHmacSha512(str, k);
+        Assert.assertTrue(encode.length() == 128);
+    }
 }

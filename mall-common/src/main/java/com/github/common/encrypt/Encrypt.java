@@ -8,10 +8,7 @@ import com.github.common.util.LogUtil;
 import com.github.common.util.U;
 import lombok.Data;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.SecretKey;
-import javax.crypto.SecretKeyFactory;
+import javax.crypto.*;
 import javax.crypto.spec.DESKeySpec;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
@@ -443,57 +440,77 @@ public final class Encrypt {
     }
 
 
-    /** 生成 md5 摘要(16 位) */
+    /** 生成 md5 值(16 位) */
     public static String to16Md5(String src) {
         return toMd5(src).substring(8, 24);
     }
-
-    /** 生成 md5 摘要(32 位) */
+    /** 生成 md5 值(32 位) */
     public static String toMd5(String src) {
         return toHash(src, "md5");
     }
-
-    /** 生成 sha-1 摘要(40 位) */
+    /** 生成 sha-1 值(40 位) */
     public static String toSha1(String src) {
         return toHash(src, "sha-1");
     }
-
-    /** 生成 sha-224 摘要(56 位) */
+    /** 生成 sha-224 值(56 位) */
     public static String toSha224(String src) {
         return toHash(src, "sha-224");
     }
-
-    /** 生成 sha-256 摘要(64 位) */
+    /** 生成 sha-256 值(64 位) */
     public static String toSha256(String src) {
         return toHash(src, "sha-256");
     }
-
-    /** 生成 sha-384 摘要(96 位) */
+    /** 生成 sha-384 值(96 位) */
     public static String toSha384(String src) {
         return toHash(src, "sha-384");
     }
-
-    /** 生成 sha-512 摘要(128 位) */
+    /** 生成 sha-512 值(128 位) */
     public static String toSha512(String src) {
         return toHash(src, "sha-512");
     }
 
-    private static String toHash(String src, String method) {
+    private static String toHash(String src, String algorithm) {
         try {
-            MessageDigest md = MessageDigest.getInstance(method);
+            MessageDigest md = MessageDigest.getInstance(algorithm);
             md.update(src.getBytes());
             return binary2Hex(md.digest());
         } catch (Exception e) {
+            String msg = "无法给(" + src + ")生成 " + algorithm + " 值";
             if (LogUtil.ROOT_LOG.isWarnEnabled()) {
-                LogUtil.ROOT_LOG.warn("无法给(" + src + ")生成(" + method + ")摘要", e);
+                LogUtil.ROOT_LOG.warn(msg, e);
             }
-            throw new RuntimeException("无法给(" + src + ")生成(" + method + ")摘要");
+            throw new RuntimeException(msg);
         }
     }
 
+    /** 生成文件的 md5 值(32 位) */
     public static String toMd5File(String file) {
+        return toHashFile(file, "md5");
+    }
+    /** 生成文件的 sha-1 值(40 位) */
+    public static String toSha1File(String file) {
+        return toHashFile(file, "sha-1");
+    }
+    /** 生成文件的 sha-224 值(56 位) */
+    public static String toSha224File(String file) {
+        return toHashFile(file, "sha-224");
+    }
+    /** 生成文件的 sha-256 值(64 位) */
+    public static String toSha256File(String file) {
+        return toHashFile(file, "sha-256");
+    }
+    /** 生成文件的 sha-384 值(96 位) */
+    public static String toSha384File(String file) {
+        return toHashFile(file, "sha-384");
+    }
+    /** 生成文件的 sha-512 值(128 位) */
+    public static String toSha512File(String file) {
+        return toHashFile(file, "sha-512");
+    }
+
+    public static String toHashFile(String file, String algorithm) {
         try (FileInputStream in = new FileInputStream(file)) {
-            MessageDigest md = MessageDigest.getInstance("md5");
+            MessageDigest md = MessageDigest.getInstance(algorithm);
             int len, count = 1024;
             byte[] buffer = new byte[count];
             while ((len = in.read(buffer, 0, count)) != -1) {
@@ -501,10 +518,50 @@ public final class Encrypt {
             }
             return binary2Hex(md.digest());
         } catch (Exception e) {
+            String msg = "无法生成文件(" + file + ")的 " + algorithm + " 值";
             if (LogUtil.ROOT_LOG.isWarnEnabled()) {
-                LogUtil.ROOT_LOG.warn("无法生成 md5", e);
+                LogUtil.ROOT_LOG.warn(msg, e);
             }
-            throw new RuntimeException("无法生成 md5");
+            throw new RuntimeException(msg);
+        }
+    }
+
+    /** 基于密钥生成 hmac-md5 值(32 位) */
+    public static String toHmacMd5(String src, String secret) {
+        return toSecret(src, "HmacMD5", secret);
+    }
+    /** 基于密钥生成 hmac-sha-1 值(40 位) */
+    public static String toHmacSha1(String src, String secret) {
+        return toSecret(src, "HmacSHA1", secret);
+    }
+    /** 基于密钥生成 hmac-sha-224 值(56 位) */
+    public static String toHmacSha224(String src, String secret) {
+        return toSecret(src, "HmacSHA224", secret);
+    }
+    /** 基于密钥生成 hmac-sha-256 值(64 位) */
+    public static String toHmacSha256(String src, String secret) {
+        return toSecret(src, "HmacSHA256", secret);
+    }
+    /** 基于密钥生成 hmac-sha-384 值(96 位) */
+    public static String toHmacSha384(String src, String secret) {
+        return toSecret(src, "HmacSHA384", secret);
+    }
+    /** 基于密钥生成 hmac-sha-512 值(128 位) */
+    public static String toHmacSha512(String src, String secret) {
+        return toSecret(src, "HmacSHA512", secret);
+    }
+
+    private static String toSecret(String src, String algorithm, String secret) {
+        try {
+            Mac mac = Mac.getInstance(algorithm);
+            mac.init(new SecretKeySpec(secret.getBytes(), algorithm));
+            return binary2Hex(mac.doFinal(src.getBytes()));
+        } catch (Exception e) {
+            String msg = "无法基于(" + secret + ")给(" + src + ")生成 " + algorithm + " 加密";
+            if (LogUtil.ROOT_LOG.isWarnEnabled()) {
+                LogUtil.ROOT_LOG.warn(msg, e);
+            }
+            throw new RuntimeException(msg);
         }
     }
 
