@@ -134,7 +134,9 @@
 //            LogUtil.ROOT_LOG.error("有错误", e);
 //        }
 //
-//        String msg = U.returnMsg(e, online);
+//        Throwable cause = e.getCause();
+//        Throwable t = (cause == null ? e : cause);
+//        String msg = U.returnMsg(t, online);
 //        // return JsonResult.fail(msg);
 //        return ResponseEntity.status(JsonCode.FAIL.getCode()).body(msg);
 //    }

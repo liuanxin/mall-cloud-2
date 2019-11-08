@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
-import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -103,16 +102,6 @@ public class GlobalException {
         return ResponseEntity.status(JsonCode.FAIL.getCode()).body(msg);
         // return ResponseEntity.status(JsonCode.BAD_REQUEST.getCode()).body(msg);
     }
-    @ExceptionHandler(MissingRequestHeaderException.class)
-    public ResponseEntity<String> missHeader(MissingRequestHeaderException e) {
-        String msg = online
-                ? "无法响应这个请求"
-                : String.format("缺少头(%s)", e.getHeaderName());
-
-        bindAndPrintLog(msg, e);
-        return ResponseEntity.status(JsonCode.FAIL.getCode()).body(msg);
-        // return ResponseEntity.status(JsonCode.BAD_REQUEST.getCode()).body(msg);
-    }
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public ResponseEntity<String> notSupported(HttpRequestMethodNotSupportedException e) {
         String msg = online
@@ -141,7 +130,9 @@ public class GlobalException {
             LogUtil.ROOT_LOG.error("有错误", e);
         }
 
-        String msg = U.returnMsg(e, online);
+        Throwable cause = e.getCause();
+        Throwable t = (cause == null ? e : cause);
+        String msg = U.returnMsg(t, online);
         return ResponseEntity.status(JsonCode.FAIL.getCode()).body(msg);
     }
 

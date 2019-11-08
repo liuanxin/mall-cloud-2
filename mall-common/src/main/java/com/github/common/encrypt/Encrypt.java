@@ -346,9 +346,10 @@ public final class Encrypt {
         try {
             return JWT_VERIFIER.verify(jwt);
         } catch (JWTExpiredException e) {
-            if (LogUtil.ROOT_LOG.isWarnEnabled()) {
-                LogUtil.ROOT_LOG.warn("使用 jwt 解密(" + data + ")时, 数据已过期", e);
+            if (LogUtil.ROOT_LOG.isDebugEnabled()) {
+                LogUtil.ROOT_LOG.debug("使用 jwt 解密(" + data + ")时, 数据已过期", e);
             }
+            throw new RuntimeException(e);
         } catch (NoSuchAlgorithmException | InvalidKeyException | IOException |
                 SignatureException | JWTVerifyException e) {
             if (LogUtil.ROOT_LOG.isWarnEnabled()) {
