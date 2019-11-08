@@ -1,7 +1,7 @@
 package com.github.common.encrypt;
 
 import com.github.common.util.A;
-import org.apache.commons.lang3.math.NumberUtils;
+import com.github.common.util.U;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -80,7 +80,7 @@ public class EncryptTest {
 
         Map<String, Object> decode = Encrypt.jwtDecode(encode);
         Assert.assertEquals(123, decode.get("id"));
-        Assert.assertTrue(System.currentTimeMillis() > NumberUtils.toLong(decode.get("name").toString()));
+        Assert.assertTrue(System.currentTimeMillis() > U.toLong(decode.get("name").toString()));
 
 
         encode = Encrypt.jwtEncode(A.maps("id", 123), 2L, TimeUnit.SECONDS);
