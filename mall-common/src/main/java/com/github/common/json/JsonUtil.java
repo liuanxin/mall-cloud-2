@@ -147,7 +147,7 @@ public class JsonUtil {
             return RENDER.readValue(json, RENDER.getTypeFactory().constructCollectionType(List.class, clazz));
         } catch (Exception e) {
             throw new RuntimeException(String.format("json(%s) to List<%s> exception",
-                    U.toStr(json, MAX_LEN, 20), clazz.getName()), e);
+                    U.toStr(json, MAX_LEN, LEFT_RIGHT_LEN), clazz.getName()), e);
         }
     }
     /** 将 json 字符串转换为指定的数组列表 */
@@ -160,7 +160,7 @@ public class JsonUtil {
         } catch (Exception e) {
             if (LogUtil.ROOT_LOG.isErrorEnabled()) {
                 LogUtil.ROOT_LOG.error(String.format("json(%s) to List<%s> exception",
-                        U.toStr(json, MAX_LEN, 20), clazz.getName()), e);
+                        U.toStr(json, MAX_LEN, LEFT_RIGHT_LEN), clazz.getName()), e);
             }
             return null;
         }
