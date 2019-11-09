@@ -417,26 +417,11 @@ public final class Encrypt {
 
     /** 使用 base64 编码 */
     public static String base64Encode(String src) {
-        try {
-            return new String(Base64.getEncoder().encode(src.getBytes(UTF8)), UTF8);
-        } catch (Exception e) {
-            if (LogUtil.ROOT_LOG.isWarnEnabled()) {
-                LogUtil.ROOT_LOG.warn("base64(" + src + ")编码失败", e);
-            }
-            throw new RuntimeException("base64 编码失败");
-        }
+        return new String(Base64.getEncoder().encode(src.getBytes(UTF8)), UTF8);
     }
-
     /** 使用 base64 解码 */
     public static String base64Decode(String src) {
-        try {
-            return new String(Base64.getDecoder().decode(src.getBytes(UTF8)), UTF8);
-        } catch (Exception e) {
-            if (LogUtil.ROOT_LOG.isWarnEnabled()) {
-                LogUtil.ROOT_LOG.warn("base64(" + src + ")解码失败", e);
-            }
-            throw new RuntimeException("base64 解码失败");
-        }
+        return new String(Base64.getDecoder().decode(src.getBytes(UTF8)), UTF8);
     }
 
 
@@ -468,7 +453,6 @@ public final class Encrypt {
     public static String toSha512(String src) {
         return toHash(src, "sha-512");
     }
-
     private static String toHash(String src, String algorithm) {
         try {
             MessageDigest md = MessageDigest.getInstance(algorithm);
@@ -507,8 +491,7 @@ public final class Encrypt {
     public static String toSha512File(String file) {
         return toHashFile(file, "sha-512");
     }
-
-    public static String toHashFile(String file, String algorithm) {
+    private static String toHashFile(String file, String algorithm) {
         try (FileInputStream in = new FileInputStream(file)) {
             MessageDigest md = MessageDigest.getInstance(algorithm);
             int len, count = 1024;
@@ -528,30 +511,29 @@ public final class Encrypt {
 
     /** 基于密钥生成 hmac-md5 值(32 位) */
     public static String toHmacMd5(String src, String secret) {
-        return toSecret(src, "HmacMD5", secret);
+        return toHmacHash(src, "HmacMD5", secret);
     }
     /** 基于密钥生成 hmac-sha-1 值(40 位) */
     public static String toHmacSha1(String src, String secret) {
-        return toSecret(src, "HmacSHA1", secret);
+        return toHmacHash(src, "HmacSHA1", secret);
     }
     /** 基于密钥生成 hmac-sha-224 值(56 位) */
     public static String toHmacSha224(String src, String secret) {
-        return toSecret(src, "HmacSHA224", secret);
+        return toHmacHash(src, "HmacSHA224", secret);
     }
     /** 基于密钥生成 hmac-sha-256 值(64 位) */
     public static String toHmacSha256(String src, String secret) {
-        return toSecret(src, "HmacSHA256", secret);
+        return toHmacHash(src, "HmacSHA256", secret);
     }
     /** 基于密钥生成 hmac-sha-384 值(96 位) */
     public static String toHmacSha384(String src, String secret) {
-        return toSecret(src, "HmacSHA384", secret);
+        return toHmacHash(src, "HmacSHA384", secret);
     }
     /** 基于密钥生成 hmac-sha-512 值(128 位) */
     public static String toHmacSha512(String src, String secret) {
-        return toSecret(src, "HmacSHA512", secret);
+        return toHmacHash(src, "HmacSHA512", secret);
     }
-
-    private static String toSecret(String src, String algorithm, String secret) {
+    private static String toHmacHash(String src, String algorithm, String secret) {
         try {
             Mac mac = Mac.getInstance(algorithm);
             mac.init(new SecretKeySpec(secret.getBytes(), algorithm));
@@ -568,7 +550,6 @@ public final class Encrypt {
     /** 二进制 转换成 十六进制字符串 */
     public static String binary2Hex(byte[] bytes) {
         StringBuilder sbd = new StringBuilder();
-
         for (byte b : bytes) {
             /*
             String hex = (Integer.toHexString(b & 0XFF));

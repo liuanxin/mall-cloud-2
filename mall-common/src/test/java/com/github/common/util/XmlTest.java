@@ -1,5 +1,6 @@
 package com.github.common.util;
 
+import com.github.common.xml.Cdata;
 import com.github.common.xml.XmlUtil;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -7,6 +8,7 @@ import lombok.NoArgsConstructor;
 import org.junit.Test;
 
 import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -15,7 +17,7 @@ public class XmlTest {
 
     @Test
     public void test() {
-        String xml = XmlUtil.toXmlNil(new P1(123L, "aaa", new Date(), Arrays.asList(
+        String xml = XmlUtil.toXmlNil(new P1(123L, "aaa<abc>", new Date(), Arrays.asList(
                 new C1(222L, "bbb"), new C1(333L, "ccc")
         )));
         System.out.println("xml: " + xml);
@@ -40,6 +42,7 @@ public class XmlTest {
     public static class P1 {
         @XmlAttribute               // 这个属性标在 <p id="xxx">...
         private Long id;
+        @XmlJavaTypeAdapter(Cdata.Adapter.class)
         private String name;
         private Date time;
         @XmlElement(name = "infos") // 自定义属性名
