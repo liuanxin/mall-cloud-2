@@ -121,7 +121,7 @@ public class DateUtil {
      *
      * toHumanRoughly("2019-01-01 01:03:02".ms - "2019-01-01 01:02:03".ms) ==> 刚刚
      *
-     * toHumanRoughly("2019-01-01 01:02:03".ms - "2019-01-11 01:03:03".ms) ==> 1 分钟前
+     * toHumanRoughly("2019-01-01 01:03:03".ms - "2019-01-01 01:02:03".ms) ==> 1 分钟前
      * toHumanRoughly("2019-01-01 02:02:02".ms - "2019-01-01 01:02:03".ms) ==> 59 分钟前
      *
      * toHumanRoughly("2019-01-01 02:02:03".ms - "2019-01-01 01:02:03".ms) ==> 1 小时前
@@ -148,18 +148,22 @@ public class DateUtil {
         }
 
         String state = flag ? "后" : "前";
+
         long minute = second / 60;
         if (minute < 60) {
             return minute + " 分钟" + state;
         }
+
         long hour = minute / 60;
         if (hour < 24) {
             return hour + " 小时" + state;
         }
+
         long day = hour / 24;
         if (day < 365) {
             return day + " 天" + state;
         }
+
         long year = day / 365;
         return year + " 年" + state;
     }
