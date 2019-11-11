@@ -115,6 +115,54 @@ public class DateUtil {
         return null;
     }
 
+    /**
+     * <pre>
+     * 一分钟内就返回 刚刚, 一小时内就返回 x 分钟, 一天内就返回 xx 小时, 一年内就返回 xxx 天, 否则返回 xxxx 年, 如
+     *
+     * toHumanRoughly("2019-01-01 01:03:02".ms - "2019-01-01 01:02:03".ms) ==> 刚刚
+     *
+     * toHumanRoughly("2019-01-01 01:02:03".ms - "2019-01-11 01:03:03".ms) ==> 1 分钟前
+     * toHumanRoughly("2019-01-01 02:02:02".ms - "2019-01-01 01:02:03".ms) ==> 59 分钟前
+     *
+     * toHumanRoughly("2019-01-01 02:02:03".ms - "2019-01-01 01:02:03".ms) ==> 1 小时前
+     * toHumanRoughly("2019-01-02 01:02:02".ms - "2019-01-01 01:02:03".ms) ==> 23 小时前
+     *
+     * toHumanRoughly("2019-01-02 01:02:03".ms - "2019-01-01 01:02:03".ms) ==> 1 天前
+     * toHumanRoughly("2019-01-11".ms - "2019-01-01".ms) ==> 10 天前
+     * toHumanRoughly("2020-01-01 01:02:02".ms - "2019-01-01 01:02:03".ms) ==> 364 天前
+     *
+     * toHumanRoughly("2020-01-01 01:02:03".ms - "2019-01-01 01:02:03".ms) ==> 1 年前
+     * toHumanRoughly("2020-01-01".ms - "2010-01-01".ms) ==> 10 年前
+     * </pre>
+     */
+    public static String toHumanRoughly(long intervalMs) {
+        if (intervalMs == 0) {
+            return "刚刚";
+        }
+
+        boolean flag = (intervalMs < 0);
+        long ms = flag ? -intervalMs : intervalMs;
+        long second = ms / SECOND;
+        if (second < 60) {
+            return "刚刚";
+        }
+
+        String state = flag ? "后" : "前";
+        long minute = second / 60;
+        if (minute < 60) {
+            return minute + " 分钟" + state;
+        }
+        long hour = minute / 60;
+        if (hour < 24) {
+            return hour + " 小时" + state;
+        }
+        long day = hour / 24;
+        if (day < 365) {
+            return day + " 天" + state;
+        }
+        long year = day / 365;
+        return year + " 年" + state;
+    }
     /** 如: toHuman(36212711413L) ==> 1 年 54 天 3 小时 5 分 11 秒 413 毫秒 */
     public static String toHuman(long intervalMs) {
         if (intervalMs == 0) {
