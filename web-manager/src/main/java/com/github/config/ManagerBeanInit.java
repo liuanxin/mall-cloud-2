@@ -34,6 +34,7 @@ public class ManagerBeanInit {
         resolver.putVariable(online)
                 .putClass(ManagerSessionUtil.class)
                 .putEnum(ManagerDataCollectUtil.VIEW_ENUM_ARRAY);
+        properties.setSuffix(".ftl");
         properties.applyToMvcViewResolver(resolver);
         return resolver;
     }
