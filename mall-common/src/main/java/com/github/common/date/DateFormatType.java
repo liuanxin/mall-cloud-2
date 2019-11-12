@@ -49,8 +49,15 @@ public enum DateFormatType {
 
     /** yyyy/MM/dd */
     USA_YYYY_MM_DD("yyyy/MM/dd"),
+    /** yyyy/MM/dd */
+    USA_YYYY_MM_DD_HH_MM("yyyy/MM/dd HH:mm"),
+    /** yyyy/MM/dd */
+    USA_YYYY_MM_DD_HH_MM_SS("yyyy/MM/dd HH:mm:ss"),
+    /** MM/dd/yyyy HH:mm:ss */
+    USA_MM_DD_YYYY_HH_MM("MM/dd/yyyy HH:mm"),
     /** MM/dd/yyyy HH:mm:ss */
     USA_MM_DD_YYYY_HH_MM_SS("MM/dd/yyyy HH:mm:ss"),
+
     /** yyyy年MM月dd日 HH时mm分ss秒 */
     CN_YYYY_MM_DD_HH_MM_SS("yyyy年MM月dd日 HH时mm分ss秒"),
     /** yyyy年MM月dd日 HH点 */
