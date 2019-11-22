@@ -539,7 +539,7 @@ public final class Encrypt {
             mac.init(new SecretKeySpec(secret.getBytes(), algorithm));
             return binary2Hex(mac.doFinal(src.getBytes()));
         } catch (Exception e) {
-            String msg = "无法基于(" + secret + ")给(" + src + ")生成 " + algorithm + " 加密";
+            String msg = "无法基于(" + secret + ")给(" + src + ")生成 " + algorithm + " 值";
             if (LogUtil.ROOT_LOG.isWarnEnabled()) {
                 LogUtil.ROOT_LOG.warn(msg, e);
             }
