@@ -9,6 +9,9 @@ public class NotLoginException extends RuntimeException implements Serializable 
     public NotLoginException() {
         super("请先登录");
     }
+    public NotLoginException(String msg) {
+        super(msg);
+    }
 
     @Override
     public Throwable fillInStackTrace() {
