@@ -86,7 +86,7 @@ public class GlobalException {
 
     @ExceptionHandler(NoHandlerFoundException.class)
     public ResponseEntity<String> noHandler(NoHandlerFoundException e) {
-        String msg = online ? "404" : String.format("没找到(%s %s)", e.getHttpMethod(), e.getRequestURL());
+        String msg = online ? "404" : String.format("404(%s %s)", e.getHttpMethod(), e.getRequestURL());
 
         bindAndPrintLog(msg, e);
         return ResponseEntity.status(JsonCode.FAIL.getCode()).body(msg);

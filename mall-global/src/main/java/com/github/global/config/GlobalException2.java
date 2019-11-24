@@ -85,7 +85,7 @@
 //
 //    @ExceptionHandler(NoHandlerFoundException.class)
 //    public JsonResult noHandler(NoHandlerFoundException e) {
-//        String msg = online ? "404" : String.format("没找到(%s %s)", e.getHttpMethod(), e.getRequestURL());
+//        String msg = online ? "404" : String.format("404(%s %s)", e.getHttpMethod(), e.getRequestURL());
 //
 //        bindAndPrintLog(msg, e);
 //        return JsonResult.notFound(msg);
