@@ -20,7 +20,7 @@ public final class RequestUtils {
     private static final String REFERRER = "referer";
 
     private static final String HTTP = "http://";
-    private static final String HTTPS = "http://";
+    private static final String HTTPS = "https://";
     private static final String SCHEME = "//";
     private static final String URL_SPLIT = "/";
     private static final String WWW = "www.";
