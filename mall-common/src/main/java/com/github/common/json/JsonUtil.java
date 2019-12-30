@@ -53,6 +53,23 @@ public class JsonUtil {
                     }
                 }
             }));
+
+            /*
+            // boolean 用 1 0 返回
+            registerModule(new SimpleModule().addSerializer(Boolean.class, new JsonSerializer<Boolean>() {
+                @Override
+                public void serialize(Boolean value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+                    gen.writeNumber(U.isNotBlank(value) && value ? 1 : 0);
+                }
+            }));
+            // 0 反序列化为 false, 否则为 true
+            registerModule(new SimpleModule().addDeserializer(Boolean.class, new JsonDeserializer<Boolean>() {
+                @Override
+                public Boolean deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+                    return !"0".equals(p.getText());
+                }
+            }));
+            */
         }
     }
 
