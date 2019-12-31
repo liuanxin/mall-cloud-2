@@ -25,7 +25,7 @@
 <#import "/layout/$.ftl" as layout>
 <#assign css>
 <@layout.style ["http://x/y.css", "http://z/m.css"]/> // 引入外部 css 文件
-<style rel="stylesheet">                              // 当前页面的 css 内容
+<style type="text/css">                               // 当前页面的 css 内容
 html {
     color: red;
 }
@@ -67,7 +67,7 @@ ${pageCss!}
 <#nested/>
 </main>
 <footer>
-<div class="copyright">&copy; ${.now?string('YYYY')} xxx</div>
+<div class="copyright">&copy; ${.now?string('yyyy')} xxx</div>
 </footer>
 <!--[if lt IE 9]>
 <@script [
