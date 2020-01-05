@@ -42,6 +42,8 @@ public final class U {
     /** 身份证号码 */
     private static final String ID_CARD = "^([0-9]{15}|[0-9]{17}[0-9Xx])$";
 
+    /** 字母 */
+    private static final String LETTER = "(?i)[a-z]";
     /** 中文 */
     private static final String CHINESE = "[\\u4e00-\\u9fa5]";
     /** 是否是移动端: https://gist.github.com/dalethedeveloper/1503252 */
@@ -483,6 +485,11 @@ public final class U {
     /** 只要找到匹配即返回 true */
     public static boolean checkRegexWithRelax(String param, String regex) {
         return isNotBlank(param) && Pattern.compile(regex).matcher(param).find();
+    }
+    
+    /** 传入的参数只要包含字母就返回 true */
+    public static boolean isLetter(String param) {
+        return checkRegexWithRelax(param, LETTER);
     }
     /** 传入的参数只要包含中文就返回 true */
     public static boolean checkChinese(String param) {
