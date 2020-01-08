@@ -307,7 +307,7 @@ public class HttpClientUtil {
             }
             sbd.append(")");
         }
-        sbd.append(" return(").append(U.toStr(result, maxLen, headTail)).append(")");
+        sbd.append(" return(").append(U.toStr(U.replaceBlank(result), maxLen, headTail)).append(")");
         return sbd.toString();
     }
     /** 发起 http 请求 */
