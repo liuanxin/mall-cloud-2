@@ -4,7 +4,6 @@ import com.github.common.util.U;
 import com.github.liuanxin.api.annotation.ApiParam;
 import com.github.liuanxin.api.annotation.ApiParamIgnore;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.io.Serializable;
@@ -31,7 +30,6 @@ import java.io.Serializable;
  */
 @Setter
 @Getter
-@NoArgsConstructor
 public class Page implements Serializable {
     private static final long serialVersionUID = 0L;
 
@@ -56,6 +54,11 @@ public class Page implements Serializable {
     /** 是否是移动端 */
     @ApiParamIgnore
     private boolean wasMobile = false;
+
+    public Page() {
+        this.page = DEFAULT_PAGE_NO;
+        this.limit = DEFAULT_LIMIT;
+    }
 
     public Page(String page, String limit) {
         this.page = handlerPage(page);
