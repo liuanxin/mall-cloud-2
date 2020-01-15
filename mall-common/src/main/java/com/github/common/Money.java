@@ -40,7 +40,7 @@ public class Money implements Serializable {
     @JsonValue
     @Override
     public String toString() {
-        return U.formatNumberToThousands(cent2Yuan(cent));
+        return cent2Yuan(cent);
     }
 
     public Long getCent() {
@@ -115,7 +115,7 @@ public class Money implements Serializable {
     }
     /** 分转换为元 */
     public static String cent2Yuan(Long cent) {
-        return U.greater0(cent) ? BigDecimal.valueOf(cent).movePointLeft(SCALE).toString() : U.EMPTY;
+        return (U.greater0(cent) ? U.EMPTY : "-") + U.formatNumberToThousands(BigDecimal.valueOf(Math.abs(cent)).movePointLeft(SCALE).toString());
     }
 
 
