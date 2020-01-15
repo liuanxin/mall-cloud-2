@@ -321,6 +321,9 @@ public final class U {
     private static final Pattern THOUSANDS_REGEX = Pattern.compile("(\\d)(?=(?:\\d{3})+$)");
     /** 1234567890.51 ==> 1,234,567,890.51 */
     public static String formatNumberToThousands(String number) {
+        if (isBlank(number)) {
+            return EMPTY;
+        }
         String left, right;
         if (number.contains(".")) {
             int point = number.indexOf(".");
@@ -486,7 +489,7 @@ public final class U {
     public static boolean checkRegexWithRelax(String param, String regex) {
         return isNotBlank(param) && Pattern.compile(regex).matcher(param).find();
     }
-    
+
     /** 传入的参数只要包含字母就返回 true */
     public static boolean isLetter(String param) {
         return checkRegexWithRelax(param, LETTER);
