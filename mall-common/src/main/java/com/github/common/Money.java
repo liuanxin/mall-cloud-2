@@ -43,6 +43,11 @@ public class Money implements Serializable {
         return cent2Yuan(cent);
     }
 
+    /** 输出 1,234,567,890.50 的形式 */
+    public String toShow() {
+        return cent2ShowYuan(cent);
+    }
+
     public Long getCent() {
         return cent;
     }
@@ -115,7 +120,17 @@ public class Money implements Serializable {
     }
     /** 分转换为元 */
     public static String cent2Yuan(Long cent) {
-        return (U.greater0(cent) ? U.EMPTY : "-") + U.formatNumberToThousands(BigDecimal.valueOf(Math.abs(cent)).movePointLeft(SCALE).toString());
+        if (U.isBlank(cent)) {
+            return U.EMPTY;
+        }
+        if (cent == 0) {
+            return "0";
+        }
+        return (cent > 0 ? U.EMPTY : "-") + BigDecimal.valueOf(Math.abs(cent)).movePointLeft(SCALE).toString();
+    }
+    /** 分转换为带千分位的元 */
+    public static String cent2ShowYuan(Long cent) {
+        return U.formatNumberToThousands(cent2Yuan(cent));
     }
 
 
