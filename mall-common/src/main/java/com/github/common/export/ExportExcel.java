@@ -105,7 +105,7 @@ final class ExportExcel {
 
         // 单个列的数据
         String cellData;
-        // 标题说明|数字格式(比如金额用 0.00)|宽度(255 以内)
+        // 标题说明|数字格式(比如金额用 0.00)~r|宽度(255 以内) : 中间字段的 ~r 表示右对齐
         String[] titleValues;
         // 数字格式
         DataFormat dataFormat = workbook.createDataFormat();
