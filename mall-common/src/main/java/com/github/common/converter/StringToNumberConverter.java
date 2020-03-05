@@ -29,9 +29,11 @@ public class StringToNumberConverter implements ConverterFactory<String, Number>
         public T convert(String source) {
             if (U.isNotBlank(source)) {
                 // 如果传 1,234,567 将转成 1234567 这样的整数
-                String tmp = source.contains(",") ? source.replaceAll(",", "") : source;
+                String commaTmp = source.contains(",") ? source.replaceAll(",", "") : source;
+                // 如果传 1_234_567 将转成 1234567 这样的整数
+                String underlineTmp = commaTmp.contains("_") ? source.replaceAll("_", "") : source;
                 try {
-                    return NumberUtils.parseNumber(tmp.trim(), this.targetType);
+                    return NumberUtils.parseNumber(underlineTmp.trim(), this.targetType);
                 } catch (IllegalArgumentException ignore) {
                 }
             }
