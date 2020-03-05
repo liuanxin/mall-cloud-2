@@ -28,8 +28,10 @@ public class StringToNumberConverter implements ConverterFactory<String, Number>
         @Override
         public T convert(String source) {
             if (U.isNotBlank(source)) {
+                // 如果传 1,234,567 将转成 1234567 这样的整数
+                String tmp = source.contains(",") ? source.replaceAll(",", "") : source;
                 try {
-                    return NumberUtils.parseNumber(source.trim(), this.targetType);
+                    return NumberUtils.parseNumber(tmp.trim(), this.targetType);
                 } catch (IllegalArgumentException ignore) {
                 }
             }
