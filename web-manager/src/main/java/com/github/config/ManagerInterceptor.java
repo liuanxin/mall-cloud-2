@@ -18,7 +18,9 @@ import java.util.List;
 
 public class ManagerInterceptor implements HandlerInterceptor {
 
-    private static final List<String> LET_IT_GO = Lists.newArrayList("/error");
+    private static final List<String> LET_IT_GO = Lists.newArrayList(
+            "/error", "/api/project", "/api/info"
+    );
 
     private boolean online;
     public ManagerInterceptor(boolean online) {
