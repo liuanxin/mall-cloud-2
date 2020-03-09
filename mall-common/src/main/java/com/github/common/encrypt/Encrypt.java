@@ -325,23 +325,23 @@ public final class Encrypt {
     }
 
 
-    /** 使用 jwt 将 map 加密, 其内部默认使用 HmacSHA256 算法 */
+    /** 使用 jwt 将 map 进行编码并使用 aes 加密 */
     public static String jwtEncode(Map<String, Object> map) {
         return aesEncode(JWT_SIGNER.sign(map));
     }
-    /** 使用 jwt 将 map 加密, 并设置一个过期时间. 其内部默认使用 HmacSHA256 算法 */
+    /** 将 map 设置过期时间且进行 jwt 编码并使用 aes 加密 */
     public static String jwtEncode(Map<String, Object> map, long time, TimeUnit unit) {
         map.put(JWTVerifier.EXP, System.currentTimeMillis() + unit.toMillis(time));
         return jwtEncode(map);
     }
-    /** 使用 jwt 解密, 其内部默认使用 HmacSHA256 算法 */
+    /** 使用 aes 解密并解码 jwt 及验证过期和数据完整性, 解码异常 或 数据已过期 或 验证失败 则抛出未登录异常 */
     public static Map<String, Object> jwtDecode(String data) {
         if (U.isBlank(data)) {
             return Collections.emptyMap();
         }
 
-        String jwt = aesDecode(data);
         try {
+            String jwt = aesDecode(data);
             return JWT_VERIFIER.verify(jwt);
         } catch (JWTExpiredException e) {
             if (LogUtil.ROOT_LOG.isDebugEnabled()) {
