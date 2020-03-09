@@ -2,15 +2,11 @@ package com.github.common.export;
 
 import com.github.common.util.A;
 import com.github.common.util.U;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /** 如果想要将数据导成文件保持, 使用 {@link FileExport} 类, 如果要导出文件在 web 端下载, 使用 {@link WebExport} 类 */
 final class ExportExcel {
@@ -24,6 +20,9 @@ final class ExportExcel {
     private static final short TITLE_ROW_HEIGHT = 20;
     /** 行高 */
     private static final short ROW_HEIGHT = 18;
+
+    /** 本地线程中缓存的自定义列样式 */
+    private static final ThreadLocal<Map<String, CellStyle>> CUSTOMIZE_CELL_STYLE = new ThreadLocal<>();
 
     static int getMaxColumn(boolean excel07) {
         return excel07 ? 16384 : 256;
@@ -80,13 +79,13 @@ final class ExportExcel {
         }
 
         // 头样式
-        CellStyle headStyle = createHeadStyle(workbook);
+        CellStyle headStyle = headStyle(workbook);
         // 内容样式
-        CellStyle contentStyle = createContentStyle(workbook);
+        CellStyle contentStyle = contentStyle(workbook);
         // 数字样式
-        CellStyle numberStyle = createNumberStyle(workbook);
+        CellStyle numberStyle = numberStyle(workbook);
         // 每个列用到的样式
-        CellStyle cellTmpStyle;
+        CellStyle cellStyle;
 
         Sheet sheet;
         //  行
@@ -112,107 +111,107 @@ final class ExportExcel {
 
         // 每个 sheet 的最大行, 标题头也是一行
         int maxRow = getMaxRow(excel07) - 1;
-        for (Map.Entry<String, List<?>> entry : dataMap.entrySet()) {
-            String sheetName = entry.getKey();
-            // 标题头, 这里跟数据中的属性相对应
-            Set<Map.Entry<String, String>> titleEntry = titleMap.get(sheetName).entrySet();
+        try {
+            for (Map.Entry<String, List<?>> entry : dataMap.entrySet()) {
+                String sheetName = entry.getKey();
+                // 标题头, 这里跟数据中的属性相对应
+                Set<Map.Entry<String, String>> titleEntry = titleMap.get(sheetName).entrySet();
 
-            // 当前 sheet 的数据
-            dataList = entry.getValue();
-            size = A.isEmpty(dataList) ? 0 : dataList.size();
+                // 当前 sheet 的数据
+                dataList = entry.getValue();
+                size = A.isEmpty(dataList) ? 0 : dataList.size();
 
-            // 一个 sheet 数据过多 excel 处理会出错, 分多个 sheet
-            sheetCount = ((size % maxRow == 0) ? (size / maxRow) : (size / maxRow + 1));
-            if (sheetCount == 0) {
-                // 如果没有记录时也至少构建一个(确保导出的文件有标题头)
-                sheetCount = 1;
-            }
-
-            for (int i = 0; i < sheetCount; i++) {
-                // 构建 sheet, 带名字
-                sheet = workbook.createSheet(sheetName + (sheetCount > 1 ? ("-" + (i + 1)) : U.EMPTY));
-
-                // 每个 sheet 的标题行
-                rowIndex = 0;
-                cellIndex = 0;
-                row = sheet.createRow(rowIndex);
-                row.setHeightInPoints(TITLE_ROW_HEIGHT);
-
-                // 每个 sheet 的标题行
-                for (Map.Entry<String, String> titleMapEntry : titleEntry) {
-                    cell = row.createCell(cellIndex);
-                    cell.setCellStyle(headStyle);
-                    cell.setCellValue(U.getNil(titleMapEntry.getValue().split("\\|")[0]));
-                    cellIndex++;
+                // 一个 sheet 数据过多 excel 处理会出错, 分多个 sheet
+                sheetCount = ((size % maxRow == 0) ? (size / maxRow) : (size / maxRow + 1));
+                if (sheetCount == 0) {
+                    // 如果没有记录时也至少构建一个(确保导出的文件有标题头)
+                    sheetCount = 1;
                 }
-                // 冻结第一行
-                sheet.createFreezePane(0, 1, 0, 1);
 
-                if (size > 0) {
-                    if (sheetCount > 1) {
-                        // 每个 sheet 除标题行以外的数据
-                        fromIndex = maxRow * i;
-                        toIndex = (i + 1 == sheetCount) ? size : maxRow;
-                        sheetList = dataList.subList(fromIndex, toIndex);
-                    } else {
-                        sheetList = dataList;
+                for (int i = 0; i < sheetCount; i++) {
+                    // 构建 sheet, 带名字
+                    sheet = workbook.createSheet(sheetName + (sheetCount > 1 ? ("-" + (i + 1)) : U.EMPTY));
+
+                    // 每个 sheet 的标题行
+                    rowIndex = 0;
+                    cellIndex = 0;
+                    row = sheet.createRow(rowIndex);
+                    row.setHeightInPoints(TITLE_ROW_HEIGHT);
+
+                    // 每个 sheet 的标题行
+                    for (Map.Entry<String, String> titleMapEntry : titleEntry) {
+                        cell = row.createCell(cellIndex);
+                        cell.setCellStyle(headStyle);
+                        cell.setCellValue(U.getNil(titleMapEntry.getValue().split("\\|")[0]));
+                        cellIndex++;
                     }
-                    for (Object data : sheetList) {
-                        if (data != null) {
-                            rowIndex++;
-                            // 每行
-                            row = sheet.createRow(rowIndex);
-                            row.setHeightInPoints(ROW_HEIGHT);
+                    // 冻结第一行
+                    sheet.createFreezePane(0, 1, 0, 1);
 
-                            cellIndex = 0;
-                            for (Map.Entry<String, String> titleMapEntry : titleEntry) {
-                                // 每列
-                                cell = row.createCell(cellIndex);
+                    if (size > 0) {
+                        if (sheetCount > 1) {
+                            // 每个 sheet 除标题行以外的数据
+                            fromIndex = maxRow * i;
+                            toIndex = (i + 1 == sheetCount) ? size : maxRow;
+                            sheetList = dataList.subList(fromIndex, toIndex);
+                        } else {
+                            sheetList = dataList;
+                        }
+                        for (Object data : sheetList) {
+                            if (data != null) {
+                                rowIndex++;
+                                // 每行
+                                row = sheet.createRow(rowIndex);
+                                row.setHeightInPoints(ROW_HEIGHT);
 
-                                cellData = U.getField(data, titleMapEntry.getKey());
-                                titleValues = titleMapEntry.getValue().split("\\|");
+                                cellIndex = 0;
+                                for (Map.Entry<String, String> titleMapEntry : titleEntry) {
+                                    // 每列
+                                    cell = row.createCell(cellIndex);
 
-                                boolean isNumber = NumberUtils.isCreatable(cellData);
-                                if (titleValues.length > 1) {
-                                    cellTmpStyle = isNumber ? createNumberStyle(workbook) : createContentStyle(workbook);
-                                    String[] format = titleValues[1].split("~");
-                                    if (format.length > 1 && "r".equalsIgnoreCase(format[1].trim())) {
-                                        cellTmpStyle.setAlignment(HorizontalAlignment.RIGHT);
+                                    cellData = U.getField(data, titleMapEntry.getKey());
+                                    titleValues = titleMapEntry.getValue().split("\\|");
+
+                                    boolean isNumber = U.isNumber(cellData);
+                                    if (titleValues.length > 1) {
+                                        cellStyle = customizeStyle(workbook, titleValues[1], isNumber, dataFormat);
+                                    } else {
+                                        cellStyle = isNumber ? numberStyle : contentStyle;
                                     }
-                                    cellTmpStyle.setDataFormat(dataFormat.getFormat(format[0].trim()));
-                                } else {
-                                    cellTmpStyle = isNumber ? numberStyle : contentStyle;
-                                }
-                                if (isNumber) {
-                                    cell.setCellValue(NumberUtils.toDouble(cellData));
-                                } else {
-                                    cell.setCellValue(cellData);
-                                }
+                                    cell.setCellStyle(cellStyle);
 
-                                cell.setCellStyle(cellTmpStyle);
-                                cellIndex++;
+                                    if (isNumber) {
+                                        cell.setCellValue(U.toDouble(cellData));
+                                    } else {
+                                        cell.setCellValue(cellData);
+                                    }
+                                    cellIndex++;
+                                }
                             }
                         }
                     }
-                }
 
-                // 在列上处理宽度
-                cellIndex = 0;
-                for (Map.Entry<String, String> titleMapEntry : titleEntry) {
-                    titleValues = titleMapEntry.getValue().split("\\|");
-                    if (titleValues.length > 2) {
-                        int width = U.toInt(titleValues[2]);
-                        // 默认 12
-                        int w = (width > 0 && width < 256) ? width : 12;
-                        // 左移 8 相当于 * 256
-                        sheet.setColumnWidth(cellIndex, w << 8);
-                    } else {
-                        // 让列的宽度自适应. 缺少中文字体计算宽度时会有问题, 需要复制中文字体文件到操作系统
-                        sheet.autoSizeColumn(cellIndex, true);
+                    // 在列上处理宽度
+                    cellIndex = 0;
+                    for (Map.Entry<String, String> titleMapEntry : titleEntry) {
+                        titleValues = titleMapEntry.getValue().split("\\|");
+                        if (titleValues.length > 2) {
+                            int width = U.toInt(titleValues[2]);
+                            // 默认 12
+                            int w = (width > 0 && width < 256) ? width : 12;
+                            // 左移 8 相当于 * 256
+                            sheet.setColumnWidth(cellIndex, w << 8);
+                        } else {
+                            // 让列的宽度自适应. 缺少中文字体计算宽度时会有问题, 需要复制中文字体文件到操作系统
+                            sheet.autoSizeColumn(cellIndex, true);
+                        }
+                        cellIndex++;
                     }
-                    cellIndex++;
                 }
             }
+        } finally {
+            // 把本地线程中缓存的自定义列样式清空
+            CUSTOMIZE_CELL_STYLE.remove();
         }
         return workbook;
     }
@@ -238,7 +237,7 @@ final class ExportExcel {
     }
 
     /** 头样式 */
-    private static CellStyle createHeadStyle(Workbook workbook) {
+    private static CellStyle headStyle(Workbook workbook) {
         CellStyle style = workbook.createCellStyle();
         // 水平居左
         style.setAlignment(HorizontalAlignment.LEFT);
@@ -254,7 +253,7 @@ final class ExportExcel {
     }
 
     /** 内容样式 */
-    private static CellStyle createContentStyle(Workbook workbook) {
+    private static CellStyle contentStyle(Workbook workbook) {
         CellStyle style = workbook.createCellStyle();
 
         style.setAlignment(HorizontalAlignment.LEFT);
@@ -267,7 +266,7 @@ final class ExportExcel {
     }
 
     /** 数字样式 */
-    private static CellStyle createNumberStyle(Workbook workbook) {
+    private static CellStyle numberStyle(Workbook workbook) {
         CellStyle style = workbook.createCellStyle();
 
         style.setAlignment(HorizontalAlignment.RIGHT);
@@ -277,5 +276,31 @@ final class ExportExcel {
         font.setFontHeightInPoints(FONT_SIZE);
         style.setFont(font);
         return style;
+    }
+
+    /**
+     * 列如果有自定义样式, 就先从 本地线程的自定义列样式缓存 中取, 有就直接返回, 没有就生成并写进缓存.
+     * 这样当一个 excel 行过多时, 相同 style 标识的自定义样式只需要生成一次, 不需要每个列都生成新的
+     */
+    private static CellStyle customizeStyle(Workbook workbook, String style, boolean isNumber, DataFormat dataFormat) {
+        Map<String, CellStyle> currentStyleMap = CUSTOMIZE_CELL_STYLE.get();
+        Map<String, CellStyle> tmpStyleMap = A.isNotEmpty(currentStyleMap) ? currentStyleMap : new HashMap<>();
+
+        CellStyle cellStyle = tmpStyleMap.get(style);
+        if (U.isNotBlank(cellStyle)) {
+            return cellStyle;
+        } else {
+            // 将 "数字格式(比如金额用 0.00)~r" 转换成具体的样式
+            CellStyle tmpStyle = isNumber ? numberStyle(workbook) : contentStyle(workbook);
+            String[] format = style.split("~");
+            if (format.length > 1 && "r".equalsIgnoreCase(format[1].trim())) {
+                tmpStyle.setAlignment(HorizontalAlignment.RIGHT);
+            }
+            tmpStyle.setDataFormat(dataFormat.getFormat(format[0].trim()));
+
+            tmpStyleMap.put(style, tmpStyle);
+            CUSTOMIZE_CELL_STYLE.set(tmpStyleMap);
+            return tmpStyle;
+        }
     }
 }
