@@ -107,9 +107,12 @@ public class Money implements Serializable {
         if (U.isBlank(yuan)) {
             return null;
         }
+
+        // 如果传 1_234_567 将转成 1234567 这样的整数
         if (yuan.contains("_")) {
             yuan = yuan.replace("_", "");
         }
+        // 如果传 1,234,567 将转成 1234567 这样的整数
         if (yuan.contains(",")) {
             yuan = yuan.replace(",", "");
         }
