@@ -63,7 +63,7 @@ public class DateUtil {
     }
 
     public static String format(Date date, String type) {
-        return DateTimeFormat.forPattern(type).print(date.getTime());
+        return (U.isBlank(date) || U.isBlank(type)) ? U.EMPTY : DateTimeFormat.forPattern(type).print(date.getTime());
     }
 
     /**
