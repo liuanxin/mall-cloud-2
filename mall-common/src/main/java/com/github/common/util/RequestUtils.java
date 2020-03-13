@@ -26,19 +26,17 @@ public final class RequestUtils {
     private static final String WWW = "www.";
 
     /**
-     * 获取真实客户端IP
-     * 关于 X-Forwarded-For 参考: http://zh.wikipedia.org/wiki/X-Forwarded-For<br>
-     * 这一 HTTP 头一般格式如下:
-     * X-Forwarded-For: client1, proxy1, proxy2,<br><br>
-     * 其中的值通过一个 逗号 + 空格 把多个 IP 地址区分开, 最左边(client1)是最原始客户端的IP地址,
-     * 代理服务器每成功收到一个请求，就把请求来源IP地址添加到右边
+     * 获取真实客户端 ip, 关于 X-Forwarded-For 参考: http://zh.wikipedia.org/wiki/X-Forwarded-For<br>
+     *
+     * 这一 HTTP 头一般格式如: X-Forwarded-For: client1, proxy1, proxy2,<br><br>
+     * 其中的值通过一个 逗号 + 空格 把多个 ip 地址区分开,
+     * 最左边(client1)是最原始客户端的 ip 地址, 代理服务器每成功收到一个请求, 就把请求来源 ip 地址添加到右边
      */
     public static String getRealIp() {
         HttpServletRequest request = getRequest();
 
         String ip = request.getHeader("X-Forwarded-For");
         if (U.isNotBlank(ip) && !"unknown".equalsIgnoreCase(ip)) {
-            // 多次反向代理后会有多个IP值，第一个为 真实 ip
             return ip.split(",")[0].trim();
         }
 
@@ -69,7 +67,7 @@ public final class RequestUtils {
         return request.getRemoteAddr();
     }
 
-    /*** 是否是本机 */
+    /*** 本机就返回 true */
     public static boolean isLocalRequest() {
         return U.isLocalRequest(getRealIp());
     }
@@ -131,7 +129,7 @@ public final class RequestUtils {
         boolean http = ("http".equalsIgnoreCase(scheme) && port != 80);
         boolean https = ("https".equalsIgnoreCase(scheme) && port != 80 && port != 443);
         if (http || https) {
-            sbd.append(":").append(port);
+            sbd.append(':').append(port);
         }
         return sbd.toString();
     }
@@ -186,8 +184,6 @@ public final class RequestUtils {
      * @return 示例: id=xxx&name=yyy
      */
     public static String formatParam() {
-        // return getRequest().getQueryString(); // 没有时将会返回 null
-
         HttpServletRequest request = getRequest();
         String contentType = request.getContentType();
         boolean upload = U.isNotBlank(contentType) && contentType.startsWith("multipart/");
@@ -256,9 +252,11 @@ public final class RequestUtils {
 
 
     /** 将「json 字符」以 json 格式输出 */
+    @SuppressWarnings("rawtypes")
     public static void toJson(JsonResult result, HttpServletResponse response) throws IOException {
         render("application/json", result, response);
     }
+    @SuppressWarnings("rawtypes")
     private static void render(String type, JsonResult jsonResult, HttpServletResponse response) throws IOException {
         String result = JsonUtil.toJson(jsonResult);
         if (LogUtil.ROOT_LOG.isInfoEnabled()) {
@@ -277,6 +275,7 @@ public final class RequestUtils {
         }
     }
     /** 将「json 字符」以 html 格式输出. 不常见! 这种只会在一些特殊的场景用到 */
+    @SuppressWarnings("rawtypes")
     public static void toHtml(JsonResult result, HttpServletResponse response) throws IOException {
         render("text/html", result, response);
     }
