@@ -104,7 +104,7 @@ final class ExportExcel {
 
         // 单个列的数据
         String cellData;
-        // 标题说明|数字格式(比如金额用 0.00)~r|宽度(255 以内) : 中间字段的 ~r 表示右对齐
+        // 标题说明|数字格式(比如金额用 0.00)~r~b|宽度(255 以内) : 中间字段的第二部分的 r 表示右对齐, b 表示粗体
         String[] titleValues;
         // 数字格式
         DataFormat dataFormat = workbook.createDataFormat();
@@ -290,16 +290,45 @@ final class ExportExcel {
         if (U.isNotBlank(cellStyle)) {
             return cellStyle;
         } else {
-            // 将 "数字格式(比如金额用 0.00)~r" 转换成具体的样式
+            // 将 "数字格式(比如金额用 0.00)~r~b" 转换成具体的样式
             CellStyle tmpStyle = isNumber ? numberStyle(workbook) : contentStyle(workbook);
-            String[] format = style.split("~");
-            if (format.length > 1 && "r".equalsIgnoreCase(format[1].trim())) {
-                tmpStyle.setAlignment(HorizontalAlignment.RIGHT);
-            }
-            tmpStyle.setDataFormat(dataFormat.getFormat(format[0].trim()));
+            if (U.isNotBlank(style)) {
+                String[] format = style.split("~");
+                tmpStyle.setDataFormat(dataFormat.getFormat(format[0].trim()));
 
-            tmpStyleMap.put(style, tmpStyle);
-            CUSTOMIZE_CELL_STYLE.set(tmpStyleMap);
+                if (format.length > 1) {
+                    String lrc = format[1].trim();
+                    if (U.isNotBlank(lrc)) {
+                        Map<String, HorizontalAlignment> tmpMap = A.maps(
+                                "r", HorizontalAlignment.RIGHT,
+                                "l", HorizontalAlignment.LEFT,
+                                "c", HorizontalAlignment.CENTER
+                        );
+                        HorizontalAlignment alignment = tmpMap.get(lrc.toLowerCase());
+                        if (U.isNotBlank(alignment)) {
+                            tmpStyle.setAlignment(alignment);
+                        }
+                    }
+                }
+
+                if (format.length > 2) {
+                    String f = format[2].trim();
+                    if (U.isNotBlank(f)) {
+                        Font font = workbook.createFont();
+                        if ("b".equalsIgnoreCase(f)) {
+                            font.setBold(true);
+                        } else if ("i".equalsIgnoreCase(f)) {
+                            font.setItalic(true);
+                        } else if ("s".equalsIgnoreCase(f)) {
+                            font.setStrikeout(true);
+                        }
+                        font.setFontHeightInPoints(FONT_SIZE);
+                        tmpStyle.setFont(font);
+                    }
+                }
+                tmpStyleMap.put(style, tmpStyle);
+                CUSTOMIZE_CELL_STYLE.set(tmpStyleMap);
+            }
             return tmpStyle;
         }
     }
