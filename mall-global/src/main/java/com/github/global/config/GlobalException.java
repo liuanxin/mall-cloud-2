@@ -35,50 +35,45 @@ public class GlobalException {
     /** 业务异常 */
     @ExceptionHandler(ServiceException.class)
     public ResponseEntity<String> service(ServiceException e) {
-        String msg = e.getMessage();
         if (LogUtil.ROOT_LOG.isDebugEnabled()) {
-            LogUtil.ROOT_LOG.debug(msg);
+            LogUtil.ROOT_LOG.debug("业务异常", e);
         }
-        return ResponseEntity.status(JsonCode.FAIL.getCode()).body(msg);
+        return ResponseEntity.status(JsonCode.FAIL.getCode()).body(e.getMessage());
     }
     /** 未登录 */
     @ExceptionHandler(NotLoginException.class)
     public ResponseEntity<String> notLogin(NotLoginException e) {
-        String msg = e.getMessage();
         if (LogUtil.ROOT_LOG.isDebugEnabled()) {
-            LogUtil.ROOT_LOG.debug(msg);
+            LogUtil.ROOT_LOG.debug("没登录", e);
         }
-        return ResponseEntity.status(JsonCode.NOT_LOGIN.getCode()).body(msg);
+        return ResponseEntity.status(JsonCode.NOT_LOGIN.getCode()).body(e.getMessage());
     }
     /** 无权限 */
     @ExceptionHandler(ForbiddenException.class)
     public ResponseEntity<String> forbidden(ForbiddenException e) {
-        String msg = e.getMessage();
         if (LogUtil.ROOT_LOG.isDebugEnabled()) {
-            LogUtil.ROOT_LOG.debug(msg);
+            LogUtil.ROOT_LOG.debug("没权限", e);
         }
-        return ResponseEntity.status(JsonCode.FAIL.getCode()).body(msg);
-        // return ResponseEntity.status(JsonCode.NOT_PERMISSION.getCode()).body(msg);
+        return ResponseEntity.status(JsonCode.FAIL.getCode()).body(e.getMessage());
+        // return ResponseEntity.status(JsonCode.NOT_PERMISSION.getCode()).body(e.getMessage());
     }
     /** 404 */
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<String> notFound(NotFoundException e) {
-        String msg = e.getMessage();
         if (LogUtil.ROOT_LOG.isDebugEnabled()) {
-            LogUtil.ROOT_LOG.debug(msg);
+            LogUtil.ROOT_LOG.debug("404", e);
         }
-        return ResponseEntity.status(JsonCode.FAIL.getCode()).body(msg);
-        // return ResponseEntity.status(JsonCode.NOT_FOUND.getCode()).body(msg);
+        return ResponseEntity.status(JsonCode.FAIL.getCode()).body(e.getMessage());
+        // return ResponseEntity.status(JsonCode.NOT_FOUND.getCode()).body(e.getMessage());
     }
     /** 错误的请求 */
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity<String> badRequest(BadRequestException e) {
-        String msg = e.getMessage();
         if (LogUtil.ROOT_LOG.isDebugEnabled()) {
-            LogUtil.ROOT_LOG.debug(msg);
+            LogUtil.ROOT_LOG.debug("错误的请求", e);
         }
-        return ResponseEntity.status(JsonCode.FAIL.getCode()).body(msg);
-        // return ResponseEntity.status(JsonCode.BAD_REQUEST.getCode()).body(msg);
+        return ResponseEntity.status(JsonCode.FAIL.getCode()).body(e.getMessage());
+        // return ResponseEntity.status(JsonCode.BAD_REQUEST.getCode()).body(e.getMessage());
     }
 
 
