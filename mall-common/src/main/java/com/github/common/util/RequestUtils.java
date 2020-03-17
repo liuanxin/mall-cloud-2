@@ -253,17 +253,17 @@ public final class RequestUtils {
 
     /** 将「json 字符」以 json 格式输出 */
     @SuppressWarnings("rawtypes")
-    public static void toJson(JsonResult result, HttpServletResponse response) throws IOException {
-        render("application/json", result, response);
+    public static void toJson(JsonResult result) throws IOException {
+        render("application/json", result);
     }
     @SuppressWarnings("rawtypes")
-    private static void render(String type, JsonResult jsonResult, HttpServletResponse response) throws IOException {
+    private static void render(String type, JsonResult jsonResult) throws IOException {
         String result = JsonUtil.toJson(jsonResult);
-        if (LogUtil.ROOT_LOG.isInfoEnabled()) {
-            LogUtil.ROOT_LOG.info("return json: " + result);
+        if (LogUtil.ROOT_LOG.isDebugEnabled()) {
+            LogUtil.ROOT_LOG.debug("return json: " + result);
         }
-
         try {
+            HttpServletResponse response = getResponse();
             response.setCharacterEncoding("utf-8");
             response.setContentType(type + ";charset=utf-8;");
             response.getWriter().write(U.toStr(result));
@@ -276,8 +276,8 @@ public final class RequestUtils {
     }
     /** 将「json 字符」以 html 格式输出. 不常见! 这种只会在一些特殊的场景用到 */
     @SuppressWarnings("rawtypes")
-    public static void toHtml(JsonResult result, HttpServletResponse response) throws IOException {
-        render("text/html", result, response);
+    public static void toHtml(JsonResult result) throws IOException {
+        render("text/html", result);
     }
 
     /** 基于请求上下文生成一个日志需要的上下文信息对象 */
