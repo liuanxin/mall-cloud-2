@@ -8,12 +8,12 @@ import java.util.regex.Pattern;
 
 class SqlFormat {
 
-    private static final Set<String> BEGIN_CLAUSES = new HashSet<String>();
-    private static final Set<String> END_CLAUSES = new HashSet<String>();
-    private static final Set<String> LOGICAL = new HashSet<String>();
-    private static final Set<String> QUANTIFIERS = new HashSet<String>();
-    private static final Set<String> DML = new HashSet<String>();
-    private static final Set<String> MISC = new HashSet<String>();
+    private static final Set<String> BEGIN_CLAUSES = new HashSet<>();
+    private static final Set<String> END_CLAUSES = new HashSet<>();
+    private static final Set<String> LOGICAL = new HashSet<>();
+    private static final Set<String> QUANTIFIERS = new HashSet<>();
+    private static final Set<String> DML = new HashSet<>();
+    private static final Set<String> MISC = new HashSet<>();
 
     static {
         BEGIN_CLAUSES.add("left");
@@ -29,7 +29,6 @@ class SqlFormat {
         END_CLAUSES.add("join");
         END_CLAUSES.add("from");
         END_CLAUSES.add("by");
-        END_CLAUSES.add("join");
         END_CLAUSES.add("into");
         END_CLAUSES.add("union");
 
@@ -108,8 +107,8 @@ class SqlFormat {
         boolean afterInsert;
         int inFunction;
         int parensSinceSelect;
-        private LinkedList<Integer> parenCounts = new LinkedList<Integer>();
-        private LinkedList<Boolean> afterByOrFromOrSelects = new LinkedList<Boolean>();
+        private LinkedList<Integer> parenCounts = new LinkedList<>();
+        private LinkedList<Boolean> afterByOrFromOrSelects = new LinkedList<>();
 
         int indent = 1;
 
@@ -318,14 +317,13 @@ class SqlFormat {
             }
             if (inFunction > 0) {
                 inFunction--;
-                out();
             } else {
                 if (!afterByOrSetOrFromOrSelect) {
                     indent--;
                     newline();
                 }
-                out();
             }
+            out();
             beginLine = false;
         }
 

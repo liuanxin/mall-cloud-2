@@ -7,6 +7,7 @@ import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
 import java.util.*;
+import java.util.regex.Pattern;
 
 /** 如果想要将数据导成文件保持, 使用 {@link FileExport} 类, 如果要导出文件在 web 端下载, 使用 {@link WebExport} 类 */
 final class ExportExcel {
@@ -20,6 +21,8 @@ final class ExportExcel {
     private static final short TITLE_ROW_HEIGHT = 20;
     /** 行高 */
     private static final short ROW_HEIGHT = 18;
+    /** 多空白符的正则 */
+    private static final Pattern BLANK_REGEX = Pattern.compile("\\s{2,}");
 
     /** 本地线程中缓存的自定义列样式 */
     private static final ThreadLocal<Map<String, CellStyle>> CUSTOMIZE_CELL_STYLE = new ThreadLocal<>();
@@ -129,8 +132,8 @@ final class ExportExcel {
                 }
 
                 for (int i = 0; i < sheetCount; i++) {
-                    // 构建 sheet, 带名字
-                    sheet = workbook.createSheet(sheetName + (sheetCount > 1 ? ("-" + (i + 1)) : U.EMPTY));
+                    // 构建 sheet
+                    sheet = workbook.createSheet(handleSheetName(sheetName, sheetCount, i));
 
                     // 每个 sheet 的标题行
                     rowIndex = 0;
@@ -234,6 +237,20 @@ final class ExportExcel {
         if (U.isNotBlank(workbook) && workbook instanceof SXSSFWorkbook) {
             ((SXSSFWorkbook) workbook).dispose();
         }
+    }
+
+    /**
+     * 将特殊字符替换成空格, 多个空格替换成一个, 如果有多个 sheet 就拼在名字后面, 长度超过 31 则截取
+     *
+     * @see org.apache.poi.ss.util.WorkbookUtil#validateSheetName(java.lang.String)
+     */
+    private static String handleSheetName(String sheetName, int sheetCount, int sheetIndex) {
+        String tmpSn = sheetName.replace("/", " ").replace("\\", " ").replace("?", " ")
+                .replace("*", " ").replace("]", " ").replace("[", " ").replace(":", " ");
+        String tmp = BLANK_REGEX.matcher(tmpSn).replaceAll(" ");
+        String indexSuffix = (sheetCount > 1) ? (" - " + (sheetIndex + 1)) : U.EMPTY;
+        int nameLen = 31 - indexSuffix.length();
+        return (tmp.length() > nameLen) ? (tmp.substring(0, nameLen) + indexSuffix) : tmp;
     }
 
     /** 头样式 */
