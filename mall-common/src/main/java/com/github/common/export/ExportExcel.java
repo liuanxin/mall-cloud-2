@@ -240,13 +240,19 @@ final class ExportExcel {
     }
 
     /**
-     * 将特殊字符替换成空格, 多个空格替换成一个, 如果有多个 sheet 就拼在名字后面, 长度超过 31 则截取
+     * 将特殊字符替换成空格, 最开始及最结尾是单引号则去掉, 多个空格替换成一个, 如果有多个 sheet 就拼在名字后面, 长度超过 31 则截取
      *
      * @see org.apache.poi.ss.util.WorkbookUtil#validateSheetName(java.lang.String)
      */
     private static String handleSheetName(String sheetName, int sheetCount, int sheetIndex) {
         String tmpSn = sheetName.replace("/", " ").replace("\\", " ").replace("?", " ")
                 .replace("*", " ").replace("]", " ").replace("[", " ").replace(":", " ");
+        if (tmpSn.startsWith("'")) {
+            tmpSn = tmpSn.substring(1);
+        }
+        if (tmpSn.endsWith("'")) {
+            tmpSn = tmpSn.substring(0, tmpSn.length() - 1);
+        }
         String tmp = BLANK_REGEX.matcher(tmpSn).replaceAll(" ");
         String indexSuffix = (sheetCount > 1) ? (" - " + (sheetIndex + 1)) : U.EMPTY;
         int nameLen = 31 - indexSuffix.length();
