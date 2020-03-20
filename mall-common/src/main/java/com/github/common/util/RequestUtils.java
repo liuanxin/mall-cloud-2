@@ -1,6 +1,5 @@
 package com.github.common.util;
 
-import com.github.common.json.JsonResult;
 import com.github.common.json.JsonUtil;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -252,12 +251,10 @@ public final class RequestUtils {
 
 
     /** 将「json 字符」以 json 格式输出 */
-    @SuppressWarnings("rawtypes")
-    public static void toJson(JsonResult result) throws IOException {
-        render("application/json", result);
+    public static <T> void toJson(T jsonResult) {
+        render("application/json", jsonResult);
     }
-    @SuppressWarnings("rawtypes")
-    private static void render(String type, JsonResult jsonResult) throws IOException {
+    private static <T> void render(String type, T jsonResult) {
         String result = JsonUtil.toJson(jsonResult);
         if (LogUtil.ROOT_LOG.isDebugEnabled()) {
             LogUtil.ROOT_LOG.debug("return json: " + result);
@@ -272,12 +269,15 @@ public final class RequestUtils {
             if (LogUtil.ROOT_LOG.isDebugEnabled()) {
                 LogUtil.ROOT_LOG.debug("response state exception", e);
             }
+        } catch (IOException e) {
+            if (LogUtil.ROOT_LOG.isErrorEnabled()) {
+                LogUtil.ROOT_LOG.error(String.format("handle json to %s io exception", type), e);
+            }
         }
     }
     /** 将「json 字符」以 html 格式输出. 不常见! 这种只会在一些特殊的场景用到 */
-    @SuppressWarnings("rawtypes")
-    public static void toHtml(JsonResult result) throws IOException {
-        render("text/html", result);
+    public static <T> void toHtml(T jsonResult) {
+        render("text/html", jsonResult);
     }
 
     /** 基于请求上下文生成一个日志需要的上下文信息对象 */
