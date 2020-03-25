@@ -58,6 +58,12 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <!-- 所有的版本都在此处统一控制, 不要在其他地方设置! -->
+        <!-- boot 和 cloud 的对应关系见: https://spring.io/projects/spring-cloud -->
+        <!--
+        Boot: 2.2.5.RELEASE
+        cloud: Hoxton.SR3
+        https://cloud.spring.io/spring-cloud-static/Hoxton.SR3/reference/html/index.html
+        -->
 
         <spring-cloud.version>Hoxton.SR3</spring-cloud.version>
         <spring-admin.version>2.2.2</spring-admin.version>
