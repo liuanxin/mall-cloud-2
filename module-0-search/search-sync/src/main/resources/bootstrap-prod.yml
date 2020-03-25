@@ -1,4 +1,0 @@
-
-logging.config: classpath:log-prod.xml
-
-spring.application.name: search-sync

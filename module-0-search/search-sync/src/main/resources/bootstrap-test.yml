@@ -1,6 +1,0 @@
-
-server.port: 9072
-
-logging.config: classpath:log-test.xml
-
-spring.application.name: search-sync

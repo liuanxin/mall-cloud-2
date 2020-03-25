@@ -1,8 +1,0 @@
-
-# https://docs.spring.io/spring-boot/docs/current/reference/html/common-application-properties.html
-
-server.port: 9072
-
-logging.config: classpath:log-dev.xml
-
-spring.application.name: search-sync

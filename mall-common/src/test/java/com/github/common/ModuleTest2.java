@@ -830,18 +830,22 @@ class Server {
             "spring.application.name: %s\n" +
             "\n" +
             "register.center: http://127.0.0.1:" + REGISTER_CENTER_PORT + "/eureka/\n" +
+            "\n" +
             "eureka:\n" +
             "  client:\n" +
             "    # 客户端间隔多久去拉取服务注册信息, 默认为 30 秒\n" +
             "    registry-fetch-interval-seconds: 20\n" +
             "    serviceUrl.defaultZone: ${register.center}\n" +
             "\n" +
-            "spring.cloud.config:\n" +
-            "#  uri: http://127.0.0.1:8001/\n" +
-            "  discovery.enabled: true\n" +
-            "  discovery.serviceId: config-server\n" +
-            "  name: all,${spring.application.name}\n" +
-            "  profile: dev\n" +
+            "spring.cloud:" +
+            "  loadbalancer.ribbon.enabled: false\n" +
+            "  config:\n" +
+            "    # uri: http://127.0.0.1:8001/\n" +
+            "    discovery:\n" +
+            "      enabled: true\n" +
+            "      serviceId: config-server\n" +
+            "    name: all,${spring.application.name}\n" +
+            "    profile: dev\n" +
             "\n" +
             "management.endpoints.web.exposure.include: \"*\"\n";
 
@@ -852,16 +856,20 @@ class Server {
             "\n" +
             "register.center: http://test1:" + REGISTER_CENTER_PORT + "/eureka/,http://test2:" +
             REGISTER_CENTER_PORT + "/eureka/,http://test3:" + REGISTER_CENTER_PORT + "/eureka/\n" +
+            "\n" +
             "eureka:\n" +
             "  client:\n" +
             "    registry-fetch-interval-seconds: 10\n" +
             "    serviceUrl.defaultZone: ${register.center}\n" +
             "\n" +
-            "spring.cloud.config:\n" +
-            "  discovery.enabled: true\n" +
-            "  discovery.serviceId: config-server\n" +
-            "  name: all,${spring.application.name}\n" +
-            "  profile: test\n" +
+            "spring.cloud:\n" +
+            "  loadbalancer.ribbon.enabled: false\n" +
+            "  config:\n" +
+            "    discovery:" +
+            "      enabled: true\n" +
+            "      serviceId: config-server\n" +
+            "    name: all,${spring.application.name}\n" +
+            "    profile: test\n" +
             "\n" +
             "management.endpoints.web.exposure.include: \"*\"\n";
 
@@ -872,16 +880,20 @@ class Server {
             "\n" +
             "register.center: http://prod1:" + REGISTER_CENTER_PORT + "/eureka/,http://prod2:" +
             REGISTER_CENTER_PORT + "/eureka/,http://prod3:" + REGISTER_CENTER_PORT + "/eureka/\n" +
+            "\n" +
             "eureka:\n" +
             "  client:\n" +
             "    registry-fetch-interval-seconds: 5\n" +
             "    serviceUrl.defaultZone: ${register.center}\n" +
             "\n" +
-            "spring.cloud.config:\n" +
-            "  discovery.enabled: true\n" +
-            "  discovery.serviceId: config-server\n" +
-            "  name: all,${spring.application.name}\n" +
-            "  profile: prod\n" +
+            "spring.cloud:" +
+            "  loadbalancer.ribbon.enabled: false\n" +
+            "  config:\n" +
+            "    discovery:" +
+            "      enabled: true\n" +
+            "      serviceId: config-server\n" +
+            "    name: all,${spring.application.name}\n" +
+            "    profile: prod\n" +
             "\n" +
             "management.endpoints.web.exposure.include: \"*\"\n";
 

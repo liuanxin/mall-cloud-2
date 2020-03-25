@@ -1,5 +1,6 @@
 
 server.port: 8761
+
 logging.config: classpath:log-dev.xml
 
 spring:
@@ -7,6 +8,7 @@ spring:
   profiles.active: dev
 
 register.center: http://127.0.0.1:${server.port}/eureka/
+
 eureka:
   instance:
     # 注册到服务器的是 ip 地址, 不要用主机名
@@ -28,3 +30,6 @@ eureka:
     # 不从服务器获取注册信息(单机不需要)
     fetch-registry: false
     serviceUrl.defaultZone: ${register.center}
+
+spring.cloud:
+  loadbalancer.ribbon.enabled: false

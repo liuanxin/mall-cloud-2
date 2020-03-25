@@ -1,5 +1,6 @@
 
 server.port: 8761
+
 logging.config: classpath:log-test.xml
 
 spring:
@@ -7,6 +8,7 @@ spring:
   profiles.active: test
 
 register.center: http://test1:${server.port}/eureka/,http://test2:${server.port}/eureka/,http://test3:${server.port}/eureka/
+
 eureka:
   instance:
     lease-renewal-interval-in-seconds: 15
@@ -16,3 +18,6 @@ eureka:
     eviction-interval-timer-in-ms: 4000
   client:
     serviceUrl.defaultZone: ${register.center}
+
+spring.cloud:
+  loadbalancer.ribbon.enabled: false

@@ -4,15 +4,19 @@ logging.config: classpath:log-test.xml
 spring.application.name: user
 
 register.center: http://test1:8761/eureka/,http://test2:8761/eureka/,http://test3:8761/eureka/
+
 eureka:
   client:
     registry-fetch-interval-seconds: 10
     serviceUrl.defaultZone: ${register.center}
 
-spring.cloud.config:
-  discovery.enabled: true
-  discovery.serviceId: config-server
-  name: all,${spring.application.name}
-  profile: test
+spring.cloud:
+  loadbalancer.ribbon.enabled: false
+  config:
+    discovery:
+      enabled: true
+      serviceId: config-server
+    name: all,${spring.application.name}
+    profile: test
 
 management.endpoints.web.exposure.include: "*"

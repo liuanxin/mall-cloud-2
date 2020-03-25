@@ -1,14 +1,14 @@
 
 server.port: 8888
+
 logging.config: classpath:log-dev.xml
 
 spring:
   application.name: config-server
   profiles.active: native
-#  cloud.config.server.native.searchLocations: file:/home/tony/project/mall-cloud-2/service-config/src/main/resources/config/
-  cloud.config.server.native.searchLocations: classpath:config/
 
 register.center: http://127.0.0.1:8761/eureka/
+
 eureka:
   client:
     # 开启健康检查(需要 spring-boot-starter-actuator 包)
@@ -23,3 +23,8 @@ eureka:
     lease-renewal-interval-in-seconds: 20
     # 服务端在收到最后一个心跳后的等待时间. 超出将移除该实例, 默认 90 秒, 此值至少要大于 lease-renewal-interval-in-seconds
     lease-expiration-duration-in-seconds: 60
+
+spring.cloud:
+  #  config.server.native.searchLocations: file:/home/tony/project/mall-cloud-2/service-config/src/main/resources/config/
+  loadbalancer.ribbon.enabled: false
+  config.server.native.searchLocations: classpath:config/

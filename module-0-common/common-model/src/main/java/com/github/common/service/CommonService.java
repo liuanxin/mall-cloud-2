@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestParam;
  * 公共相关的接口
  */
 public interface CommonService {
-    
+
     /**
      * 示例接口
      * 

@@ -1,16 +1,12 @@
 
 server.port: 8888
+
 logging.config: classpath:log-test.xml
 
-spring:
-  application.name: config-server
-  cloud.config.server.git:
-    uri: https://git.xxx.com/orign/project
-    username: xxx
-    password: yyy
-    defaultLabel: develop
+spring.application.name: config-server
 
 register.center: http://test1:8761/eureka/,http://test2:8761/eureka/,http://test3:8761/eureka/
+
 eureka:
   client:
     healthcheck.enabled: true
@@ -19,3 +15,11 @@ eureka:
   instance:
     lease-renewal-interval-in-seconds: 10
     lease-expiration-duration-in-seconds: 30
+
+spring.cloud:
+  loadbalancer.ribbon.enabled: false
+  config.server.git:
+    uri: https://git.xxx.com/orign/project
+    username: xxx
+    password: yyy
+    defaultLabel: develop

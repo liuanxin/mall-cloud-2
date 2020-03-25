@@ -1,13 +1,10 @@
 
 logging.config: classpath:log-dev.xml
 
-spring:
-  application.name: order
-#  security.user:
-#    name: "client"
-#    password: "client"
+spring.application.name: order
 
 register.center: http://127.0.0.1:8761/eureka/
+
 eureka:
   client:
     # 客户端间隔多久去拉取服务注册信息, 默认为 30 秒
@@ -27,11 +24,14 @@ eureka:
 #      user.name: ${spring.security.user.name}
 #      user.password: ${spring.security.user.password}
 
-spring.cloud.config:
-#  uri: http://127.0.0.1:8001/
-  discovery.enabled: true
-  discovery.serviceId: config-server
-  name: all,${spring.application.name}
-  profile: dev
+spring.cloud:
+  loadbalancer.ribbon.enabled: false
+  config:
+    # uri: http://127.0.0.1:8001/
+    discovery:
+      enabled: true
+      serviceId: config-server
+    name: all,${spring.application.name}
+    profile: dev
 
 management.endpoints.web.exposure.include: "*"

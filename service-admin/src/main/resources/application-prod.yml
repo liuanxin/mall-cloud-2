@@ -3,9 +3,14 @@ server.port: 8008
 
 logging.config: classpath:log-prod.xml
 
-spring.application.name: service-admin
+spring:
+  application.name: service-admin
+  security.user:
+    name: admin
+    password: 9pt70oBcW%r%
 
 register.center: http://prod1:8761/eureka/,http://prod2:8761/eureka/,http://prod3:8761/eureka/
+
 eureka:
   client:
     registry-fetch-interval-seconds: 5

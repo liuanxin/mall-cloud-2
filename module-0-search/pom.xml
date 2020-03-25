@@ -17,6 +17,5 @@
         <module>search-model</module>
         <module>search-client</module>
         <module>search-server</module>
-        <module>search-sync</module>
     </modules>
 </project>
