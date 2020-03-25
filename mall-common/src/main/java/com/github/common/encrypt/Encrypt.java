@@ -7,6 +7,8 @@ import com.github.common.encrypt.jwt.JWTVerifyException;
 import com.github.common.exception.NotLoginException;
 import com.github.common.util.LogUtil;
 import com.github.common.util.U;
+import com.google.common.hash.HashFunction;
+import com.google.common.hash.Hashing;
 import lombok.Data;
 
 import javax.crypto.*;
@@ -415,6 +417,49 @@ public final class Encrypt {
             iOutputChar[x] = (char) (iInputChar[x] ^ iCY);
         }
         return new String(iOutputChar);
+    }
+
+    // 也不是很懂为什么 guava 都已经发布快 30 个版本了, 还在 Beta, 这个注解用来抑制 idea 的警告
+    @SuppressWarnings("UnstableApiUsage")
+    private static final HashFunction HASH_FUN = Hashing.murmur3_32();
+    /** 62 进制(0-9, a-z, A-Z), 64 进制则再加上 _ 的 @ */
+    private static final char[] HEX = new char[] {
+            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+            'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
+            'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'
+    };
+    private static final int HEX_LEN = HEX.length;
+
+    /**
+     * <pre>
+     * 生成短地址: 长度大于 6 则用 Murmur3_32Hash 算法来生成 hash 并返回其 62 进制数(0-9 + a-z + A-Z)
+     *
+     * getShortString("user/info?id=123&name=中文&sex=0&province=广东") ==> 44y34N
+     * 这样可以将 { http://abc.xyz.com/user/info?id=123&name=中文&sex=0&province=广东 } 缩短成 { http://t.co/44y34N }
+     * </pre>
+     */
+    @SuppressWarnings("UnstableApiUsage")
+    public static String getShortString(String src) {
+        if (U.isBlank(src)) {
+            return U.EMPTY;
+        } else if (src.length() < 6) {
+            return src;
+        } else {
+            StringBuilder sbd = new StringBuilder();
+            long pad = Math.abs(HASH_FUN.hashBytes(src.getBytes(StandardCharsets.UTF_8)).padToLong());
+            if (pad < HEX_LEN) {
+                sbd.append(HEX[(int) pad]);
+            } else {
+                long t = pad;
+                while (t > HEX_LEN) {
+                    int p = (int) (t % HEX_LEN);
+                    t = t / HEX_LEN;
+                    sbd.insert(0, HEX[p]);
+                }
+                sbd.insert(0, HEX[(int) t]);
+            }
+            return sbd.toString();
+        }
     }
 
     /** 使用 base64 编码 */
