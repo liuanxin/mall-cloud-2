@@ -21,8 +21,8 @@
     <logger name="httpclient" level="warn"/>
     <logger name="freemarker" level="warn"/>
 
-    <logger name="com.alibaba" level="error"/>
-    <logger name="com.netflix" level="error"/>
+    <logger name="com.alibaba" level="WARN"/>
+    <logger name="com.netflix" level="WARN"/>
     <logger name="com.github" level="warn"/>
 
     <logger name="org.springframework" level="warn"/>

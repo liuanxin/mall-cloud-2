@@ -38,9 +38,10 @@
     <logger name="org.apache" level="error"/>
     <logger name="org.jboss" level="error"/>
 
-    <logger name="io.lettuce" level="warn"/>
-    <logger name="io.netty" level="warn"/>
-    <logger name="reactor" level="warn"/>
+    <logger name="io.micrometer" level="error"/>
+    <logger name="io.lettuce" level="error"/>
+    <logger name="io.netty" level="error"/>
+    <logger name="reactor" level="error"/>
 
 
     <root level="info">

@@ -955,6 +955,8 @@ class Server {
                     "    <logger name=\"org.apache\" level=\"~LEVEL~\"/>\n" +
                     "    <logger name=\"org.jboss\" level=\"~LEVEL~\"/>\n" +
                     "\n" +
+                    "\n" +
+                    "    <logger name=\"io.micrometer\" level=\"~LEVEL~\"/>\n" +
                     "    <logger name=\"io.lettuce\" level=\"~LEVEL~\"/>\n" +
                     "    <logger name=\"io.netty\" level=\"~LEVEL~\"/>\n" +
                     "    <logger name=\"reactor\" level=\"~LEVEL~\"/>\n";

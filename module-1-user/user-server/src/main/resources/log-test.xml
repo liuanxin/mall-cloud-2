@@ -53,6 +53,7 @@
     <logger name="org.apache" level="warn"/>
     <logger name="org.jboss" level="warn"/>
 
+    <logger name="io.micrometer" level="warn"/>
     <logger name="io.lettuce" level="warn"/>
     <logger name="io.netty" level="warn"/>
     <logger name="reactor" level="warn"/>
