@@ -33,11 +33,13 @@
     <logger name="com.sun" level="error"/>
 
     <logger name="org.springframework" level="error"/>
+    <logger name="org.thymeleaf" level="error"/>
     <logger name="org.hibernate" level="error"/>
     <logger name="org.mybatis" level="error"/>
     <logger name="org.apache" level="error"/>
     <logger name="org.jboss" level="error"/>
 
+    <logger name="io.micrometer" level="error"/>
     <logger name="io.lettuce" level="error"/>
     <logger name="io.netty" level="error"/>
     <logger name="reactor" level="error"/>

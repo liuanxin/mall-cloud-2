@@ -20,4 +20,7 @@ eureka:
     lease-renewal-interval-in-seconds: 5
     lease-expiration-duration-in-seconds: 15
 
+spring.cloud:
+  loadbalancer.ribbon.enabled: false
+
 management.endpoints.web.exposure.include: "*"

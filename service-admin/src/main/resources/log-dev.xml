@@ -19,11 +19,13 @@
     <logger name="com.sun" level="warn"/>
 
     <logger name="org.springframework" level="warn"/>
+    <logger name="org.thymeleaf" level="warn"/>
     <logger name="org.hibernate" level="warn"/>
     <logger name="org.mybatis" level="warn"/>
     <logger name="org.apache" level="warn"/>
     <logger name="org.jboss" level="warn"/>
 
+    <logger name="io.micrometer" level="warn"/>
     <logger name="io.lettuce" level="warn"/>
     <logger name="io.netty" level="warn"/>
     <logger name="reactor" level="warn"/>
