@@ -50,7 +50,7 @@ public class ModuleTest2 {
         generate("2-product", "8092", "商品");
         generate("3-order",   "8093", "订单");
 
-        soutInfo();
+        printInfo();
     }
 
     private static List<List<String>> moduleNameList = new ArrayList<>();
@@ -75,7 +75,7 @@ public class ModuleTest2 {
         moduleList.add(Arrays.asList(model, client, server));
     }
 
-    private static void soutInfo() throws Exception {
+    private static void printInfo() throws Exception {
         System.out.println();
         for (List<String> list : moduleNameList) {
             System.out.println(String.format("<!-- %s模块 -->\n<module>%s</module>", list.get(0), list.get(1)));
@@ -544,163 +544,6 @@ class Server {
             "    */\n" +
             "}\n";
 
-    private static final String EXCEPTION = "package " + PACKAGE + ".%s.config;\n" +
-            "\n" +
-            "import " + PACKAGE + ".common.exception.*;\n" +
-            "import " + PACKAGE + ".common.json.JsonResult;\n" +
-            "import " + PACKAGE + ".common.util.A;\n" +
-            "import " + PACKAGE + ".common.util.LogUtil;\n" +
-            "import " + PACKAGE + ".common.util.RequestUtils;\n" +
-            "import " + PACKAGE + ".common.util.U;\n" +
-            "import org.springframework.beans.factory.annotation.Value;\n" +
-            "import org.springframework.http.ResponseEntity;\n" +
-            "import org.springframework.web.HttpRequestMethodNotSupportedException;\n" +
-            "import org.springframework.web.bind.MissingServletRequestParameterException;\n" +
-            "import org.springframework.web.bind.annotation.ExceptionHandler;\n" +
-            "import org.springframework.web.bind.annotation.RestControllerAdvice;\n" +
-            "import org.springframework.web.multipart.MaxUploadSizeExceededException;\n" +
-            "import org.springframework.web.servlet.NoHandlerFoundException;\n" +
-            "\n" +
-            "/**\n" +
-            " * 处理全局异常的控制类\n" +
-            " *\n" +
-            " * @see org.springframework.boot.web.servlet.error.ErrorController\n" +
-            " * @see org.springframework.boot.autoconfigure.web.ErrorProperties\n" +
-            " * @see org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration\n" +
-            AUTHOR +
-            " */\n" +
-            "@RestControllerAdvice\n" +
-            "public class %sGlobalException {\n" +
-            "\n" +
-            "    @Value(\"${online:false}\")\n" +
-            "    private boolean online;\n" +
-            "\n" +
-            "    /** 业务异常 */\n" +
-            "    @ExceptionHandler(ServiceException.class)\n" +
-            "    public ResponseEntity<String> service(ServiceException e) {\n" +
-            "        String msg = e.getMessage();\n" +
-            "        if (LogUtil.ROOT_LOG.isDebugEnabled()) {\n" +
-            "            LogUtil.ROOT_LOG.debug(msg);\n" +
-            "        }\n" +
-            "\n" +
-            "        JsonResult result = JsonResult.serviceFail(msg);\n" +
-            "        return ResponseEntity.status(result.getCode()).body(result.getMsg());\n" +
-            "    }\n" +
-            "    /** 未登录 */\n" +
-            "    @ExceptionHandler(NotLoginException.class)\n" +
-            "    public ResponseEntity<String> notLogin(NotLoginException e) {\n" +
-            "        String msg = e.getMessage();\n" +
-            "        if (LogUtil.ROOT_LOG.isDebugEnabled()) {\n" +
-            "            LogUtil.ROOT_LOG.debug(msg);\n" +
-            "        }\n" +
-            "\n" +
-            "        JsonResult result = JsonResult.notLogin(msg);\n" +
-            "        return ResponseEntity.status(result.getCode()).body(result.getMsg());\n" +
-            "    }\n" +
-            "    /** 无权限 */\n" +
-            "    @ExceptionHandler(ForbiddenException.class)\n" +
-            "    public ResponseEntity<String> forbidden(ForbiddenException e) {\n" +
-            "        String msg = e.getMessage();\n" +
-            "        if (LogUtil.ROOT_LOG.isDebugEnabled()) {\n" +
-            "            LogUtil.ROOT_LOG.debug(msg);\n" +
-            "        }\n" +
-            "\n" +
-            "        JsonResult result = JsonResult.notPermission(msg);\n" +
-            "        return ResponseEntity.status(result.getCode()).body(result.getMsg());\n" +
-            "    }\n" +
-            "    /** 404 */\n" +
-            "    @ExceptionHandler(NotFoundException.class)\n" +
-            "    public ResponseEntity<String> notFound(NotFoundException e) {\n" +
-            "        String msg = e.getMessage();\n" +
-            "        if (LogUtil.ROOT_LOG.isDebugEnabled()) {\n" +
-            "            LogUtil.ROOT_LOG.debug(msg);\n" +
-            "        }\n" +
-            "\n" +
-            "        JsonResult result = JsonResult.notFound(msg);\n" +
-            "        return ResponseEntity.status(result.getCode()).body(result.getMsg());\n" +
-            "    }\n" +
-            "    /** 错误的请求 */\n" +
-            "    @ExceptionHandler(BadRequestException.class)\n" +
-            "    public ResponseEntity<String> badRequest(BadRequestException e) {\n" +
-            "        String msg = e.getMessage();\n" +
-            "        if (LogUtil.ROOT_LOG.isDebugEnabled()) {\n" +
-            "            LogUtil.ROOT_LOG.debug(msg);\n" +
-            "        }\n" +
-            "\n" +
-            "        JsonResult result = JsonResult.badRequest(msg);\n" +
-            "        return ResponseEntity.status(result.getCode()).body(result.getMsg());\n" +
-            "    }\n" +
-            "\n" +
-            "\n" +
-            "    // 以下是 spring 的内部异常\n" +
-            "\n" +
-            "    @ExceptionHandler(NoHandlerFoundException.class)\n" +
-            "    public ResponseEntity<String> noHandler(NoHandlerFoundException e) {\n" +
-            "        bindAndPrintLog(e);\n" +
-            "\n" +
-            "        String msg = String.format(\"没找到(%%s %%s)\", e.getHttpMethod(), e.getRequestURL());\n" +
-            "        JsonResult result = JsonResult.notFound(msg);\n" +
-            "        return ResponseEntity.status(result.getCode()).body(result.getMsg());\n" +
-            "    }\n" +
-            "    @ExceptionHandler(MissingServletRequestParameterException.class)\n" +
-            "    public ResponseEntity<String> missParam(MissingServletRequestParameterException e) {\n" +
-            "        bindAndPrintLog(e);\n" +
-            "\n" +
-            "        String msg = String.format(\"缺少必须的参数(%%s), 类型(%%s)\", e.getParameterName(), e.getParameterType());\n" +
-            "        JsonResult result = JsonResult.badRequest(msg);\n" +
-            "        return ResponseEntity.status(result.getCode()).body(result.getMsg());\n" +
-            "    }\n" +
-            "    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)\n" +
-            "    public ResponseEntity<String> notSupported(HttpRequestMethodNotSupportedException e) {\n" +
-            "        bindAndPrintLog(e);\n" +
-            "\n" +
-            "        String msg = \"不支持此种请求方式.\";\n" +
-            "        if (!online) {\n" +
-            "            msg += String.format(\" 当前(%%s), 支持(%%s)\", e.getMethod(), A.toStr(e.getSupportedMethods()));\n" +
-            "        }\n" +
-            "        JsonResult result = JsonResult.serviceFail(msg);\n" +
-            "        return ResponseEntity.status(result.getCode()).body(result.getMsg());\n" +
-            "    }\n" +
-            "    @ExceptionHandler(MaxUploadSizeExceededException.class)\n" +
-            "    public ResponseEntity<String> uploadSizeExceeded(MaxUploadSizeExceededException e) {\n" +
-            "        bindAndPrintLog(e);\n" +
-            "\n" +
-            "        // 右移 20 位相当于除以两次 1024, 正好表示从字节到 Mb\n" +
-            "        String msg = String.format(\"上传文件太大! 请保持在 %%sM 以内\", (e.getMaxUploadSize() >> 20));\n" +
-            "        JsonResult result = JsonResult.serviceFail(msg);\n" +
-            "        return ResponseEntity.status(result.getCode()).body(result.getMsg());\n" +
-            "    }\n" +
-            "\n" +
-            "    // 以上是 spring 的内部异常\n" +
-            "\n" +
-            "\n" +
-            "    /** 未知的所有其他异常 */\n" +
-            "    @ExceptionHandler(Throwable.class)\n" +
-            "    public ResponseEntity<String> other(Throwable e) {\n" +
-            "        if (LogUtil.ROOT_LOG.isErrorEnabled()) {\n" +
-            "            LogUtil.ROOT_LOG.error(\"有错误\", e);\n" +
-            "        }\n" +
-            "\n" +
-            "        String msg = U.returnMsg(e, online);\n" +
-            "        JsonResult<Object> result = JsonResult.fail(msg);\n" +
-            "        return ResponseEntity.status(result.getCode()).body(result.getMsg());\n" +
-            "    }\n" +
-            "\n" +
-            "    // ==================================================\n" +
-            "\n" +
-            "    private void bindAndPrintLog(Exception e) {\n" +
-            "        if (LogUtil.ROOT_LOG.isDebugEnabled()) {\n" +
-            "            // 当没有进到全局拦截器就抛出的异常, 需要这么处理才能在日志中输出整个上下文信息\n" +
-            "            LogUtil.bind(RequestUtils.logContextInfo());\n" +
-            "            try {\n" +
-            "                LogUtil.ROOT_LOG.debug(e.getMessage(), e);\n" +
-            "            } finally {\n" +
-            "                LogUtil.unbind();\n" +
-            "            }\n" +
-            "        }\n" +
-            "    }\n" +
-            "}\n";
-
     private static final String INTERCEPTOR = "package " + PACKAGE + ".%s.config;\n" +
             "\n" +
             "import " + PACKAGE + ".common.util.LogUtil;\n" +
@@ -985,7 +828,7 @@ class Server {
             "        <!-- yyyy-MM-dd_HH 每小时建一个, yyyy-MM-dd_HH-mm 每分钟建一个 -->\n" +
             "        <rollingPolicy class=\"ch.qos.logback.core.rolling.TimeBasedRollingPolicy\">\n" +
             "            <fileNamePattern>${FILE_PATH}-%d{yyyy-MM-dd}.log</fileNamePattern>\n" +
-            "            <maxHistory>7</maxHistory>\n" +
+            "            <maxHistory>3</maxHistory>\n" +
             "        </rollingPolicy>\n" +
             "        <!-- 开启了下面的配置将会在文件达到 10MB 的时候才新建文件, 将会按上面的规则一天建一个  -->\n" +
             "        <!--<triggeringPolicy class=\"ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy\">\n" +
@@ -1000,7 +843,7 @@ class Server {
             "        <file>${FILE_PATH}-sql.log</file>\n" +
             "        <rollingPolicy class=\"ch.qos.logback.core.rolling.TimeBasedRollingPolicy\">\n" +
             "            <fileNamePattern>${FILE_PATH}-sql-%d{yyyy-MM-dd}.log</fileNamePattern>\n" +
-            "            <maxHistory>7</maxHistory>\n" +
+            "            <maxHistory>3</maxHistory>\n" +
             "        </rollingPolicy>\n" +
             "        <encoder>\n" +
             "            <pattern>${SQL_PATTERN}</pattern>\n" +
@@ -1085,12 +928,6 @@ class Server {
             "        <dependency>\n" +
             "            <groupId>org.springframework.boot</groupId>\n" +
             "            <artifactId>spring-boot-starter-jdbc</artifactId>\n" +
-//            "            <exclusions>\n" +
-//            "                <exclusion>\n" +
-//            "                    <groupId>org.apache.tomcat</groupId>\n" +
-//            "                    <artifactId>tomcat-jdbc</artifactId>\n" +
-//            "                </exclusion>\n" +
-//            "            </exclusions>\n" +
             "        </dependency>\n" +
             "        <dependency>\n" +
             "            <groupId>org.springframework.boot</groupId>\n" +
@@ -1105,15 +942,11 @@ class Server {
             "            <groupId>org.springframework.cloud</groupId>\n" +
             "            <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>\n" +
             "        </dependency>\n" +
-//            "        <dependency>\n" +
-//            "            <groupId>org.springframework.cloud</groupId>\n" +
-//            "            <artifactId>spring-cloud-starter-zipkin</artifactId>\n" +
-//            "        </dependency>\n" +
+            "        <!--<dependency>\n" +
+            "            <groupId>org.springframework.cloud</groupId>\n" +
+            "            <artifactId>spring-cloud-starter-zipkin</artifactId>\n" +
+            "        </dependency>-->\n" +
             "\n" +
-//            "        <dependency>\n" +
-//            "            <groupId>com.zaxxer</groupId>\n" +
-//            "            <artifactId>HikariCP</artifactId>\n" +
-//            "        </dependency>\n" +
             "        <dependency>\n" +
             "            <groupId>mysql</groupId>\n" +
             "            <artifactId>mysql-connector-java</artifactId>\n" +
@@ -1174,7 +1007,7 @@ class Server {
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
     static void generateServer(String moduleName, String packageName, String model,
-                               String server, String module, String port, String comment) throws IOException {
+                               String server, String module, String port, String comment) {
         String parentPackageName = packageName.replace("-", ".");
         String clazzName = capitalize(parentPackageName);
 

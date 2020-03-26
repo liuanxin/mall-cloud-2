@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-    <property name="FILE_PATH" value="${user.home}/logs/order-test"/>
+    <property name="FILE_PATH" value="${user.home}/logs/service-admin-test"/>
     <property name="SQL_PATTERN" value="%n[%d] [${PID:- } %t\\(%logger\\) : %p] %class.%method\\(%file:%line\\) %m%n"/>
     <property name="LOG_PATTERN" value="%n[%X{receiveTime}%d] [${PID:- } %t\\(%logger\\) : %p]%X{requestInfo} %class{30}#%method\\(%file:%line\\) %m%n"/>
 
@@ -9,7 +9,7 @@
         <!-- yyyy-MM-dd_HH 每小时建一个, yyyy-MM-dd_HH-mm 每分钟建一个 -->
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <fileNamePattern>${FILE_PATH}-%d{yyyy-MM-dd}.log</fileNamePattern>
-            <maxHistory>7</maxHistory>
+            <maxHistory>3</maxHistory>
         </rollingPolicy>
         <!-- 开启了下面的配置将会在文件达到 10MB 的时候才新建文件, 将会按上面的规则一天建一个  -->
         <!--<triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
@@ -24,7 +24,7 @@
         <file>${FILE_PATH}-sql.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <fileNamePattern>${FILE_PATH}-sql-%d{yyyy-MM-dd}.log</fileNamePattern>
-            <maxHistory>7</maxHistory>
+            <maxHistory>3</maxHistory>
         </rollingPolicy>
         <encoder>
             <pattern>${SQL_PATTERN}</pattern>
