@@ -4,7 +4,6 @@ import com.github.common.encrypt.jwt.JWTExpiredException;
 import com.github.common.encrypt.jwt.JWTSigner;
 import com.github.common.encrypt.jwt.JWTVerifier;
 import com.github.common.encrypt.jwt.JWTVerifyException;
-import com.github.common.exception.NotLoginException;
 import com.github.common.util.LogUtil;
 import com.github.common.util.U;
 import com.google.common.hash.HashFunction;
@@ -349,18 +348,18 @@ public final class Encrypt {
             if (LogUtil.ROOT_LOG.isDebugEnabled()) {
                 LogUtil.ROOT_LOG.debug("使用 jwt 解密(" + data + ")时, 数据已过期", e);
             }
-            throw new NotLoginException("登录已过期, 请重新登录");
+            throw new RuntimeException("登录已过期, 请重新登录");
         } catch (NoSuchAlgorithmException | InvalidKeyException | IOException |
                 SignatureException | JWTVerifyException e) {
-            if (LogUtil.ROOT_LOG.isWarnEnabled()) {
-                LogUtil.ROOT_LOG.warn("使用 jwt 解密(" + data + ")失败", e);
+            if (LogUtil.ROOT_LOG.isDebugEnabled()) {
+                LogUtil.ROOT_LOG.debug("使用 jwt 解密(" + data + ")失败", e);
             }
-            throw new NotLoginException("验证失败, 需要重新登录");
+            throw new RuntimeException("验证失败, 需要重新登录");
         } catch (Exception e) {
-            if (LogUtil.ROOT_LOG.isWarnEnabled()) {
-                LogUtil.ROOT_LOG.warn("使用 jwt 解密(" + data + ")异常", e);
+            if (LogUtil.ROOT_LOG.isDebugEnabled()) {
+                LogUtil.ROOT_LOG.debug("使用 jwt 解密(" + data + ")异常", e);
             }
-            throw new NotLoginException();
+            throw new RuntimeException("验证失败, 请重新登录");
         }
     }
 
