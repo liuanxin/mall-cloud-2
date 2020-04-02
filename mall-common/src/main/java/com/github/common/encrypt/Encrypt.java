@@ -79,7 +79,7 @@ public final class Encrypt {
     }
     /** 使用 aes 解密 */
     public static String aesDecode(String data, String secretKey) {
-        if (data == null || data.trim().length() == 0) {
+        if (U.isBlank(data)) {
             throw new RuntimeException("空值无需使用 " + AES + " 解密");
         }
         if (secretKey.length() != AES_LEN) {
@@ -434,7 +434,7 @@ public final class Encrypt {
      * 生成短地址: 长度大于 6 则用 Murmur3_32Hash 算法来生成 hash 并返回其 62 进制数(0-9 + a-z + A-Z)
      *
      * getShortString("user/info?id=123&name=中文&sex=0&province=广东") ==> 44y34N
-     * 这样可以将 { http://abc.xyz.com/user/info?id=123&name=中文&sex=0&province=广东 } 缩短成 { http://t.co/44y34N }
+     * 这样可以将 { http://abc.xyz.com/user/info?id=123&name=中文&sex=0&province=广东 } 缩短成 { http://t.io/44y34N }
      * </pre>
      */
     @SuppressWarnings("UnstableApiUsage")
