@@ -91,6 +91,7 @@ public final class U {
      * @param clazz 枚举的类信息
      * @param obj 要匹配的值
      */
+    @SuppressWarnings("rawtypes")
     public static <E extends Enum> E toEnum(Class<E> clazz, Object obj) {
         if (isNotBlank(obj)) {
             E[] constants = clazz.getEnumConstants();
@@ -109,8 +110,8 @@ public final class U {
                     }
 
                     // 如果传递过来的值跟枚举的 getValue(中文) 相同则返回
-                    code = getMethod(em, "getValue");
-                    if (isNotBlank(code) && source.equalsIgnoreCase(code.toString().trim())) {
+                    Object value = getMethod(em, "getValue");
+                    if (isNotBlank(value) && source.equalsIgnoreCase(value.toString().trim())) {
                         return em;
                     }
 
@@ -179,6 +180,7 @@ public final class U {
      * }
      * </pre>
      */
+    @SuppressWarnings("rawtypes")
     public static <E extends Enum> E enumDeserializer(Object obj, Class<E> enumClass) {
         if (isBlank(obj)) {
             return null;
@@ -199,6 +201,7 @@ public final class U {
         }
         return toEnum(enumClass, tmp);
     }
+    @SuppressWarnings("rawtypes")
     private static Object getEnumInMap(Map map) {
         if (A.isNotEmpty(map)) {
             Object tmp = map.get(ENUM_CODE);
@@ -231,7 +234,7 @@ public final class U {
             return ((Number) obj).intValue();
         }
         try {
-            return Integer.parseInt(obj.toString());
+            return Integer.parseInt(obj.toString().trim());
         } catch (NumberFormatException e) {
             return 0;
         }
@@ -244,7 +247,7 @@ public final class U {
             return ((Number) obj).longValue();
         }
         try {
-            return Long.parseLong(obj.toString());
+            return Long.parseLong(obj.toString().trim());
         } catch (NumberFormatException e) {
             return 0L;
         }
@@ -257,7 +260,7 @@ public final class U {
             return ((Number) obj).floatValue();
         }
         try {
-            return Float.parseFloat(obj.toString());
+            return Float.parseFloat(obj.toString().trim());
         } catch (NumberFormatException e) {
             return 0F;
         }
@@ -270,7 +273,7 @@ public final class U {
             return ((Number) obj).doubleValue();
         }
         try {
-            return Double.parseDouble(obj.toString());
+            return Double.parseDouble(obj.toString().trim());
         } catch (NumberFormatException e) {
             return 0D;
         }
@@ -283,7 +286,7 @@ public final class U {
             return true;
         }
         try {
-            Double.parseDouble(obj.toString());
+            Double.parseDouble(obj.toString().trim());
             return true;
         } catch (NumberFormatException e) {
             return false;
@@ -656,6 +659,7 @@ public final class U {
      * @param field 属性名
      * @return 如果属性是枚举则调用枚举的 getValue 方法, 如果是日期则格式化, 否则返回此属性值的 toString 方法
      */
+    @SuppressWarnings("rawtypes")
     public static String getField(Object data, String field) {
         if (isBlank(data) || isBlank(field)) {
             return EMPTY;
