@@ -43,6 +43,7 @@ import java.util.*;
 public class HttpClientUtil {
 
     private static final int TIME_OUT = 30 * 1000;
+    private static final String USER_AGENT = "Mozilla/5.0 (httpclient4.5; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36";
 
     private static final PoolingHttpClientConnectionManager CONNECTION_MANAGER;
     private static final HttpRequestRetryHandler HTTP_REQUEST_RETRY_HANDLER;
@@ -105,6 +106,7 @@ public class HttpClientUtil {
 
     private static CloseableHttpClient createHttpClient() {
         return HttpClients.custom()
+                .setUserAgent(USER_AGENT)
                 .setConnectionManager(CONNECTION_MANAGER)
                 .setRetryHandler(HTTP_REQUEST_RETRY_HANDLER).build();
     }
@@ -281,7 +283,7 @@ public class HttpClientUtil {
     private static String collectContext(long start, String method, String url, String params,
                                          Header[] requestHeaders, Header[] responseHeaders, String result) {
         StringBuilder sbd = new StringBuilder();
-        sbd.append("HttpClient => [")
+        sbd.append("HttpClient4 => [")
                 .append(DateUtil.formatMs(new Date(start))).append(" -> ").append(DateUtil.nowTimeMs())
                 .append("] (").append(method).append(" ").append(url).append(")");
         // 太长就只输出前后, 不全部输出
