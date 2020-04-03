@@ -19,7 +19,7 @@ import java.util.List;
 public class ManagerInterceptor implements HandlerInterceptor {
 
     private static final List<String> LET_IT_GO = Lists.newArrayList(
-            "/error", "/api/project", "/api/info", "/api/example"
+            "/error", "/api/project", "/api/info", "/api/example/*"
     );
 
     private boolean online;
@@ -44,8 +44,8 @@ public class ManagerInterceptor implements HandlerInterceptor {
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response,
                                 Object handler, Exception ex) throws Exception {
         if (ex != null) {
-            if (LogUtil.ROOT_LOG.isDebugEnabled()) {
-                LogUtil.ROOT_LOG.debug("request was over, but have exception: " + ex.getMessage());
+            if (LogUtil.ROOT_LOG.isErrorEnabled()) {
+                LogUtil.ROOT_LOG.error("request was over, but have exception", ex);
             }
         }
         unbindParam();
@@ -69,8 +69,17 @@ public class ManagerInterceptor implements HandlerInterceptor {
         if (!online) {
             return;
         }
-        if (LET_IT_GO.contains(RequestUtils.getRequest().getRequestURI())) {
-            return;
+        String uri = RequestUtils.getRequest().getRequestURI();
+        for (String letItGo : LET_IT_GO) {
+            if (letItGo.equals(uri)) {
+                return;
+            }
+            if (letItGo.contains("*")) {
+                letItGo = letItGo.replace("*", "(.*)?");
+                if (uri.matches(letItGo)) {
+                    return;
+                }
+            }
         }
         if (!handler.getClass().isAssignableFrom(HandlerMethod.class)) {
             return;
