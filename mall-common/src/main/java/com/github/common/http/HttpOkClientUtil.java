@@ -44,24 +44,24 @@ public class HttpOkClientUtil {
     }
 
     /** 向指定 url 进行 get 请求 */
-    public static String get(String url, boolean online) {
+    public static String get(String url) {
         if (U.isBlank(url)) {
             return null;
         }
 
-        return handleRequest(url, new Request.Builder(), null, online);
+        return handleRequest(url, new Request.Builder(), null);
     }
     /** 向指定 url 进行 get 请求. 有参数 */
-    public static String get(String url, Map<String, Object> params, boolean online) {
+    public static String get(String url, Map<String, Object> params) {
         if (U.isBlank(url)) {
             return null;
         }
 
         url = handleGetParams(url, params);
-        return handleRequest(url, new Request.Builder(), U.formatParam(params), online);
+        return handleRequest(url, new Request.Builder(), U.formatParam(params));
     }
     /** 向指定 url 进行 get 请求. 有参数和头 */
-    public static String getWithHeader(String url, Map<String, Object> params, Map<String, Object> headerMap, boolean online) {
+    public static String getWithHeader(String url, Map<String, Object> params, Map<String, Object> headerMap) {
         if (U.isBlank(url)) {
             return null;
         }
@@ -69,43 +69,43 @@ public class HttpOkClientUtil {
         url = handleGetParams(url, params);
         Request.Builder builder = new Request.Builder();
         handleHeader(builder, headerMap);
-        return handleRequest(url, builder, U.formatParam(params), online);
+        return handleRequest(url, builder, U.formatParam(params));
     }
 
 
     /** 向指定的 url 进行 post 请求. 有参数 */
-    public static String post(String url, Map<String, Object> params, boolean online) {
+    public static String post(String url, Map<String, Object> params) {
         if (U.isBlank(url)) {
             return null;
         }
 
         Request.Builder builder = handlePostParams(params);
-        return handleRequest(url, builder, U.formatParam(params), online);
+        return handleRequest(url, builder, U.formatParam(params));
     }
     /** 向指定的 url 进行 post 请求. 参数以 json 的方式一次传递 */
-    public static String post(String url, String json, boolean online) {
+    public static String post(String url, String json) {
         if (U.isBlank(url)) {
             return null;
         }
 
         RequestBody body = RequestBody.create(JSON, json);
         Request.Builder builder = new Request.Builder().post(body);
-        return handleRequest(url, builder, json, online);
+        return handleRequest(url, builder, json);
     }
     /** 向指定的 url 进行 post 请求. 有参数和头 */
-    public static String postWithHeader(String url, Map<String, Object> params, Map<String, Object> headers, boolean online) {
+    public static String postWithHeader(String url, Map<String, Object> params, Map<String, Object> headers) {
         if (U.isBlank(url)) {
             return null;
         }
 
         Request.Builder builder = handlePostParams(params);
         handleHeader(builder, headers);
-        return handleRequest(url, builder, U.formatParam(params), online);
+        return handleRequest(url, builder, U.formatParam(params));
     }
 
 
     /** 向指定 url 上传 png 图片文件 */
-    public static String postFile(String url, Map<String, Object> params, Map<String, File> files, boolean online) {
+    public static String postFile(String url, Map<String, Object> params, Map<String, File> files) {
         if (U.isBlank(url)) {
             return null;
         }
@@ -127,7 +127,7 @@ public class HttpOkClientUtil {
             }
         }
         Request.Builder request = new Request.Builder().post(builder.build());
-        return handleRequest(url, request, U.formatParam(params), online);
+        return handleRequest(url, request, U.formatParam(params));
     }
 
 
@@ -162,7 +162,7 @@ public class HttpOkClientUtil {
         }
     }
     /** 收集上下文中的数据, 以便记录日志 */
-    private static String collectContext(boolean online, Date start, String method, String url, String params,
+    private static String collectContext(Date start, String method, String url, String params,
                                          Headers requestHeaders, Headers responseHeaders, String result) {
         StringBuilder sbd = new StringBuilder();
         sbd.append("OkHttp3 => (")
@@ -195,7 +195,7 @@ public class HttpOkClientUtil {
         return sbd.toString();
     }
     /** 发起 http 请求 */
-    private static String handleRequest(String url, Request.Builder builder, String params, boolean online) {
+    private static String handleRequest(String url, Request.Builder builder, String params) {
         url = handleEmptyScheme(url);
         Request request = wrapperRequest(builder, url);
         String method = request.method();
@@ -206,10 +206,9 @@ public class HttpOkClientUtil {
             if (body != null) {
                 String result = body.string();
                 if (LogUtil.ROOT_LOG.isInfoEnabled()) {
-                    Headers requestHeaders = request.headers();
-                    Headers responseHeaders = response.headers();
-                    String log = collectContext(online, start, method, url, params, requestHeaders, responseHeaders, result);
-                    LogUtil.ROOT_LOG.info(log);
+                    Headers reqHeaders = request.headers();
+                    Headers resHeaders = response.headers();
+                    LogUtil.ROOT_LOG.info(collectContext(start, method, url, params, reqHeaders, resHeaders, result));
                 }
                 return result;
             }

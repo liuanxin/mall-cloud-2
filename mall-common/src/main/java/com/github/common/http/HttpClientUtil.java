@@ -322,10 +322,9 @@ public class HttpClientUtil {
             if (U.isNotBlank(entity)) {
                 String result = EntityUtils.toString(entity, StandardCharsets.UTF_8);
                 if (LogUtil.ROOT_LOG.isInfoEnabled()) {
-                    Header[] requestHeaders = request.getAllHeaders();
-                    Header[] responseHeaders = response.getAllHeaders();
-                    String log = collectContext(start, method, url, params, requestHeaders, responseHeaders, result);
-                    LogUtil.ROOT_LOG.info(log);
+                    Header[] reqHeaders = request.getAllHeaders();
+                    Header[] resHeaders = response.getAllHeaders();
+                    LogUtil.ROOT_LOG.info(collectContext(start, method, url, params, reqHeaders, resHeaders, result));
                 }
                 EntityUtils.consume(entity);
                 return result;
