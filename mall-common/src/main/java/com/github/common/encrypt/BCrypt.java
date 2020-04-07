@@ -29,12 +29,12 @@ final class BCrypt {
 
     private static final int SALT_LEN = 16;
 
-    private static final int P_ORIG[] = {
+    private static final int[] P_ORIG = {
             0x243f6a88, 0x85a308d3, 0x13198a2e, 0x03707344, 0xa4093822, 0x299f31d0,
             0x082efa98, 0xec4e6c89, 0x452821e6, 0x38d01377, 0xbe5466cf, 0x34e90c6c,
             0xc0ac29b7, 0xc97c50dd, 0x3f84d5b5, 0xb5470917, 0x9216d5d9, 0x8979fb1b
     };
-    private static final int S_ORIG[] = {
+    private static final int[] S_ORIG = {
             0xd1310ba6, 0x98dfb5ac, 0x2ffd72db, 0xd01adfb7,
             0xb8e1afed, 0x6a267e96, 0xba7c9045, 0xf12c7f99,
             0x24a19947, 0xb3916cf7, 0x0801f2e2, 0x858efc16,
@@ -294,12 +294,12 @@ final class BCrypt {
     };
 
     // bcrypt IV: "OrpheanBeholderScryDoubt"
-    static private final int BF_CRYPT_CIPHER_TEXT[] = {
+    static private final int[] BF_CRYPT_CIPHER_TEXT = {
             0x4f727068, 0x65616e42, 0x65686f6c, 0x64657253, 0x63727944, 0x6f756274
     };
 
     // Table for Base64 encoding
-    static private final char BASE_64_CODE[] = {
+    static private final char[] BASE_64_CODE = {
             '.', '/', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J',
             'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V',
             'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h',
@@ -309,7 +309,7 @@ final class BCrypt {
     };
 
     // Table for Base64 decoding
-    static private final byte INDEX_64[] = {
+    static private final byte[] INDEX_64 = {
             -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
             -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
             -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
@@ -341,7 +341,7 @@ final class BCrypt {
      * @return base64-encoded string
      * @throws IllegalArgumentException if the length is invalid
      */
-    private static String encode_base64(byte d[], int len)
+    private static String encode_base64(byte[] d, int len)
             throws IllegalArgumentException {
         if (len <= 0 || len > d.length) {
             throw new IllegalArgumentException("Invalid len");
@@ -407,7 +407,7 @@ final class BCrypt {
 
         StringBuilder sbd = new StringBuilder();
         int off = 0, length = s.length(), olen = 0;
-        byte ret[];
+        byte[] ret;
         byte c1, c2, c3, c4, o;
 
         while (off < length - 1 && olen < maxLen) {
@@ -453,7 +453,7 @@ final class BCrypt {
      * @param lr  an array containing the two 32-bit half blocks
      * @param off the position in the array of the blocks
      */
-    private void encipher(int lr[], int off) {
+    private void encipher(int[] lr, int off) {
         int i, n, l = lr[off], r = lr[off + 1];
         int blowFishNumRounds = 16;
 
@@ -485,7 +485,7 @@ final class BCrypt {
      *             current offset into data
      * @return the next word of material from data
      */
-    private static int streamToWord(byte data[], int offp[]) {
+    private static int streamToWord(byte[] data, int[] offp) {
         int i;
         int word = 0;
         int off = offp[0];
@@ -512,10 +512,10 @@ final class BCrypt {
      *
      * @param key an array containing the key
      */
-    private void key(byte key[]) {
+    private void key(byte[] key) {
         int i;
-        int koffp[] = {0};
-        int lr[] = {0, 0};
+        int[] koffp = {0};
+        int[] lr = {0, 0};
         int plen = p.length, slen = s.length;
 
         for (i = 0; i < plen; i++) {
@@ -543,10 +543,10 @@ final class BCrypt {
      * @param data salt information
      * @param key  password information
      */
-    private void eksKey(byte data[], byte key[]) {
+    private void eksKey(byte[] data, byte[] key) {
         int i;
-        int koffp[] = {0}, doffp[] = {0};
-        int lr[] = {0, 0};
+        int[] koffp = {0}, doffp = {0};
+        int[] lr = {0, 0};
         int plen = p.length, slen = s.length;
 
         for (i = 0; i < plen; i++) {
@@ -580,11 +580,11 @@ final class BCrypt {
      *                   of rounds of hashing to apply
      * @return an array containing the binary encryptPass password
      */
-    private byte[] crypt_raw(byte password[], byte salt[], int log_rounds) {
+    private byte[] crypt_raw(byte[] password, byte[] salt, int log_rounds) {
         int rounds, i, j;
-        int cdata[] = BF_CRYPT_CIPHER_TEXT.clone();
+        int[] cdata = BF_CRYPT_CIPHER_TEXT.clone();
         int length = cdata.length;
-        byte ret[];
+        byte[] ret;
 
         if (log_rounds < 4 || log_rounds > 31) {
             throw new IllegalArgumentException("Bad number of rounds");
