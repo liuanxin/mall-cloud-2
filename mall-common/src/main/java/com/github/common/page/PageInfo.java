@@ -41,7 +41,7 @@ public class PageInfo<T> implements Serializable {
     @ApiReturn("SELECT COUNT(*) FROM ... 的结果")
     private int total;
 
-    @ApiReturn("SELECT ... FROM ... LIMIT ?,? 的结果")
+    @ApiReturn("SELECT ... FROM ... LIMIT 0, 10 的结果")
     private List<T> list;
 
     public static <T> PageInfo<T> emptyReturn() {

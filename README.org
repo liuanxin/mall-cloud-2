@@ -53,7 +53,7 @@
 
 在 controller 中这样
 #+BEGIN_SRC java
-// 如果不传 page 和 limit, 或者传的是 page=a&limit=-100 将会有默认值 page=1&limit=15
+// 如果不传 page 和 limit, 或者传的是 page=a&limit=-100 时, Page 将会有默认值 page=1&limit=10
 @GetMapping("/demo")  // 如果参数不多的话, 不需要构建 dto, 直接写在这里就好了, 返回只有一个字段直接返回就好了, 也不用新建 vo
 public JsonResult<PageInfo<DemoVo>> demoList(DemoDto dto, Page page) {
     // dto 中写方法来生成跟数据库对应的 model, 方法中可以先做 web 层的数据校验
