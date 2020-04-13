@@ -50,10 +50,49 @@ class TrustCerts {
         }
     }
 
+    /**
+     * <pre>
+     * 见: https://docs.oracle.com/javase/7/docs/technotes/tools/solaris/keytool.html
+     *
+     * 生成 jks 文件
+     * keytool -genkey -alias xxx-jks \
+     *   -dname "CN=Tom Cat, OU=Java, O=Oracle, L=SZ, ST=GD, C=CN" \
+     *   -keyalg RSA -keystore file.jks -validity 3600 \
+     *   -storepass 123456 -keypass abcdef
+     *
+     * 转换成 pkcs12 标准格式
+     * keytool -importkeystore -srcalias xxx-jks -destalias xxx-new-jks \
+     *   -srckeystore file.jks -srcstoretype jks -destkeystore file-new.jks -deststoretype pkcs12 \
+     *   -srcstorepass 123456 -srckeypass abcdef -deststorepass 123456 -destkeypass abcdef
+     *
+     *
+     * storepass 是用来访问密钥库, keypass 是用来访问密钥库中具体的密钥. 通常建议保持一致
+     * 第二行开始的命令中, 如果 storepass 和 keypass 是一致的, 则不需要 -destkeypass 选项
+     *
+     *
+     * 使用旧的 jks 转换成 pfx 格式(IIS)
+     * keytool -importkeystore -srcalias xxx-jks -destalias xxx-pfx \
+     *   -srckeystore file.jks -srcstoretype jks -destkeystore file.pfx -deststoretype pkcs12 \
+     *   -srcstorepass 123456 -srckeypass abcdef -deststorepass 123456 -destkeypass abcdef
+     *
+     * 使用新的 jks 转换成 pfx 格式
+     * keytool -importkeystore -srcalias xxx-new-jks -destalias xxx-new-pfx \
+     *   -srckeystore file-new.jks -srcstoretype pkcs12 -destkeystore file-new.pfx -deststoretype pkcs12 \
+     *   -srcstorepass 123456 -srckeypass abcdef -deststorepass 123456 -destkeypass abcdef
+     *
+     *
+     * 将 jks 导出成 crt 和 key 文件(apache 及 nginx), 提取时基于 pkcs12 标准格式
+     * 见: https://www.openssl.org/docs/man1.0.2/man1/pkcs12.html
+     *
+     * 提取 key: openssl pkcs12 -in file-new.jks -nocerts -nodes -out file.key -passin pass:123456
+     * 提取 crt: openssl pkcs12 -in file-new.jks -nokeys -out file.crt -passin pass:123456
+     * 将 crt 转换成 pem 格式: openssl x509 -in file.crt -out file.pem
+     * </pre>
+     */
     private static final String FILE_JKS = "/xxx/yyy/file.jks";
-    /** store-pass 用来访问密码库 */
+    /** store-pass 用来访问密钥库 */
     private static final String KEY_STORE_PASS = "key-store-pass";
-    /** key-pass 用来访问密码库中密钥对的私钥 */
+    /** key-pass 用来访问密钥库中的密钥 */
     private static final String KEY_PASS = "key-pass";
 
     static SSLContext createFileVerifySSL() {
