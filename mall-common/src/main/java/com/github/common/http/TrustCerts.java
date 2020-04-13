@@ -66,8 +66,8 @@ class TrustCerts {
      *   -srcstorepass 123456 -srckeypass abcdef -deststorepass 123456 -destkeypass abcdef
      *
      *
-     * storepass 是用来访问密钥库, keypass 是用来访问密钥库中具体的密钥. 通常建议保持一致
-     * 第二行开始的命令中, 如果 storepass 和 keypass 是一致的, 则不需要 -destkeypass 选项
+     * storepass 用来访问密钥库, keypass 用来访问密钥库中具体的密钥. 通常建议保持一致
+     * 如果 storepass 和 keypass 是一致的, -importkeystore 时则不需要 -destkeypass 选项, 下同
      *
      *
      * 使用旧的 jks 转换成 pfx 格式(IIS)
@@ -81,7 +81,7 @@ class TrustCerts {
      *   -srcstorepass 123456 -srckeypass abcdef -deststorepass 123456 -destkeypass abcdef
      *
      *
-     * 将 jks 导出成 crt 和 key 文件(apache 及 nginx), 提取时基于 pkcs12 标准格式
+     * 将 jks 导出成 crt 和 key 文件(apache 及 nginx), 提取时用 openssl 命令基于 pkcs12 标准格式的文件操作即可
      * 见: https://www.openssl.org/docs/man1.0.2/man1/pkcs12.html
      *
      * 提取 key: openssl pkcs12 -in file-new.jks -nocerts -nodes -out file.key -passin pass:123456
