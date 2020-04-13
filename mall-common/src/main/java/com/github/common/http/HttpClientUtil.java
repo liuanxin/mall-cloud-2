@@ -50,7 +50,7 @@ public class HttpClientUtil {
     private static final int RETRY_COUNT = 3;
     static {
         SSLConnectionSocketFactory sslConnectionSocketFactory;
-        SSLContext ignoreVerifySSL = TrustAllCerts.SSL_CONTEXT;
+        SSLContext ignoreVerifySSL = TrustCerts.IGNORE_SSL_CONTEXT;
         if (U.isBlank(ignoreVerifySSL)) {
             sslConnectionSocketFactory = SSLConnectionSocketFactory.getSocketFactory();
         } else {

@@ -36,9 +36,9 @@ public class HttpOkClientUtil {
                 // .connectionPool(new ConnectionPool(20, 5, TimeUnit.MINUTES));
                 .connectionPool(new ConnectionPool());
 
-        SSLContext ignoreVerifySSL = TrustAllCerts.SSL_CONTEXT;
+        SSLContext ignoreVerifySSL = TrustCerts.IGNORE_SSL_CONTEXT;
         if (U.isNotBlank(ignoreVerifySSL)) {
-            builder.sslSocketFactory(ignoreVerifySSL.getSocketFactory(), TrustAllCerts.INSTANCE);
+            builder.sslSocketFactory(ignoreVerifySSL.getSocketFactory(), TrustCerts.INSTANCE);
         }
         HTTP_CLIENT = builder.build();
     }
