@@ -87,6 +87,8 @@ class TrustCerts {
      * 提取 key: openssl pkcs12 -in file-new.jks -nocerts -nodes -out file.key -passin pass:123456
      * 提取 crt: openssl pkcs12 -in file-new.jks -nokeys -out file.crt -passin pass:123456
      * 将 crt 转换成 pem 格式: openssl x509 -in file.crt -out file.pem
+     *
+     * 基于 crt/pem 和 key 生成 jsk: openssl pkcs12 -export -in file.(crt|pem) -inkey file.key -out file.jks -passout pass:123456
      * </pre>
      */
     private static final String FILE_JKS = "/xxx/yyy/file.jks";
