@@ -16,7 +16,7 @@ package com.github.common.encrypt;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 
-/** 加密慢算法 */
+/** 加密慢算法. 见: https://coolshell.cn/articles/2078.html */
 final class BCrypt {
 
     // ========== 可配置项. start ==========
