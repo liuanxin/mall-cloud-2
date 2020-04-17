@@ -2,9 +2,13 @@ package com.github.common.util;
 
 import com.github.common.date.DateFormatType;
 import com.github.common.date.DateUtil;
+import com.google.common.collect.Sets;
 import org.junit.Test;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.*;
 
 public class NoTest {
@@ -27,7 +31,7 @@ public class NoTest {
             });
         }
         List<Future<String>> futures = threadPool.invokeAll(callList, 1, TimeUnit.MINUTES);
-        Set<String> set = new HashSet<>();
+        Set<String> set = Sets.newConcurrentHashSet();
         for (Future<String> future : futures) {
             set.add(future.get());
         }
