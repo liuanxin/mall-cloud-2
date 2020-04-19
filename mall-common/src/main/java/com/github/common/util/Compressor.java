@@ -14,7 +14,7 @@ import java.util.regex.Pattern;
  * 4. 把 &lt;!--[if lt IE 7 ]> &lt;html class="no-js ie6"> &lt;![endif]--> 还原回来<br>
  * 5. 把 换行符 替换成一个空格, 再将多个空格替换成一个<br>
  * 6. 把 &lt;pre> &lt;textarea> 还原回去<br>
- * 7. 把 js 代码还原回去(先把字符串里的「//  / *  * /」替换成指定的占位, 再去掉注释, 再把字符串里面的指定占位还原回去)<br>/
+ * 7. 把 js 代码还原回去(先把字符串里的「//  / *  * /」替换成指定的占位, 再去掉注释, 再把字符串里面的指定占位还原回去)<br>
  */
 public final class Compressor {
 
@@ -72,7 +72,7 @@ public final class Compressor {
     /** js 代码中的单行注释字符串标签 */
     private static final Pattern SCRIPT_STR_SINGLE_PLACE_REGEX = compile(SCRIPT_STR_SINGLE_PLACE);
 
-    /** js 代码中的字符串 /* 匹配 */
+    /** js 代码中的字符串 / * 匹配 */
     private static final Pattern SCRIPT_STR_MULTI_START_REGEX = compile("(\".*?)(/\\*)(.*?\")");
     private static final Pattern SCRIPT_STR_MULTI_START_APOSTROPHE_REGEX = compile("('.*?)(/\\*)(.*?')");
     /** js 代码中的多行注释开始字符串占位符 */
@@ -181,7 +181,7 @@ public final class Compressor {
 
                     // 去掉 js 中的 多行 及 单行 注释
                     place = replaceJsAnnotation(place);
-                    // 去掉空白(换行制表空格等)
+                    // 去掉空白(换行制表空格等). 注意: 如果字符串中有多个空格, 这里将会替换成一个. 如 '  abc' 交替换成 ' abc'
                     place = replaceBlank(place);
 
                     // 把 js 代码中的字符串还原回去
