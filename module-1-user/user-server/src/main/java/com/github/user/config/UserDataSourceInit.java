@@ -24,7 +24,6 @@ import javax.sql.DataSource;
 public class UserDataSourceInit {
 
     private final DataSource dataSource;
-
     public UserDataSourceInit(DataSource dataSource) {
         this.dataSource = dataSource;
     }

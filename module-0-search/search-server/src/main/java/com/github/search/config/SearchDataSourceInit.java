@@ -24,7 +24,6 @@ import javax.sql.DataSource;
 public class SearchDataSourceInit {
 
     private final DataSource dataSource;
-
     public SearchDataSourceInit(DataSource dataSource) {
         this.dataSource = dataSource;
     }

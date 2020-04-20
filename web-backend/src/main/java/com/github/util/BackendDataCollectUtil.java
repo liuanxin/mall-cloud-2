@@ -16,6 +16,7 @@ import com.google.common.collect.Maps;
 import java.util.Map;
 
 /** 从各模块中收集数据的工具类 */
+@SuppressWarnings("rawtypes")
 public final class BackendDataCollectUtil {
 
     private static final Map<String, Class> ENUM_MAP = A.maps(
@@ -33,10 +34,10 @@ public final class BackendDataCollectUtil {
     // public static final Class[] VIEW_ENUM_ARRAY = CollectEnumUtil.getEnumClass(ENUM_MAP);
 
     /** 提供接口出去的 所有 枚举信息 */
-    public static final Map<String, Map<Object, Object>> ALL_ENUM_INFO = CollectEnumUtil.enumMap(ENUM_MAP);
+    public static final Map<String, Map<String, Object>> ALL_ENUM_INFO = CollectEnumUtil.enumMap(ENUM_MAP);
     /** 提供接口出去的 单个 枚举信息 */
-    public static Map<String, Map<Object, Object>> singleEnumInfo(String type) {
-        Map<String, Map<Object, Object>> returnMap = Maps.newHashMap();
+    public static Map<String, Map<String, Object>> singleEnumInfo(String type) {
+        Map<String, Map<String, Object>> returnMap = Maps.newHashMap();
         for (String anEnum : type.split(",")) {
             if (U.isNotBlank(anEnum)) {
                 anEnum = anEnum.trim();
@@ -50,7 +51,7 @@ public final class BackendDataCollectUtil {
                 } else {
                     name = anEnum;
                 }
-                Map<Object, Object> map = ALL_ENUM_INFO.get(name.trim());
+                Map<String, Object> map = ALL_ENUM_INFO.get(name.trim());
                 if (A.isNotEmpty(map)) {
                     returnMap.put(anEnum, map);
                 }

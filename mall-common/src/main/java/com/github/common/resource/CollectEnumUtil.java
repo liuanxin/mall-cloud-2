@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+@SuppressWarnings("rawtypes")
 public final class CollectEnumUtil {
 
     /** 如果需要在 enum 中返回给前台的下拉数据, 添加一个这样的方法名, 返回结果用 Map. 如果有定义将无视下面的 code 和 value */
@@ -40,8 +41,8 @@ public final class CollectEnumUtil {
     }
 
     /** 获取所有枚举的说明 */
-    public static Map<String, Map<Object, Object>> enumMap(Map<String, Class> enumClassMap) {
-        Map<String, Map<Object, Object>> returnMap = Maps.newHashMap();
+    public static Map<String, Map<String, Object>> enumMap(Map<String, Class> enumClassMap) {
+        Map<String, Map<String, Object>> returnMap = Maps.newHashMap();
         for (Map.Entry<String, Class> entry : enumClassMap.entrySet()) {
             List<Class> enumList = LoaderClass.getEnumArray(entry.getValue(), Const.enumPath(entry.getKey()));
             for (Class anEnum : enumList) {
@@ -55,20 +56,20 @@ public final class CollectEnumUtil {
 
     /** 根据枚举的名字获取单个枚举的说明. loadEnum 为 true 表示需要基于加载器去获取相关包里面的 枚举 */
     @SuppressWarnings("unchecked")
-    private static Map<Object, Object> enumInfo(Class<?> enumClass) {
+    private static Map<String, Object> enumInfo(Class<?> enumClass) {
         try {
             // 在 enum 中如果有 select 方法且返回的是 Map 就用这个
             Method select = enumClass.getMethod(METHOD);
             if (U.isNotBlank(select)) {
                 Object result = select.invoke(null);
                 if (U.isNotBlank(result) && result instanceof Map) {
-                    return (Map<Object, Object>) result;
+                    return (Map<String, Object>) result;
                 }
             }
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException ignore) {
         }
 
-        Map<Object, Object> returnMap = Maps.newHashMap();
+        Map<String, Object> returnMap = Maps.newHashMap();
         for (Object anEnum : enumClass.getEnumConstants()) {
             // 没有 getCode 方法就使用枚举的 ordinal
             Object key = U.getMethod(anEnum, CODE);
@@ -82,7 +83,7 @@ public final class CollectEnumUtil {
                 value = ((Enum) anEnum).name();
             }
 
-            returnMap.put(key, value);
+            returnMap.put(U.toStr(key), value);
         }
         return returnMap;
     }

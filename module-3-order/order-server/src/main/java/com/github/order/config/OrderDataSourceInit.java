@@ -24,7 +24,6 @@ import javax.sql.DataSource;
 public class OrderDataSourceInit {
 
     private final DataSource dataSource;
-
     public OrderDataSourceInit(DataSource dataSource) {
         this.dataSource = dataSource;
     }

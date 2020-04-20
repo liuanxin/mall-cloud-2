@@ -2,7 +2,6 @@ package com.github.common.config;
 
 import com.github.common.Const;
 import com.github.liuanxin.page.PageInterceptor;
-import org.apache.ibatis.plugin.Interceptor;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.spring.SqlSessionFactoryBean;
 import org.mybatis.spring.SqlSessionTemplate;
@@ -24,7 +23,6 @@ import javax.sql.DataSource;
 public class CommonDataSourceInit {
 
     private final DataSource dataSource;
-
     public CommonDataSourceInit(DataSource dataSource) {
         this.dataSource = dataSource;
     }
@@ -38,7 +36,7 @@ public class CommonDataSourceInit {
         // 装载 typeHandler 实现
         sessionFactory.setTypeHandlers(CommonConfigData.HANDLER_ARRAY);
         // mybatis 的分页插件
-        sessionFactory.setPlugins(new Interceptor[] { new PageInterceptor("mysql") });
+        sessionFactory.setPlugins(new PageInterceptor("mysql"));
         return sessionFactory.getObject();
     }
 
