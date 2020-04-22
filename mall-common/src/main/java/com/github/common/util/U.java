@@ -127,7 +127,7 @@ public final class U {
     private static final String ENUM_VALUE = "value";
     /**
      * <pre>
-     * 序列化枚举, 属性是枚举时, 返回给前端时, 可以将 传递 和 显示的都返回, 如以下示例
+     * 序列化枚举, 如以下示例
      *
      * public enum Gender {
      *   Male(0, "男"), Female(1, "女");
@@ -149,6 +149,9 @@ public final class U {
      *     return enumDeserializer(obj, Gender.class);
      *   }
      * }
+     *
+     * Gender.Male 在序列化时将返回 { "code": 0, "value": "男" } 其中 code 用来交互, value 用来显示
+     * 反序列化时, 0、男、{ "code": 0, "value": "男" } 都可以反序列化成 Gender.Male
      * </pre>
      */
     public static Map<String, String> serializerEnum(int code, String value) {
@@ -178,6 +181,9 @@ public final class U {
      *     return <span style="color:red">enumDeserializer(obj, Gender.class);</span>
      *   }
      * }
+     *
+     * Gender.Male 在序列化时将返回 { "code": 0, "value": "男" } code 用来交互, value 用来显示
+     * 而 0、男、{ "code": 0, "value": "男" } 也都可以反序列化成 Gender.Male
      * </pre>
      */
     @SuppressWarnings("rawtypes")
@@ -190,7 +196,7 @@ public final class U {
         if (obj instanceof Map) {
             tmp = getEnumInMap((Map) obj);
         } else {
-            String tmpStr = obj.toString();
+            String tmpStr = obj.toString().trim();
             if (tmpStr.startsWith("{") && tmpStr.endsWith("}")) {
                 tmp = getEnumInMap(JsonUtil.toObjectNil(obj.toString(), Map.class));
             }
