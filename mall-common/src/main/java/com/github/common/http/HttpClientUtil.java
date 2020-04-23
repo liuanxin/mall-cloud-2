@@ -261,7 +261,7 @@ public class HttpClientUtil {
                 String key = entry.getKey();
                 Object value = entry.getValue();
                 if (U.isNotBlank(key) && U.isNotBlank(value)) {
-                    nameValuePairs.add(new BasicNameValuePair(key, A.toStringWithArrayOrCollection(value)));
+                    nameValuePairs.add(new BasicNameValuePair(key, A.toString(value)));
                 }
             }
             request.setEntity(new UrlEncodedFormEntity(nameValuePairs, StandardCharsets.UTF_8));

@@ -7,6 +7,7 @@ import java.lang.reflect.Array;
 import java.util.*;
 
 /** 集合相关的工具包 */
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public final class A {
 
     private static final String SPLIT = ",";
@@ -16,6 +17,23 @@ public final class A {
     }
     public static boolean isNotArray(Object obj) {
         return !isArray(obj);
+    }
+
+    public static boolean isEmpty(Object arrayOrCollectionOrMap) {
+        if (arrayOrCollectionOrMap == null) {
+            return true;
+        } else if (arrayOrCollectionOrMap.getClass().isArray()) {
+            return Array.getLength(arrayOrCollectionOrMap) == 0;
+        } else if (arrayOrCollectionOrMap instanceof Collection) {
+            return ((Collection<?>) arrayOrCollectionOrMap).isEmpty();
+        } else if (arrayOrCollectionOrMap instanceof Map) {
+            return ((Map) arrayOrCollectionOrMap).isEmpty();
+        } else {
+            return false;
+        }
+    }
+    public static boolean isNotEmpty(Object arrayOrCollectionOrMap) {
+        return !isEmpty(arrayOrCollectionOrMap);
     }
 
     public static <T> boolean isEmpty(T[] array) {
@@ -61,21 +79,25 @@ public final class A {
         return toStr(collection, SPLIT);
     }
     public static String toStr(Collection<?> collection, String split) {
-        StringBuilder sbd = new StringBuilder();
-        int i = 0;
-        for (Object obj : collection) {
-            if (i > 0) {
-                sbd.append(split);
+        if (isEmpty(collection)) {
+            return U.EMPTY;
+        } else {
+            StringBuilder sbd = new StringBuilder();
+            int i = 0;
+            for (Object obj : collection) {
+                if (i > 0) {
+                    sbd.append(split);
+                }
+                sbd.append(obj);
+                i++;
             }
-            sbd.append(obj);
-            i++;
+            return sbd.toString();
         }
-        return sbd.toString();
     }
-    public static String toStringWithArrayOrCollection(Object arrayOrCollection) {
-        return toStringWithArrayOrCollection(arrayOrCollection, SPLIT);
+    public static String toString(Object arrayOrCollection) {
+        return toString(arrayOrCollection, SPLIT);
     }
-    public static String toStringWithArrayOrCollection(Object arrayOrCollection, String split) {
+    public static String toString(Object arrayOrCollection, String split) {
         if (arrayOrCollection != null) {
             if (arrayOrCollection.getClass().isArray()) {
                 StringBuilder sbd = new StringBuilder();
@@ -128,11 +150,9 @@ public final class A {
     }
 
     /** 构造 HashMap, 必须保证每两个参数的类型是一致的! 当参数是奇数时, 最后一个 key 将会被忽略 */
-    @SuppressWarnings("unchecked")
     public static <K, V> HashMap<K, V> maps(Object... keysAndValues) {
         return (HashMap<K, V>) maps(Maps.newHashMap(), keysAndValues);
     }
-    @SuppressWarnings("unchecked")
     private static <K, V> Map<K, V> maps(Map<K, V> result, Object... keysAndValues) {
         if (isNotEmpty(keysAndValues)) {
             for (int i = 0; i < keysAndValues.length; i += 2) {
@@ -143,7 +163,6 @@ public final class A {
         }
         return result;
     }
-    @SuppressWarnings("unchecked")
     /** 构造 LinkedHashMap, 必须保证每两个参数的类型是一致的! 当参数是奇数时, 最后一个 key 将会被忽略 */
     public static <K, V> LinkedHashMap<K, V> linkedMaps(Object... keysAndValues) {
         return (LinkedHashMap<K, V>) maps(Maps.newLinkedHashMap(), keysAndValues);
@@ -153,6 +172,11 @@ public final class A {
     public static <T> T first(T[] array) {
         return isEmpty(array) ? null : array[0];
     }
+    /** 获取数组的最后一个元素 */
+    public static <T> T last(T[] array) {
+        return isEmpty(array) ? null : array[array.length - 1];
+    }
+
     /** 获取集合的第一个元素 */
     public static <T> T first(Collection<T> collection) {
         return isEmpty(collection) ? null : collection.iterator().next();
@@ -179,7 +203,6 @@ public final class A {
     }
 
     /** 集合中随机返回一个 */
-    @SuppressWarnings("unchecked")
     public static <T> T rand(Collection<T> source) {
         return isEmpty(source) ? null : (T) source.toArray()[U.RANDOM.nextInt(source.size())];
     }

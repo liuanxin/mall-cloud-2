@@ -750,7 +750,7 @@ public final class U {
                 if (i > 0) {
                     sbd.append("&");
                 }
-                String v = "password".equalsIgnoreCase(key) ? "***" : A.toStringWithArrayOrCollection(value);
+                String v = "password".equalsIgnoreCase(key) ? "***" : A.toString(value);
                 sbd.append(key).append("=").append(v);
                 i++;
             }
