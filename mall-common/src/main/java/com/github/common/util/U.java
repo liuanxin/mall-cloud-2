@@ -691,7 +691,7 @@ public final class U {
             if (split.length > 1 && isNotBlank(split[1])) {
                 return getNil(DateUtil.format((Date) value, split[1]));
             } else {
-                return getNil(DateUtil.formatFull((Date) value));
+                return getNil(DateUtil.formatDateTime((Date) value));
             }
         } else {
             return getNil(value);

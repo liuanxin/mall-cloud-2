@@ -12,8 +12,8 @@ public class DateTest {
     public void date() {
         Date now = DateUtil.now();
         System.out.println(now);
-        System.out.println(DateUtil.formatFull(now));
-        System.out.println(DateUtil.formatMs(now));
+        System.out.println(DateUtil.formatDateTime(now));
+        System.out.println(DateUtil.formatDateTimeMs(now));
 
         String date = DateUtil.formatDate(now);
         System.out.println(date);

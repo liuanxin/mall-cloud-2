@@ -166,7 +166,7 @@ public class HttpOkClientUtil {
                                          Headers requestHeaders, Headers responseHeaders, String result) {
         StringBuilder sbd = new StringBuilder();
         sbd.append("OkHttp3 => (")
-                .append(DateUtil.formatMs(start)).append(" -> ").append(DateUtil.nowTimeMs())
+                .append(DateUtil.formatDateTimeMs(start)).append(" -> ").append(DateUtil.nowDateTimeMs())
                 .append("] (").append(method).append(" ").append(url).append(")");
         // 太长就只输出前后, 不全部输出
         int maxLen = 1000, headTail = 200;

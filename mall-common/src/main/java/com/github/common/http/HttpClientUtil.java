@@ -284,7 +284,7 @@ public class HttpClientUtil {
                                          Header[] requestHeaders, Header[] responseHeaders, String result) {
         StringBuilder sbd = new StringBuilder();
         sbd.append("HttpClient4 => [")
-                .append(DateUtil.formatMs(new Date(start))).append(" -> ").append(DateUtil.nowTimeMs())
+                .append(DateUtil.formatDateTimeMs(new Date(start))).append(" -> ").append(DateUtil.nowDateTimeMs())
                 .append("] (").append(method).append(" ").append(url).append(")");
         // 太长就只输出前后, 不全部输出
         int maxLen = 1000, headTail = 200;
