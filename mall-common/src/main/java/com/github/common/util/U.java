@@ -776,13 +776,6 @@ public final class U {
     }
 
 
-    /** flag 为 true 时, 则抛出异常 */
-    public static void assertBoolean(boolean flag, String msg) {
-        if (flag) {
-            assertException(msg);
-        }
-    }
-
     /** 对象为 null、空白符、"null" 字符串时, 则抛出异常 */
     public static void assertNil(Object obj, String msg) {
         if (isBlank(obj)) {
