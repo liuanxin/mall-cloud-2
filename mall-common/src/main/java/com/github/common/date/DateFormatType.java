@@ -3,8 +3,6 @@ package com.github.common.date;
 /** 日期的格式化类型 */
 public enum DateFormatType {
 
-    /** yyyy-MM-dd HH:mm:ss SSS */
-    YYYY_MM_DD_HH_MM_SS_SSS("yyyy-MM-dd HH:mm:ss SSS"),
     /** yyyy-MM-dd HH:mm:ss */
     YYYY_MM_DD_HH_MM_SS("yyyy-MM-dd HH:mm:ss"),
     /** yyyy-MM-dd HH:mm */
@@ -13,6 +11,11 @@ public enum DateFormatType {
     YYYY_MM_DD("yyyy-MM-dd"),
     /** yyyy-MM */
     YYYY_MM("yyyy-MM"),
+
+    /** yyyy-MM-dd HH:mm:ss.SSS */
+    YYYY_MM_DD_HH_MM_SS_S("yyyy-MM-dd HH:mm:ss.SSS"),
+    /** yyyy-MM-dd HH:mm:ss SSS */
+    YYYY_MM_DD_HH_MM_SS_SSS("yyyy-MM-dd HH:mm:ss SSS"),
     /** yyyy-MM-dd am/pm --> am/pm 会根据时区自动完成, 也就是如果当前时区是北京的话, 会显示成 上午/下午 */
     YYYY_MM_DD_AP("yyyy-MM-dd a"),
 
@@ -70,7 +73,7 @@ public enum DateFormatType {
     /** 直接打印 new Date() 时的样式 */
     CST("EEE MMM dd HH:mm:ss zzz yyyy");
 
-    private String value;
+    private final String value;
     DateFormatType(String value) { this.value = value; }
     public String getValue() { return value; }
 
