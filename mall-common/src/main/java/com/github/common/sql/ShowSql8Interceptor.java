@@ -1,6 +1,6 @@
 package com.github.common.sql;
 
-
+import com.github.common.date.DateUtil;
 import com.github.common.util.LogUtil;
 import com.github.common.util.U;
 import com.mysql.cj.MysqlConnection;
@@ -41,7 +41,7 @@ public class ShowSql8Interceptor implements QueryInterceptor {
                 String formatSql = SqlFormat.format(sql.get());
                 Long start = TIME.get();
                 if (start != null) {
-                    LogUtil.SQL_LOG.debug("time: {} ms, sql:\n{}", (System.currentTimeMillis() - start), formatSql);
+                    LogUtil.SQL_LOG.debug("time: {}, sql:\n{}", DateUtil.toHuman(System.currentTimeMillis() - start), formatSql);
                 } else {
                     LogUtil.SQL_LOG.debug("sql:\n{}", formatSql);
                 }
