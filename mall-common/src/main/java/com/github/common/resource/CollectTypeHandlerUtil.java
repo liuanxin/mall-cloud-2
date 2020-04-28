@@ -18,6 +18,7 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 /** 收集 mybatis 的类型处理工具类 */
+@SuppressWarnings("rawtypes")
 public final class CollectTypeHandlerUtil {
 
     /**
@@ -39,8 +40,8 @@ public final class CollectTypeHandlerUtil {
 
     /** 基于指定的类(用来获取 ClassLoader), 在指定的包名下获取 mybatis 的类型处理器 */
     private static List<TypeHandler> getHandleArray(Class clazz, String classPackage) {
-        if (LogUtil.ROOT_LOG.isTraceEnabled()) {
-            LogUtil.ROOT_LOG.trace("{} in ({})", clazz, U.getClassInFile(clazz));
+        if (LogUtil.ROOT_LOG.isDebugEnabled()) {
+            LogUtil.ROOT_LOG.debug("{} in ({})", clazz, U.getClassInFile(clazz));
         }
         List<TypeHandler> handlerList = Lists.newArrayList();
         String packageName = classPackage.replace(".", "/");
@@ -85,7 +86,7 @@ public final class CollectTypeHandlerUtil {
             String className = classPackage + "." + name.replace(".class", "");
             try {
                 Class<?> clazz = Class.forName(className);
-                if (clazz != null && TypeHandler.class.isAssignableFrom(clazz)) {
+                if (TypeHandler.class.isAssignableFrom(clazz)) {
                     return (TypeHandler) clazz.newInstance();
                 }
             } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
