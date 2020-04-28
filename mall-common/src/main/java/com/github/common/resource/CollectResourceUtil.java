@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 /** 收集资源文件(这里主要是指 mybatis 的 xml 文件)的工具类 */
+@SuppressWarnings("rawtypes")
 public final class CollectResourceUtil {
 
     /**
