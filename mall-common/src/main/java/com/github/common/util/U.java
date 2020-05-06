@@ -385,16 +385,36 @@ public final class U {
         String str = toStr(obj);
         if (isBlank(str)) {
             return EMPTY;
-        } else {
-            int length = str.length();
-            if (length > maxLen) {
-                int returnLength = leftRightLen * 2 + 5;
-                if (maxLen > returnLength) {
-                    return str.substring(0, leftRightLen) + " ... " + str.substring(length - leftRightLen, length);
-                }
+        }
+
+        int length = str.length();
+        if (length > maxLen) {
+            int returnLength = leftRightLen * 2 + 5;
+            if (maxLen > returnLength) {
+                return str.substring(0, leftRightLen) + " ... " + str.substring(length - leftRightLen, length);
             }
+        }
+        return str;
+    }
+
+    /** 如果字符小于指定的位数, 就在前面补全指定的字符 */
+    public static String toStr(Object obj, int minLen, String completion) {
+        String str = toStr(obj);
+        if (isBlank(str)) {
+            return EMPTY;
+        }
+
+        int length = str.length();
+        if (length >= minLen) {
             return str;
         }
+
+        StringBuilder sbd = new StringBuilder();
+        int loop = minLen - length;
+        for (int i = 0; i < loop; i++) {
+            sbd.append(completion);
+        }
+        return sbd.append(str).toString();
     }
 
     /** 去掉所有的制表符 和 换行符 */
