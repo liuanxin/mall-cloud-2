@@ -4,8 +4,8 @@ spring.datasource:
   username: prod_product_user
   password: prod_product_pass
   hikari:
-    minimumIdle: 10
-    maximumPoolSize: 20
+    minimumIdle: 5
+    maximumPoolSize: 10
     dataSourceProperties:
       prepStmtCacheSize: 250
       prepStmtCacheSqlLimit: 2048

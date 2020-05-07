@@ -5,8 +5,8 @@ spring.datasource:
   password: prod_user_pass
   # https://github.com/brettwooldridge/HikariCP/wiki/About-Pool-Sizing
   hikari:
-    minimumIdle: 10
-    maximumPoolSize: 20
+    minimumIdle: 5
+    maximumPoolSize: 10
     dataSourceProperties:
       prepStmtCacheSize: 250
       prepStmtCacheSqlLimit: 2048
