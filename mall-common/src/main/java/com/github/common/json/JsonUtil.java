@@ -16,6 +16,7 @@ import com.github.common.util.U;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -79,7 +80,7 @@ public class JsonUtil {
         return U.isBlank(source) ? null : toObjectNil(toJson(source), clazz);
     }
     /** 集合转换, 失败将会返回 null */
-    public static <S,T> List<T> convertList(List<S> sourceList, Class<T> clazz) {
+    public static <S,T> List<T> convertList(Collection<S> sourceList, Class<T> clazz) {
         return A.isEmpty(sourceList) ? Collections.emptyList() : toListNil(toJson(sourceList), clazz);
     }
 
