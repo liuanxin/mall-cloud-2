@@ -101,9 +101,6 @@ final class ExportExcel {
         int size, fromIndex, toIndex;
         //      数据
         List<?> dataList;
-        //      每个 sheet 的数据, 当数据量大, 有多个 sheet 时会用到
-        List<?> sheetList;
-
 
         // 单个列的数据
         String cellData;
@@ -125,7 +122,7 @@ final class ExportExcel {
                 size = A.isEmpty(dataList) ? 0 : dataList.size();
 
                 // 一个 sheet 数据过多 excel 处理会出错, 分多个 sheet
-                sheetCount = ((size % maxRow == 0) ? (size / maxRow) : (size / maxRow + 1));
+                sheetCount = (size % maxRow == 0) ? (size / maxRow) : (size / maxRow + 1);
                 if (sheetCount == 0) {
                     // 如果没有记录时也至少构建一个(确保导出的文件有标题头)
                     sheetCount = 1;
@@ -140,36 +137,34 @@ final class ExportExcel {
                     cellIndex = 0;
                     row = sheet.createRow(rowIndex);
                     row.setHeightInPoints(TITLE_ROW_HEIGHT);
-
-                    // 每个 sheet 的标题行
                     for (Map.Entry<String, String> titleMapEntry : titleEntry) {
+                        // 标题列
                         cell = row.createCell(cellIndex);
                         cell.setCellStyle(headStyle);
                         cell.setCellValue(U.getNil(titleMapEntry.getValue().split("\\|")[0]));
                         cellIndex++;
                     }
-                    // 冻结第一行
+                    // 冻结标题
                     sheet.createFreezePane(0, 1, 0, 1);
 
                     if (size > 0) {
                         if (sheetCount > 1) {
-                            // 每个 sheet 除标题行以外的数据
                             fromIndex = maxRow * i;
                             toIndex = (i + 1 == sheetCount) ? size : maxRow;
-                            sheetList = dataList.subList(fromIndex, toIndex);
                         } else {
-                            sheetList = dataList;
+                            fromIndex = 0;
+                            toIndex = size;
                         }
-                        for (Object data : sheetList) {
+                        for (int j = fromIndex; j < toIndex; j++) {
+                            // 每个 sheet 除标题行以外的数据
+                            Object data = dataList.get(j);
                             if (data != null) {
                                 rowIndex++;
-                                // 每行
+                                cellIndex = 0;
                                 row = sheet.createRow(rowIndex);
                                 row.setHeightInPoints(ROW_HEIGHT);
-
-                                cellIndex = 0;
                                 for (Map.Entry<String, String> titleMapEntry : titleEntry) {
-                                    // 每列
+                                    // 数据列
                                     cell = row.createCell(cellIndex);
 
                                     cellData = U.getField(data, titleMapEntry.getKey());
@@ -242,7 +237,7 @@ final class ExportExcel {
     /**
      * 将特殊字符替换成空格, 最开始及最结尾是单引号则去掉, 多个空格替换成一个, 如果有多个 sheet 就拼在名字后面, 长度超过 31 则截取
      *
-     * @see org.apache.poi.ss.util.WorkbookUtil#validateSheetName(java.lang.String)
+     * @see org.apache.poi.ss.util.WorkbookUtil#validateSheetName
      */
     private static String handleSheetName(String sheetName, int sheetCount, int sheetIndex) {
         String tmpSn = sheetName.replace("/", " ").replace("\\", " ").replace("?", " ")

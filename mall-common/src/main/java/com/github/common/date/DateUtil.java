@@ -163,7 +163,7 @@ public class DateUtil {
     /** 如: toHuman(36212711413L) ==> 1 年 54 天 3 小时 5 分 11 秒 413 毫秒 */
     public static String toHuman(long intervalMs) {
         if (intervalMs == 0) {
-            return U.EMPTY;
+            return "0";
         }
 
         boolean flag = (intervalMs < 0);
