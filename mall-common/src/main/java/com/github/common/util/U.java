@@ -302,7 +302,7 @@ public final class U {
         return !isNumber(obj);
     }
 
-    /** 将数值转换成 ipv4, 类似于 mysql 中 INET_NTOA(134744072) => 8.8.8.8 */
+    /** 将数值转换成 ipv4, 类似于 mysql 中 INET_NTOA(134744072) ==> 8.8.8.8 */
     public static String num2ip(long num) {
         return ((num & 0xff000000) >> 24) + "." + ((num & 0xff0000) >> 16)
                 + "." + ((num & 0xff00) >> 8) + "." + ((num & 0xff));
