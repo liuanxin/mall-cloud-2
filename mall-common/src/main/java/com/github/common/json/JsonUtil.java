@@ -1,21 +1,14 @@
 package com.github.common.json;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.github.common.util.A;
 import com.github.common.util.LogUtil;
 import com.github.common.util.U;
 
 import java.io.IOException;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -29,7 +22,6 @@ public class JsonUtil {
 
     private static class RenderObjectMapper extends ObjectMapper {
         private static final long serialVersionUID = 0L;
-        @SuppressWarnings("deprecation")
         private RenderObjectMapper() {
             super();
             // 日期不用 utc 方式显示(utc 是一个整数值)
@@ -42,36 +34,9 @@ public class JsonUtil {
             configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
             // 允许字符串中包含未加引号的控制字符(值小于 32 的 ASCII 字符, 包括制表符和换行字符)
             // json 标准要求所有控制符必须使用引号, 因此默认是 false, 遇到此类字符时会抛出异常
-            configure(JsonParser.Feature.ALLOW_UNQUOTED_CONTROL_CHARS, true);
+            // configure(JsonParser.Feature.ALLOW_UNQUOTED_CONTROL_CHARS, true);
             // NON_NULL: null 值不序列化, NON_EMPTY: null 空字符串、长度为 0 的 list、map 都不序列化
             setSerializationInclusion(JsonInclude.Include.NON_NULL);
-
-            // 如果用 BigDecimal 表示金额时的处理: 保留两位小数的精度返回
-            registerModule(new SimpleModule().addSerializer(BigDecimal.class, new JsonSerializer<BigDecimal>() {
-                @Override
-                public void serialize(BigDecimal money, JsonGenerator gen, SerializerProvider ser) throws IOException {
-                    if (U.isNotBlank(money)) {
-                        gen.writeObject(money.setScale(2, RoundingMode.DOWN));
-                    }
-                }
-            }));
-
-            /*
-            // boolean 用 1 0 返回
-            registerModule(new SimpleModule().addSerializer(Boolean.class, new JsonSerializer<Boolean>() {
-                @Override
-                public void serialize(Boolean value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
-                    gen.writeNumber(U.isNotBlank(value) && value ? 1 : 0);
-                }
-            }));
-            // 0 反序列化为 false, 否则为 true
-            registerModule(new SimpleModule().addDeserializer(Boolean.class, new JsonDeserializer<Boolean>() {
-                @Override
-                public Boolean deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-                    return !"0".equals(p.getText());
-                }
-            }));
-            */
         }
     }
 
