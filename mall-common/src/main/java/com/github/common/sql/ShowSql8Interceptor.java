@@ -1,11 +1,12 @@
 package com.github.common.sql;
 
-import com.github.common.date.DateUtil;
 import com.github.common.util.LogUtil;
 import com.github.common.util.U;
 import com.mysql.cj.MysqlConnection;
 import com.mysql.cj.Query;
+import com.mysql.cj.ServerPreparedQuery;
 import com.mysql.cj.interceptors.QueryInterceptor;
+import com.mysql.cj.jdbc.result.ResultSetImpl;
 import com.mysql.cj.log.Log;
 import com.mysql.cj.protocol.Resultset;
 import com.mysql.cj.protocol.ServerSession;
@@ -34,16 +35,25 @@ public class ShowSql8Interceptor implements QueryInterceptor {
     }
 
     @Override
-    public <T extends Resultset> T postProcess(Supplier<String> sql, Query interceptedQuery,
-                                               T originalResultSet, ServerSession serverSession) {
-        if (U.isNotBlank(sql)) {
+    public <T extends Resultset> T postProcess(Supplier<String> sql, Query query, T rs, ServerSession serverSession) {
+        String realSql = U.isNotBlank(sql) ? sql.get() : "";
+        if (realSql.contains("?") && query instanceof ServerPreparedQuery && rs instanceof ResultSetImpl) {
+            String tmp = ((ResultSetImpl) rs).getOwningQuery().toString();
+
+            String colon = ":";
+            if (U.isNotBlank(tmp) && tmp.contains(colon)) {
+                realSql = tmp.substring(tmp.indexOf(colon) + colon.length()).trim();
+            }
+        }
+
+        if (U.isNotBlank(realSql)) {
             if (LogUtil.SQL_LOG.isDebugEnabled()) {
-                String formatSql = SqlFormat.format(sql.get());
+                String printSql = SqlFormat.format(realSql);
                 Long start = TIME.get();
                 if (start != null) {
-                    LogUtil.SQL_LOG.debug("time: {}, sql:\n{}", DateUtil.toHuman(System.currentTimeMillis() - start), formatSql);
+                    LogUtil.SQL_LOG.debug("time: {} ms, sql:\n{}", (System.currentTimeMillis() - start), printSql);
                 } else {
-                    LogUtil.SQL_LOG.debug("sql:\n{}", formatSql);
+                    LogUtil.SQL_LOG.debug("sql:\n{}", printSql);
                 }
             }
         }
