@@ -38,6 +38,9 @@ public class ShowSql8Interceptor implements QueryInterceptor {
     public <T extends Resultset> T postProcess(Supplier<String> sql, Query query, T rs, ServerSession serverSession) {
         String realSql = U.isNotBlank(sql) ? sql.get() : "";
         if (realSql.contains("?") && query instanceof ServerPreparedQuery && rs instanceof ResultSetImpl) {
+            // 如果设置了 useServerPrepStmts 为 true 的话, query 将是 ServerPreparedQuery,
+            // 此时通过下面方式获取的 sql 语句中不会有单引号('), 比如应该是 name = '张三' 的将会输出成 name = 张三
+            // 且 insert 语句只能输出带 ? 的语句
             String tmp = ((ResultSetImpl) rs).getOwningQuery().toString();
 
             String colon = ":";

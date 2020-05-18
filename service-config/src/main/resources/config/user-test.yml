@@ -7,7 +7,7 @@ spring.datasource:
     minimumIdle: 2
     maximumPoolSize: 2
     dataSourceProperties:
-      prepStmtCacheSize: 250
-      prepStmtCacheSqlLimit: 2048
+      prepStmtCacheSize: 50
+      prepStmtCacheSqlLimit: 128
       cachePrepStmts: true
-      useServerPrepStmts: true
+      useServerPrepStmts: false
