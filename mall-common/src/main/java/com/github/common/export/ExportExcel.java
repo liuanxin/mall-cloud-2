@@ -110,7 +110,7 @@ final class ExportExcel {
         DataFormat dataFormat = workbook.createDataFormat();
 
         // 每个 sheet 的最大行, 标题头也是一行
-        int maxRow = getMaxRow(excel07) - 1;
+        int sheetMaxRow = getMaxRow(excel07) - 1;
         try {
             for (Map.Entry<String, List<?>> entry : dataMap.entrySet()) {
                 String sheetName = entry.getKey();
@@ -122,7 +122,7 @@ final class ExportExcel {
                 size = A.isEmpty(dataList) ? 0 : dataList.size();
 
                 // 一个 sheet 数据过多 excel 处理会出错, 分多个 sheet
-                sheetCount = (size % maxRow == 0) ? (size / maxRow) : (size / maxRow + 1);
+                sheetCount = (size % sheetMaxRow == 0) ? (size / sheetMaxRow) : (size / sheetMaxRow + 1);
                 if (sheetCount == 0) {
                     // 如果没有记录时也至少构建一个(确保导出的文件有标题头)
                     sheetCount = 1;
@@ -149,8 +149,8 @@ final class ExportExcel {
 
                     if (size > 0) {
                         if (sheetCount > 1) {
-                            fromIndex = maxRow * i;
-                            toIndex = (i + 1 == sheetCount) ? size : maxRow;
+                            fromIndex = sheetMaxRow * i;
+                            toIndex = (i + 1 == sheetCount) ? size : (fromIndex + sheetMaxRow);
                         } else {
                             fromIndex = 0;
                             toIndex = size;
