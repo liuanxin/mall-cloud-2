@@ -51,7 +51,7 @@ public class BackendWebConfig extends WebMvcConfigurationSupport {
 
     @Override
     public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
-        SpringMvc.handlerConvert(converters);
+        SpringMvc.handlerConvert(converters, online);
     }
 
     @Override

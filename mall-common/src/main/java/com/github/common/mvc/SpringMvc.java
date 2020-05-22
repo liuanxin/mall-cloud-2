@@ -35,9 +35,9 @@ public final class SpringMvc {
         registry.addConverter(new StringToMoneyConverter());
     }
 
-    public static void handlerConvert(List<HttpMessageConverter<?>> converters) {
+    public static void handlerConvert(List<HttpMessageConverter<?>> converters, boolean online) {
         handlerStringConvert(converters, StringHttpMessageConverter.class, new StringHttpMessageConverter(StandardCharsets.UTF_8));
-        handlerStringConvert(converters, MappingJackson2HttpMessageConverter.class, new CustomizeJacksonConverter());
+        handlerStringConvert(converters, MappingJackson2HttpMessageConverter.class, new CustomizeJacksonConverter(online));
     }
     private static void handlerStringConvert(List<HttpMessageConverter<?>> converters,
                                              Class<? extends HttpMessageConverter> clazz,
@@ -55,6 +55,10 @@ public final class SpringMvc {
         converters.add(i, httpMessageConverter);
     }
     public static class CustomizeJacksonConverter extends MappingJackson2HttpMessageConverter {
+        boolean online;
+        public CustomizeJacksonConverter(boolean online) {
+            this.online = online;
+        }
         @Override
         protected void writeSuffix(JsonGenerator generator, Object object) throws IOException {
             super.writeSuffix(generator, object);
@@ -67,8 +71,8 @@ public final class SpringMvc {
                         if (notRequestInfo) {
                             LogUtil.bind(RequestUtils.logContextInfo());
                         }
-                        // 太长就只输出前后, 不全部输出
-                        LogUtil.ROOT_LOG.info("return: ({})", U.toStr(json, 1000, 200));
+                        // 如果在生产环境, 太长就只输出前后, 不全部输出
+                        LogUtil.ROOT_LOG.info("return: ({})", (online ? U.toStr(json, 1000, 200) : json));
                     } finally {
                         if (notRequestInfo) {
                             LogUtil.unbind();

@@ -603,6 +603,10 @@ class Server {
             " */\n" +
             "@Configuration\n" +
             "public class %sWebConfig extends WebMvcConfigurationSupport {\n" +
+            "\n" +
+            "    @Value(\"${online:false}\")\n" +
+            "    private boolean online;\n" +
+            "\n" +
             "    @Override\n" +
             "    protected RequestMappingHandlerMapping createRequestMappingHandlerMapping() {\n" +
             "        return new VersionRequestMappingHandlerMapping();\n" +
@@ -621,7 +625,7 @@ class Server {
             "\n" +
             "    @Override\n" +
             "    public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {\n" +
-            "        SpringMvc.handlerConvert(converters);\n" +
+            "        SpringMvc.handlerConvert(converters, online);\n" +
             "    }\n" +
             "\n" +
             "    @Override\n" +
