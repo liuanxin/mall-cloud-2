@@ -4,14 +4,18 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.github.common.date.DateFormatType;
 import com.github.common.util.A;
 import com.github.common.util.LogUtil;
 import com.github.common.util.U;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.TimeZone;
 
 public class JsonUtil {
 
@@ -25,9 +29,11 @@ public class JsonUtil {
         private RenderObjectMapper() {
             super();
             // 日期不用 utc 方式显示(utc 是一个整数值)
-            // configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
-            // 时间格式. 要想自定义在字段上标 @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd") 即可
-            // setDateFormat(new SimpleDateFormat(DateFormatType.YYYY_MM_DD_HH_MM_SS.getValue()));
+            configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+            // 时间格式. 要想自定义在字段上标 @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8") 即可
+            SimpleDateFormat dateFormat = new SimpleDateFormat(DateFormatType.YYYY_MM_DD_HH_MM_SS.getValue());
+            dateFormat.setTimeZone(TimeZone.getTimeZone("GMT+8"));
+            setDateFormat(dateFormat);
             // 不确定值的枚举返回 null
             configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL, true);
             // 不确定的属性项上不要失败
