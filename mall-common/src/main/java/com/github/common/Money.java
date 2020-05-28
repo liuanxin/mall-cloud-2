@@ -194,10 +194,8 @@ public class Money implements Serializable {
                 "万", "拾", "佰", "仟",
                 "亿", "拾", "佰", "仟"
         };
-        private static final String[] DECIMAL = {/*"厘", */"分", "角"};
-        private static final String[] NUM = {
-                "零", "壹", "贰", "叁", "肆", "伍", "陆", "柒", "捌", "玖"
-        };
+        private static final String[] DECIMAL = { /* "微", "忽", "丝", "毫", "厘", */ "分", "角"};
+        private static final String[] NUM = { "零", "壹", "贰", "叁", "肆", "伍", "陆", "柒", "捌", "玖" };
 
         private static final String MONEY_NOT_EFFECTIVE = "不是有效的金额";
         private static final String MAX_CONVERT = "最大只能转换到小数位前 " + INTEGER.length + " 位";
@@ -246,16 +244,24 @@ public class Money implements Serializable {
             }
 
             // 基本的位数检查, 按小数拆分, 分别处理
-            String left = money.contains(".") ? money.substring(0, money.indexOf(".")) : money;
+            int pointIndex = money.indexOf(".");
+            boolean hasPoint = pointIndex > -1;
+
+            String left = hasPoint ? money.substring(0, pointIndex) : money;
             long leftLong = U.toLong(left);
-            if (leftLong < 0) {
+            boolean negative = leftLong < 0;
+            if (negative) {
                 left = left.substring(1);
             }
-            if (left.length() > INTEGER.length) {
+            int leftLen = left.length();
+            if (leftLen > INTEGER.length) {
                 return MAX_CONVERT;
             }
-            String right = money.contains(".") ? money.substring(money.indexOf(".") + 1) : "";
-            if (right.length() > DECIMAL.length) {
+
+            // 处理小数位后面的值
+            String right = hasPoint ? money.substring(pointIndex + 1) : "";
+            int rightLen = right.length();
+            if (rightLen > DECIMAL.length) {
                 // right = right.substring(0, DECIMAL.length);
                 return MIN_CONVERT;
             }
@@ -263,22 +269,21 @@ public class Money implements Serializable {
             StringBuilder sbd = new StringBuilder();
             // 处理小数位前面的数
             if (leftLong != 0) {
-                if (leftLong < 0) {
+                if (negative) {
                     sbd.append(NEGATIVE);
                 }
-                for (int i = 0; i < left.length(); i++) {
+                for (int i = 0; i < leftLen; i++) {
                     int number = U.toInt(String.valueOf(left.charAt(i)));
-                    sbd.append(NUM[number]).append(INTEGER[left.length() - i - 1]);
+                    sbd.append(NUM[number]).append(INTEGER[leftLen - i - 1]);
                 }
             }
-
             // 处理小数位后面的值
             long rightLong = U.toLong(right);
             if (rightLong > 0) {
                 sbd.append(SPLIT);
-                for (int i = 0; i < right.length(); i++) {
+                for (int i = 0; i < rightLen; i++) {
                     int number = U.toInt(String.valueOf(right.charAt(i)));
-                    sbd.append(NUM[number]).append(DECIMAL[right.length() - i - 1]);
+                    sbd.append(NUM[number]).append(DECIMAL[rightLen - i - 1]);
                 }
             } else if (rightLong == 0) {
                 sbd.append(WHOLE);
