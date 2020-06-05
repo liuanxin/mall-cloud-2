@@ -20,13 +20,12 @@ import org.springframework.web.bind.annotation.RestController;
 public class ManagerUserController {
 
     private final UserService userService;
-
     public ManagerUserController(UserService userService) {
         this.userService = userService;
     }
 
+    @ApiMethod("示例")
     @GetMapping("/demo")
-    @ApiMethod(value = "示例", develop = "liuanxin")
     public JsonResult<PageInfo<DemoVo>> demo(@ApiParam("用户名") String name, DemoDto dto, Page page) {
         userService.demo(name, page.getPage(), page.getLimit());
         return JsonResult.success("xx", null);
