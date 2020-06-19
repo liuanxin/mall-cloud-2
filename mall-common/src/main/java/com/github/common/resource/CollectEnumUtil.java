@@ -2,6 +2,7 @@ package com.github.common.resource;
 
 import com.github.common.Const;
 import com.github.common.util.U;
+import com.google.common.base.CaseFormat;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
@@ -41,13 +42,14 @@ public final class CollectEnumUtil {
     }
 
     /** 获取所有枚举的说明 */
+    @SuppressWarnings("rawtypes")
     public static Map<String, Map<String, Object>> enumMap(Map<String, Class> enumClassMap) {
         Map<String, Map<String, Object>> returnMap = Maps.newHashMap();
         for (Map.Entry<String, Class> entry : enumClassMap.entrySet()) {
             List<Class> enumList = LoaderClass.getEnumArray(entry.getValue(), Const.enumPath(entry.getKey()));
             for (Class anEnum : enumList) {
                 if (U.isNotBlank(anEnum) && anEnum.isEnum()) {
-                    returnMap.put(anEnum.getSimpleName(), enumInfo(anEnum));
+                    returnMap.put(CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, anEnum.getSimpleName()), enumInfo(anEnum));
                 }
             }
         }
@@ -55,7 +57,7 @@ public final class CollectEnumUtil {
     }
 
     /** 根据枚举的名字获取单个枚举的说明. loadEnum 为 true 表示需要基于加载器去获取相关包里面的 枚举 */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     private static Map<String, Object> enumInfo(Class<?> enumClass) {
         try {
             // 在 enum 中如果有 select 方法且返回的是 Map 就用这个

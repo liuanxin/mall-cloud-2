@@ -43,11 +43,11 @@ public final class BackendDataCollectUtil {
                 anEnum = anEnum.trim();
                 String name;
                 if (anEnum.contains("-")) {
-                    name = CaseFormat.LOWER_HYPHEN.to(CaseFormat.UPPER_CAMEL, anEnum);
+                    name = CaseFormat.LOWER_HYPHEN.to(CaseFormat.LOWER_CAMEL, anEnum);
                 } else if (anEnum.contains("_")) {
-                    name = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, anEnum);
-                } else if (Character.isLowerCase(anEnum.charAt(0))) {
-                    name = anEnum.substring(0, 1).toUpperCase() + anEnum.substring(1);
+                    name = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, anEnum);
+                } else if (Character.isUpperCase(anEnum.charAt(0))) {
+                    name = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, anEnum);
                 } else {
                     name = anEnum;
                 }
