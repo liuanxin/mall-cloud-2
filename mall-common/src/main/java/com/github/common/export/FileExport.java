@@ -40,12 +40,12 @@ import java.util.Map;
  * // 查询要保存的数据
  * List&lt;XX&gt; xxList = xxService.xxx(...);
  *
- * // {@link FileExport#save(String, String, List, Class, String)}
+ * // {@link #save(String, String, List, Class, String)}
  * FileExport.save(type, "文件名", xxList, XX.class, directory);
  * // 其中 type 可以是 xls03、xls07、csv 三种(忽略大小写)
  *
  * // 如果不想在实体中使用 ExportColumn 注解, 可以自己构建一个 {"字段名": "标题"} 的 map,
- * // 调用 {@link FileExport#save(String, String, LinkedHashMap, List, String)} 即可
+ * // 调用 {@link #save(String, String, LinkedHashMap, List, String)} 即可
  * </pre>
  */
 public final class FileExport {
