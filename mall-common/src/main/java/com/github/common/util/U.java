@@ -432,9 +432,17 @@ public final class U {
 
     /** 对象为 null, 或者其字符串形态为 空白符, "null", "undefined" 时返回 true */
     public static boolean isBlank(Object obj) {
-        return obj == null || EMPTY.equals(obj.toString().trim())
-                || "null".equalsIgnoreCase(obj.toString().trim())
-                || "undefined".equalsIgnoreCase(obj.toString().trim());
+        if (obj == null) {
+            return true;
+        }
+
+        String str = obj.toString().trim();
+        if (EMPTY.equals(str)) {
+            return true;
+        }
+
+        String lower = str.toLowerCase();
+        return "null".equals(lower) || "undefined".equals(lower);
     }
     /** 对象非空时返回 true */
     public static boolean isNotBlank(Object obj) {
