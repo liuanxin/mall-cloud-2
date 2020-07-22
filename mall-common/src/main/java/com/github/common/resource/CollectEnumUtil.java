@@ -1,12 +1,12 @@
 package com.github.common.resource;
 
 import com.github.common.Const;
+import com.github.common.util.LogUtil;
 import com.github.common.util.U;
 import com.google.common.base.CaseFormat;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
@@ -60,7 +60,7 @@ public final class CollectEnumUtil {
     @SuppressWarnings({"unchecked", "rawtypes"})
     private static Map<String, Object> enumInfo(Class<?> enumClass) {
         try {
-            // 在 enum 中如果有 select 方法且返回的是 Map 就用这个
+            // 在 enum 中如果有静态的 select 方法且返回的是 Map 就用这个
             Method select = enumClass.getMethod(METHOD);
             if (U.isNotBlank(select)) {
                 Object result = select.invoke(null);
@@ -68,7 +68,10 @@ public final class CollectEnumUtil {
                     return (Map<String, Object>) result;
                 }
             }
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException ignore) {
+        } catch (Exception e) {
+            if (LogUtil.ROOT_LOG.isErrorEnabled()) {
+                LogUtil.ROOT_LOG.error(String.format("enum(%s.%s) exception", enumClass.getName(), METHOD), e);
+            }
         }
 
         Map<String, Object> returnMap = Maps.newHashMap();
