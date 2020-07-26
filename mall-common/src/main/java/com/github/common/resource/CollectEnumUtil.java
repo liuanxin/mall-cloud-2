@@ -68,10 +68,7 @@ public final class CollectEnumUtil {
                     return (Map<String, Object>) result;
                 }
             }
-        } catch (Exception e) {
-            if (LogUtil.ROOT_LOG.isErrorEnabled()) {
-                LogUtil.ROOT_LOG.error(String.format("enum(%s.%s) exception", enumClass.getName(), METHOD), e);
-            }
+        } catch (Exception ignore) {
         }
 
         Map<String, Object> returnMap = Maps.newHashMap();
