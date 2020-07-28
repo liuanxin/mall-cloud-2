@@ -29,6 +29,25 @@ public final class LogUtil {
         recordTime();
         MDC.put(REQUEST_INFO, logContextInfo.requestInfo());
     }
+    /**
+     * <pre>
+     * 使用 &#064;RequestBody 注解时, 想要输出请求参数, 需要在 Control 第一行调用此方法
+     *
+     * &#064;XxxMapping("/xxx")
+     * public JsonResult&lt;XXX&gt; xxx(&#064;RequestBody XXX xxx) {
+     *     LogUtil.bindRequestBody(JsonUtil.toJson(xxx));
+     *     ...
+     * }
+     * </pre>
+     */
+    public static void bindRequestBody(String requestBody) {
+        if (U.isNotBlank(requestBody)) {
+            String requestInfo = MDC.get(REQUEST_INFO);
+            if (U.isNotBlank(requestInfo)) {
+                MDC.put(REQUEST_INFO, requestInfo.replace("params()", "requestBody(" + requestInfo + ")"));
+            }
+        }
+    }
     public static void unbind() {
         MDC.clear();
     }
