@@ -44,7 +44,7 @@ public final class LogUtil {
         if (U.isNotBlank(requestBody)) {
             String requestInfo = MDC.get(REQUEST_INFO);
             if (U.isNotBlank(requestInfo)) {
-                MDC.put(REQUEST_INFO, requestInfo.replace("params()", "requestBody(" + requestInfo + ")"));
+                MDC.put(REQUEST_INFO, requestInfo.replace("params()", "requestBody(" + requestBody + ")"));
             }
         }
     }
