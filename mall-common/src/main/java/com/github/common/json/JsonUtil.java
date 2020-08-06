@@ -42,7 +42,7 @@ public class JsonUtil {
             // json 标准要求所有控制符必须使用引号, 因此默认是 false, 遇到此类字符时会抛出异常
             // configure(JsonParser.Feature.ALLOW_UNQUOTED_CONTROL_CHARS, true);
             // NON_NULL: null 值不序列化, NON_EMPTY: null 空字符串、长度为 0 的 list、map 都不序列化
-            setSerializationInclusion(JsonInclude.Include.NON_NULL);
+            setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
         }
     }
 
