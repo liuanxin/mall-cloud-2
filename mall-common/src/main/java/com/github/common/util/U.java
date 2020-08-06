@@ -883,7 +883,7 @@ public final class U {
     public static String returnMsg(Throwable e, boolean online) {
         String msg;
         if (online) {
-            msg = "请求时出现" + (e instanceof NullPointerException ? "问题" : "错误") + ", 我们会尽快处理";
+            msg = "请求时出现" + (e instanceof NullPointerException ? "问题" : "错误");
         } else if (e instanceof NullPointerException) {
             msg = "空指针异常, 联系后台查看日志进行处理";
         } else {
