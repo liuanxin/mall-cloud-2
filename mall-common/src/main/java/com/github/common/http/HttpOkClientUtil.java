@@ -8,7 +8,6 @@ import com.google.common.io.Files;
 import okhttp3.*;
 
 import javax.activation.MimetypesFileTypeMap;
-import javax.net.ssl.SSLContext;
 import java.io.File;
 import java.io.IOException;
 import java.util.Date;
@@ -27,20 +26,15 @@ public class HttpOkClientUtil {
 
     private static final OkHttpClient HTTP_CLIENT;
     static {
-        OkHttpClient.Builder builder = new OkHttpClient().newBuilder()
+        HTTP_CLIENT = new OkHttpClient().newBuilder()
                 // 连接超时时间
                 .connectTimeout(TIME_OUT, TimeUnit.SECONDS)
                 // 响应超时时间
                 .readTimeout(TIME_OUT, TimeUnit.SECONDS)
                 // 连接池中的最大连接数默认是 5 且每个连接保持 5 分钟
                 // .connectionPool(new ConnectionPool(20, 5, TimeUnit.MINUTES));
-                .connectionPool(new ConnectionPool());
-
-        SSLContext ignoreVerifySSL = TrustCerts.IGNORE_SSL_CONTEXT;
-        if (U.isNotBlank(ignoreVerifySSL)) {
-            builder.sslSocketFactory(ignoreVerifySSL.getSocketFactory(), TrustCerts.INSTANCE);
-        }
-        HTTP_CLIENT = builder.build();
+                .connectionPool(new ConnectionPool())
+                .build();
     }
 
     /** 向指定 url 进行 get 请求 */
@@ -172,7 +166,7 @@ public class HttpOkClientUtil {
         int maxLen = 1000, headTail = 200;
 
         if (U.isNotBlank(params)) {
-            sbd.append(" params(").append(U.toStr(params, maxLen, headTail)).append(") ");
+            sbd.append(" params(").append(U.toStr(params, maxLen, headTail)).append(")");
         }
         if (U.isNotBlank(requestHeaders)) {
             sbd.append(" request headers(");
