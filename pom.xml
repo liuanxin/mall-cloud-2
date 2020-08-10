@@ -82,7 +82,7 @@
         <mybatis-page.version>1.2.8</mybatis-page.version>
         <mybatis-redis-cache.version>1.2.7</mybatis-redis-cache.version>
 
-        <api-document.version>0.7.5</api-document.version>
+        <api-document.version>0.7.6</api-document.version>
         <google-jib.version>2.4.0</google-jib.version>
     </properties>
 
