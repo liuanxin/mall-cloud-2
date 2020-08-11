@@ -7,3 +7,4 @@ spring.datasource:
     minimumIdle: 1
     maximumPoolSize: 1
 
+# 连接池数量见: https://github.com/brettwooldridge/HikariCP/wiki/About-Pool-Sizing
