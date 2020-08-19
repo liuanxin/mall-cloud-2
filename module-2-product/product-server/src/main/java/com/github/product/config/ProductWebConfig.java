@@ -1,5 +1,6 @@
 package com.github.product.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.common.mvc.SpringMvc;
 import com.github.common.mvc.VersionRequestMappingHandlerMapping;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,6 +24,11 @@ public class ProductWebConfig extends WebMvcConfigurationSupport {
     @Value("${online:false}")
     private boolean online;
 
+    private final ObjectMapper objectMapper;
+    public ProductWebConfig(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }
+
     @Override
     protected RequestMappingHandlerMapping createRequestMappingHandlerMapping() {
         return new VersionRequestMappingHandlerMapping();
@@ -40,7 +46,7 @@ public class ProductWebConfig extends WebMvcConfigurationSupport {
 
     @Override
     public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
-        SpringMvc.handlerConvert(converters, online);
+        SpringMvc.handlerConvert(converters, online, objectMapper);
     }
 
     @Override

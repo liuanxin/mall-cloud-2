@@ -1,8 +1,8 @@
 package com.github.common.mvc;
 
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.common.converter.*;
-import com.github.common.json.JsonUtil;
 import com.github.common.page.Page;
 import com.github.common.util.LogUtil;
 import com.github.common.util.RequestUtils;
@@ -33,9 +33,9 @@ public final class SpringMvc {
         registry.addConverter(new StringToMoneyConverter());
     }
 
-    public static void handlerConvert(List<HttpMessageConverter<?>> converters, boolean online) {
+    public static void handlerConvert(List<HttpMessageConverter<?>> converters, boolean online, ObjectMapper objectMapper) {
         handlerStringConvert(converters, StringHttpMessageConverter.class, new StringHttpMessageConverter(StandardCharsets.UTF_8));
-        handlerStringConvert(converters, MappingJackson2HttpMessageConverter.class, new CustomizeJacksonConverter(online));
+        handlerStringConvert(converters, MappingJackson2HttpMessageConverter.class, new CustomizeJacksonConverter(online, objectMapper));
     }
     private static void handlerStringConvert(List<HttpMessageConverter<?>> converters,
                                              Class<? extends HttpMessageConverter> clazz,
@@ -53,16 +53,23 @@ public final class SpringMvc {
         converters.add(i, httpMessageConverter);
     }
     public static class CustomizeJacksonConverter extends MappingJackson2HttpMessageConverter {
-        boolean online;
-        public CustomizeJacksonConverter(boolean online) {
+        private final boolean online;
+        private final ObjectMapper objectMapper;
+        public CustomizeJacksonConverter(boolean online, ObjectMapper objectMapper) {
             this.online = online;
+            this.objectMapper = objectMapper;
         }
         @Override
         protected void writeSuffix(JsonGenerator generator, Object object) throws IOException {
             super.writeSuffix(generator, object);
 
             if (LogUtil.ROOT_LOG.isInfoEnabled()) {
-                String json = JsonUtil.toJsonNil(object);
+                String json;
+                try {
+                    json = objectMapper.writeValueAsString(object);
+                } catch (Exception ignore) {
+                    return;
+                }
                 if (U.isNotBlank(json)) {
                     boolean notRequestInfo = LogUtil.hasNotRequestInfo();
                     try {
