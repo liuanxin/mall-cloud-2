@@ -61,6 +61,10 @@ public class ManagerSessionUtil {
         return getSessionInfo().getUserName();
     }
 
+    public static String getUserInfo() {
+        return getSessionInfo().userInfo();
+    }
+
     /** 验证登录, 未登录则抛出异常 */
     public static void checkLogin() {
         if (getSessionInfo().notLogin()) {

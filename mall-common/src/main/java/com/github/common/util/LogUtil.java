@@ -44,7 +44,7 @@ public final class LogUtil {
         if (U.isNotBlank(requestBody)) {
             String requestInfo = MDC.get(REQUEST_INFO);
             if (U.isNotBlank(requestInfo)) {
-                MDC.put(REQUEST_INFO, requestInfo.replace("params()", "requestBody(" + requestBody + ")"));
+                MDC.put(REQUEST_INFO, requestInfo.replace("]", " requestBody(" + requestBody + ")]"));
             }
         }
     }
@@ -65,8 +65,7 @@ public final class LogUtil {
     @NoArgsConstructor
     @Accessors(chain = true)
     public static class RequestLogContext {
-        private String id;
-        private String name;
+        private String user;
         /** 访问 ip */
         private String ip;
         /** 访问方法 */
@@ -86,19 +85,15 @@ public final class LogUtil {
             this.heads = heads;
         }
 
-        /** 输出 " [ip (id/name) (method url) params(...) headers(...)]" */
+        /** 输出 " [ip (user) (method url) params(...) headers(...)]" */
         private String requestInfo() {
             // 参数 及 头 的长度如果超过 1100 就只输出前后 500 个字符
             int maxLen = 1100, headTail = 500;
             StringBuilder sbd = new StringBuilder();
             sbd.append(" [");
             sbd.append(ip);
-            if (U.isNotBlank(id) || U.isNotBlank(name)) {
-                sbd.append(" (");
-                sbd.append(U.isBlank(id) ? U.EMPTY : id);
-                sbd.append("/");
-                sbd.append(U.isBlank(name) ? U.EMPTY : name);
-                sbd.append(")");
+            if (U.isNotBlank(user)) {
+                sbd.append(" (").append(user).append(")");
             }
             sbd.append(" (").append(method).append(" ").append(url).append(")");
 

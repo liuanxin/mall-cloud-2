@@ -20,6 +20,8 @@ class BackendSessionModel implements Serializable {
     private static final Long DEFAULT_ID = 0L;
     /** 默认未登录用户的 name */
     private static final String DEFAULT_NAME = "未登录用户";
+    /** 无值时的默认模型 */
+    private static final BackendSessionModel DEFAULT_MODEL = new BackendSessionModel(DEFAULT_ID, DEFAULT_NAME);
 
 
     // ========== 存放在 session 中的数据 ==========
@@ -30,6 +32,15 @@ class BackendSessionModel implements Serializable {
     private String name;
 
     // ========== 存放在 session 中的数据 ==========
+
+    private BackendSessionModel(Long id, String userName) {
+        this.id = id;
+        this.name = userName;
+    }
+
+    public String userInfo() {
+        return id + "/" + name;
+    }
 
 
     /** 当前用户在指定域名下是否已登录. 已登录就返回 true */
@@ -48,6 +59,6 @@ class BackendSessionModel implements Serializable {
 
     /** 未登录时的默认用户信息 */
     static BackendSessionModel defaultUser() {
-        return new BackendSessionModel().setId(DEFAULT_ID).setName(DEFAULT_NAME);
+        return DEFAULT_MODEL;
     }
 }

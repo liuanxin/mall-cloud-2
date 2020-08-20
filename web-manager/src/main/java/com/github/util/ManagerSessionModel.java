@@ -40,6 +40,15 @@ class ManagerSessionModel implements Serializable {
 
     // ========== 存放在 session 中的数据 ==========
 
+    private ManagerSessionModel(Long id, String userName) {
+        this.id = id;
+        this.userName = userName;
+    }
+
+    public String userInfo() {
+        return id + "/" + userName;
+    }
+
 
     @Setter
     @Getter
@@ -54,11 +63,6 @@ class ManagerSessionModel implements Serializable {
         private String method;
     }
 
-
-    private ManagerSessionModel(Long id, String userName) {
-        this.id = id;
-        this.userName = userName;
-    }
 
     private boolean wasLogin() {
         return !DEFAULT_ID.equals(id) && !DEFAULT_NAME.equals(userName);
