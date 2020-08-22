@@ -8,7 +8,7 @@
         <file>${FILE_PATH}.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <fileNamePattern>${FILE_PATH}-%d{yyyy-MM-dd}.log</fileNamePattern>
-            <maxHistory>3</maxHistory>
+            <maxHistory>2</maxHistory>
         </rollingPolicy>
         <encoder>
             <pattern>${LOG_PATTERN}</pattern>

@@ -836,7 +836,7 @@ class Server {
             "        <!-- yyyy-MM-dd_HH 每小时建一个, yyyy-MM-dd_HH-mm 每分钟建一个 -->\n" +
             "        <rollingPolicy class=\"ch.qos.logback.core.rolling.TimeBasedRollingPolicy\">\n" +
             "            <fileNamePattern>${FILE_PATH}-%d{yyyy-MM-dd}.log</fileNamePattern>\n" +
-            "            <maxHistory>3</maxHistory>\n" +
+            "            <maxHistory>2</maxHistory>\n" +
             "        </rollingPolicy>\n" +
             "        <!-- 开启了下面的配置将会在文件达到 10MB 的时候才新建文件, 将会按上面的规则一天建一个  -->\n" +
             "        <!--<triggeringPolicy class=\"ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy\">\n" +
@@ -851,7 +851,7 @@ class Server {
             "        <file>${FILE_PATH}-sql.log</file>\n" +
             "        <rollingPolicy class=\"ch.qos.logback.core.rolling.TimeBasedRollingPolicy\">\n" +
             "            <fileNamePattern>${FILE_PATH}-sql-%d{yyyy-MM-dd}.log</fileNamePattern>\n" +
-            "            <maxHistory>3</maxHistory>\n" +
+            "            <maxHistory>2</maxHistory>\n" +
             "        </rollingPolicy>\n" +
             "        <encoder>\n" +
             "            <pattern>${SQL_PATTERN}</pattern>\n" +
@@ -877,7 +877,7 @@ class Server {
             "        <file>${FILE_PATH}.log</file>\n" +
             "        <rollingPolicy class=\"ch.qos.logback.core.rolling.TimeBasedRollingPolicy\">\n" +
             "            <fileNamePattern>${FILE_PATH}-%d{yyyy-MM-dd}.log</fileNamePattern>\n" +
-            "            <maxHistory>15</maxHistory>\n" +
+            "            <maxHistory>7</maxHistory>\n" +
             "        </rollingPolicy>\n" +
             "        <encoder>\n" +
             "            <pattern>${LOG_PATTERN}</pattern>\n" +
