@@ -1,5 +1,6 @@
 package com.github.global.service;
 
+import com.github.common.util.U;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -10,13 +11,14 @@ import org.springframework.data.redis.core.script.RedisScript;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-/** @see org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration */
 @Configuration
 @ConditionalOnClass({ RedisTemplate.class, StringRedisTemplate.class })
 public class CacheService {
 
+    /** @see org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration */
     private final StringRedisTemplate stringRedisTemplate;
     private final RedisTemplate<Object, Object> redisTemplate;
 
@@ -41,6 +43,15 @@ public class CacheService {
                 set(key, value, now.getTime() - expireTime.getTime(), TimeUnit.MILLISECONDS);
             }
         }
+    }
+
+    public void expire(String key, long time, TimeUnit timeUnit) {
+        stringRedisTemplate.expire(key, time, timeUnit);
+    }
+
+    public long incr(String key) {
+        Long inc = stringRedisTemplate.opsForValue().increment(key, 1L);
+        return inc == null ? 0 : inc;
     }
 
     /**
@@ -134,11 +145,6 @@ public class CacheService {
         stringRedisTemplate.execute(redisScript, keys);
     }
 
-    /** 设置超时 */
-    public void expire(String key, int time, TimeUnit unit) {
-        redisTemplate.expire(key, time, unit);
-    }
-
     /** 从 redis 中取值 */
     public String get(String key) {
         return stringRedisTemplate.opsForValue().get(key);
@@ -172,8 +178,34 @@ public class CacheService {
         Long add = stringRedisTemplate.opsForSet().add(key, set);
         return add != null ? add : 0L;
     }
+    public Set<String> setGet(String key) {
+        return stringRedisTemplate.opsForSet().members(key);
+    }
+    public void setRemove(String key, String value) {
+        stringRedisTemplate.opsForSet().remove(key, value);
+    }
     /** 从指定的 set 中随机取一个值: spop key */
     public Object setPop(String key) {
         return stringRedisTemplate.opsForSet().pop(key);
+    }
+
+
+    public void hashPut(String key, String hashKey, String hashValue) {
+        stringRedisTemplate.opsForHash().put(key, hashKey, hashValue);
+    }
+    public void hashPutIfAbsent(String key, String hashKey, String hashValue) {
+        stringRedisTemplate.opsForHash().putIfAbsent(key, hashKey, hashValue);
+    }
+    public long hashSize(String key) {
+        return stringRedisTemplate.opsForHash().size(key);
+    }
+    public String hashGet(String key, String hashKey) {
+        return U.toStr(stringRedisTemplate.opsForHash().get(key, hashKey));
+    }
+    public void hashIncr(String key, String hashKey) {
+        stringRedisTemplate.opsForHash().increment(key, hashKey, 1);
+    }
+    public void hashRemove(String key, String hashKey) {
+        stringRedisTemplate.opsForHash().delete(key, hashKey);
     }
 }
