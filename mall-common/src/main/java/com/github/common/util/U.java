@@ -30,9 +30,8 @@ public final class U {
 
     private static final String LIKE = "%";
 
-    // 匹配所有手机卡: ^(?:\+?86)?1(?:3\d{3}|5[^4\D]\d{2}|8\d{3}|7[^0129\D](?(?<=4)(?:0\d|1[0-2]|9\d)|\d{2})|9[189]\d{2}|66\d{2})\d{6}$
-    /** 匹配所有支持短信功能的号码（手机卡 + 上网卡） */
-    private static final String PHONE = "^(?:\\+?86)?1(?:3\\d{3}|5[^4\\D]\\d{2}|8\\d{3}|7[^29\\D](?(?<=4)(?:0\\d|1[0-2]|9\\d)|\\d{2})|9[189]\\d{2}|6[567]\\d{2}|4[579]\\d{2})\\d{6}$";
+    /** 手机号. 见: https://zh.wikipedia.org/wiki/%E4%B8%AD%E5%9B%BD%E5%86%85%E5%9C%B0%E7%A7%BB%E5%8A%A8%E7%BB%88%E7%AB%AF%E9%80%9A%E8%AE%AF%E5%8F%B7%E6%AE%B5 */
+    private static final String PHONE = "^1[3-9]\\d{9}$";
     /** _abc-def@123-hij.uvw_xyz.com 是正确的, -123@xyz.com 不是 */
     private static final String EMAIL = "^\\w[\\w\\-]*@([\\w\\-]+\\.\\w+)+$";
     /** ico, jpeg, jpg, bmp, png 后缀 */
@@ -472,8 +471,13 @@ public final class U {
         if (start < 0 || end < start || end > param.length()) {
             return param;
         }
-
         return param.substring(0, start) + ALL.matcher(param.substring(start, end)).replaceAll("*") + param.substring(end);
+    }
+    public static String foggyPhone(String phone) {
+        return checkPhone(phone) ? phone.substring(0, 3) + " **** " + phone.substring(phone.length() - 4) : phone;
+    }
+    public static String foggyIdCard(String idCard) {
+        return isIdCard(idCard) ? idCard.substring(0, 6) + " **** " + idCard.substring(idCard.length() - 4) : idCard;
     }
 
     public static String like(String param) {
