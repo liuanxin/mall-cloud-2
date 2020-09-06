@@ -519,6 +519,23 @@ public final class U {
     public static boolean isIdCard(String num) {
         return checkRegexWithStrict(num, ID_CARD);
     }
+    /** 基于身份证号码返回性别 */
+    public static String idCardToGender(String num) {
+        if (isIdCard(num)) {
+            int len = num.length();
+            String g;
+            if (len == 15) {
+                g = num.substring(14, 15);
+            } else if (len == 18) {
+                g = num.substring(16, 17);
+            } else {
+                g = EMPTY;
+            }
+            return isNumber(g) ? (toInt(g) % 2 == 0 ? "女" : "男") : "未知";
+        } else {
+            return "未知";
+        }
+    }
     /** 是本地请求则返回 true */
     public static boolean isLocalRequest(String ip) {
         return checkRegexWithStrict(ip, LOCAL);
