@@ -1,5 +1,6 @@
 package com.github.common.page;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.github.common.util.U;
 import com.github.liuanxin.api.annotation.ApiReturn;
 import lombok.AllArgsConstructor;
@@ -35,6 +36,7 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class PageInfo<T> implements Serializable {
     private static final long serialVersionUID = 0L;
 
