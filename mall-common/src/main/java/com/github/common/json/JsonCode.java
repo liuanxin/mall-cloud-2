@@ -24,7 +24,7 @@ public enum JsonCode {
     NOT_LOGIN(401, "未登录"),
 
     // /** 403: 无权限(客户端错误) */
-    // NOT_PERMISSION(403, "无权限"),
+    NOT_PERMISSION(403, "无权限"),
 
     // /** 404: 不需要额外处理(客户端错误) */
     // NOT_FOUND(404, "未找到相应处理"),

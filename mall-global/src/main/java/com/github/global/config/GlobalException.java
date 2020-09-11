@@ -54,8 +54,7 @@ public class GlobalException {
         if (LogUtil.ROOT_LOG.isDebugEnabled()) {
             LogUtil.ROOT_LOG.debug("没权限", e);
         }
-        return ResponseEntity.status(JsonCode.FAIL.getCode()).body(e.getMessage());
-        // return ResponseEntity.status(JsonCode.NOT_PERMISSION.getCode()).body(e.getMessage());
+        return ResponseEntity.status(JsonCode.NOT_PERMISSION.getCode()).body(e.getMessage());
     }
     /** 404 */
     @ExceptionHandler(NotFoundException.class)
