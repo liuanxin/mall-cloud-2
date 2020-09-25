@@ -83,7 +83,7 @@
         <mybatis-redis-cache.version>1.2.7</mybatis-redis-cache.version>
 
         <api-document.version>0.7.6</api-document.version>
-        <google-jib.version>2.4.0</google-jib.version>
+        <google-jib.version>2.5.2</google-jib.version>
     </properties>
 
     <dependencyManagement>
