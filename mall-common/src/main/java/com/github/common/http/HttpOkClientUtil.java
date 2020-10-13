@@ -219,25 +219,61 @@ public class HttpOkClientUtil {
     }
 
     /** 用 get 方式请求 url 并将响应结果保存指定的文件 */
-    @SuppressWarnings("UnstableApiUsage")
+    @SuppressWarnings({"UnstableApiUsage", "ResultOfMethodCallIgnored"})
     public static void download(String url, String file) {
         url = handleEmptyScheme(url);
         Request request = wrapperRequest(new Request.Builder(), url);
 
-        long start = System.currentTimeMillis();
+        Date start = DateUtil.now();
         try (Response response = HTTP_CLIENT.newCall(request).execute()) {
             ResponseBody body = response.body();
-            if (body != null) {
-                Files.write(body.bytes(), new File(file));
-                if (LogUtil.ROOT_LOG.isInfoEnabled()) {
-                    long ms = (System.currentTimeMillis() - start);
-                    LogUtil.ROOT_LOG.info("download ({}) to file({}) success, time({}ms)", url, file, ms);
-                }
+            U.assertNil(body, "下载文件时, 响应了空数据");
+
+            byte[] bytes = body.bytes();
+            if (LogUtil.ROOT_LOG.isInfoEnabled()) {
+                Headers reqHeaders = request.headers();
+                Headers resHeaders = response.headers();
+                LogUtil.ROOT_LOG.info(collectContext(start, "GET", url, "", reqHeaders, resHeaders, A.toString(bytes)));
             }
+
+            File f = new File(file);
+            f.getParentFile().mkdirs();
+            Files.write(bytes, f);
         } catch (IOException e) {
             if (LogUtil.ROOT_LOG.isInfoEnabled()) {
                 LogUtil.ROOT_LOG.info(String.format("download (%s) to file(%s) exception", url, file), e);
             }
+            U.assertException("下载文件异常");
+        }
+    }
+
+    /** 用 post 方式请求 url 并将响应结果保存指定的文件 */
+    @SuppressWarnings({"UnstableApiUsage", "ResultOfMethodCallIgnored"})
+    public static void postDownloadFile(String url, String json, String file) {
+        Request.Builder builder = new Request.Builder().post(RequestBody.create(JSON, json));
+        url = handleEmptyScheme(url);
+        Request request = wrapperRequest(builder, url);
+
+        Date start = DateUtil.now();
+        try (Response response = HTTP_CLIENT.newCall(request).execute()) {
+            ResponseBody body = response.body();
+            U.assertNil(body, "下载文件时, 响应了空数据");
+
+            byte[] bytes = body.bytes();
+            if (LogUtil.ROOT_LOG.isInfoEnabled()) {
+                Headers reqHeaders = request.headers();
+                Headers resHeaders = response.headers();
+                LogUtil.ROOT_LOG.info(collectContext(start, "POST", url, json, reqHeaders, resHeaders, A.toString(bytes)));
+            }
+
+            File f = new File(file);
+            f.getParentFile().mkdirs();
+            Files.write(bytes, f);
+        } catch (IOException e) {
+            if (LogUtil.ROOT_LOG.isErrorEnabled()) {
+                LogUtil.ROOT_LOG.error(String.format("post download (%s) to file(%s) exception", url, file), e);
+            }
+            U.assertException("下载文件异常");
         }
     }
 }
