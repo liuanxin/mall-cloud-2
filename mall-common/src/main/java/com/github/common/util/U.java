@@ -477,7 +477,16 @@ public final class U {
         return checkPhone(phone) ? phone.substring(0, 3) + " **** " + phone.substring(phone.length() - 4) : phone;
     }
     public static String foggyIdCard(String idCard) {
-        return isIdCard(idCard) ? idCard.substring(0, 6) + " **** " + idCard.substring(idCard.length() - 4) : idCard;
+        // 是标准的 15 或 18 位身份证就返回「前面 6 位 + 后面 4 位」. 只有 6 位尾数则只返回「后面 2 位」
+        if (isBlank(idCard)) {
+            return idCard;
+        } else if (isIdCard(idCard)) {
+            return idCard.substring(0, 6) + " **** " + idCard.substring(idCard.length() - 4);
+        } else if (idCard.length() == 6) {
+            return "**** " + idCard.substring(2);
+        } else {
+            return idCard;
+        }
     }
 
     public static String like(String param) {
