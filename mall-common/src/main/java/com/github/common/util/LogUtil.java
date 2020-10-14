@@ -87,8 +87,6 @@ public final class LogUtil {
 
         /** 输出 " [ip (user) (method url) params(...) headers(...)]" */
         private String requestInfo() {
-            // 参数 及 头 的长度如果超过 1100 就只输出前后 500 个字符
-            int maxLen = 1100, headTail = 500;
             StringBuilder sbd = new StringBuilder();
             sbd.append(" [");
             sbd.append(ip);
@@ -96,29 +94,12 @@ public final class LogUtil {
                 sbd.append(" (").append(user).append(")");
             }
             sbd.append(" (").append(method).append(" ").append(url).append(")");
-
-            if (U.isNotBlank(params)) {
-                sbd.append(" params(");
-                int paramLen = params.length();
-                if (paramLen > maxLen) {
-                    sbd.append(params, 0, headTail).append(" ... ").append(params, paramLen - headTail, paramLen);
-                } else {
-                    sbd.append(params);
-                }
-                sbd.append(")");
-            }
-
             if (U.isNotBlank(heads)) {
-                sbd.append(" headers(");
-                int headLen = heads.length();
-                if (headLen > maxLen) {
-                    sbd.append(heads, 0, headTail).append(" ... ").append(heads, headLen - headTail, headLen);
-                } else {
-                    sbd.append(heads);
-                }
-                sbd.append(")");
+                sbd.append(" headers(").append(heads).append(")");
             }
-
+            if (U.isNotBlank(params)) {
+                sbd.append(" params(").append(params).append(")");
+            }
             sbd.append("]");
             return sbd.toString();
         }
