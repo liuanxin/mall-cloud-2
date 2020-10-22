@@ -7,13 +7,13 @@ import com.github.common.util.U;
 import com.google.common.io.Files;
 import okhttp3.*;
 
-import javax.activation.MimetypesFileTypeMap;
 import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+@SuppressWarnings("ConstantConditions")
 public class HttpOkClientUtil {
 
     // MIME 说明: http://www.w3school.com.cn/media/media_mimeref.asp
@@ -114,10 +114,14 @@ public class HttpOkClientUtil {
         for (Map.Entry<String, File> entry : files.entrySet()) {
             File file = entry.getValue();
             if (U.isNotBlank(file)) {
-                MediaType type = MediaType.parse(new MimetypesFileTypeMap().getContentType(file));
-
-                RequestBody body = RequestBody.create(type, file);
-                builder.addFormDataPart(entry.getKey(), null, body);
+                try {
+                    MediaType type = MediaType.parse(java.nio.file.Files.probeContentType(file.toPath()));
+                    builder.addFormDataPart(entry.getKey(), null, RequestBody.create(type, file));
+                } catch (IOException e) {
+                    if (LogUtil.ROOT_LOG.isErrorEnabled()) {
+                        LogUtil.ROOT_LOG.error(String.format("add file (%s) to post exception", file.getName()), e);
+                    }
+                }
             }
         }
         Request.Builder request = new Request.Builder().post(builder.build());

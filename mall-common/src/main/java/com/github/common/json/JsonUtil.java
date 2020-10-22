@@ -19,6 +19,24 @@ import java.util.TimeZone;
 
 public class JsonUtil {
 
+    /*
+    使用 JacksonXml 可以像 json 一样使用相关的 api
+    ObjectMapper RENDER = new XmlMapper();
+
+    // object to xml
+    String xml = RENDER.writeValueAsString(request);
+
+    // xml to object
+    Parent<Child> parent = RENDER.readValue(xml, new TypeReference<Parent<Child>>() {});
+
+    但是需要引入一个包
+    <dependency>
+        <groupId>com.fasterxml.jackson.dataformat</groupId>
+        <artifactId>jackson-dataformat-xml</artifactId>
+        <version>...</version>
+    </dependency>
+    */
+
     private static final int MAX_LEN = 500;
     private static final int LEFT_RIGHT_LEN = 100;
 

@@ -1,7 +1,6 @@
 package com.github.common.resource;
 
 import com.github.common.Const;
-import com.github.common.util.LogUtil;
 import com.github.common.util.U;
 import com.google.common.base.CaseFormat;
 import com.google.common.collect.Maps;
