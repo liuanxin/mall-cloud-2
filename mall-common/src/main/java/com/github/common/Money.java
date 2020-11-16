@@ -129,7 +129,14 @@ public class Money implements Serializable {
         if (cent == 0) {
             return "0";
         }
-        return (cent > 0 ? U.EMPTY : "-") + BigDecimal.valueOf(Math.abs(cent)).movePointLeft(SCALE).toString();
+        String yuan = (cent > 0 ? U.EMPTY : "-") + BigDecimal.valueOf(Math.abs(cent)).movePointLeft(SCALE).toString();
+        if (yuan.endsWith("0")) {
+            yuan = yuan.substring(0, yuan.length() - 1);
+            if (yuan.endsWith("0")) {
+                yuan = yuan.substring(0, yuan.length() - 2);
+            }
+        }
+        return yuan;
     }
     /** 分转换为带千分位的元 */
     public static String cent2ShowYuan(Long cent) {
