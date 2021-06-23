@@ -1,11 +1,7 @@
 
 server.port: 8888
 
-logging.config: classpath:log-dev.xml
-
-spring:
-  application.name: config-server
-  profiles.active: native
+spring.application.name: config-server
 
 register.center: http://127.0.0.1:8761/eureka/
 
