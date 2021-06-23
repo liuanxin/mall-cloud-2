@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!--
+    https://docs.spring.io/spring-boot/docs/current/reference/html/howto.html#howto-logging
+    https://docs.spring.io/spring-boot/docs/current/reference/html/spring-boot-features.html#boot-features-logback-extensions
+
+    https://docs.spring.io/spring-boot/docs/current/reference/html/spring-boot-features.html#environment-properties
+    -->
+
+    <springProperty scope="context" name="applicationName" source="spring.application.name" defaultValue="log"/>
+    <!-- 在 application.yml 中添加 log.level: info 即可, 下面的依此类推 -->
+    <springProperty scope="context" name="logLevel" source="log.level" defaultValue="debug"/>
+    <springProperty scope="context" name="thirdLogLevel" source="log.thirdLevel" defaultValue="warn"/>
+    <springProperty scope="context" name="filePath" source="log.filePath" defaultValue="${user.home}/logs"/>
+    <springProperty scope="context" name="fileMaxHistory" source="log.maxHistory" defaultValue="15"/>
+
+
+    <logger name="com.github.common.mvc" level="${thirdLogLevel}"/>
+
+    <logger name="com.baomidou" level="${thirdLogLevel}"/>
+    <logger name="com.netflix" level="${thirdLogLevel}"/>
+    <logger name="com.github" level="${thirdLogLevel}"/>
+    <logger name="com.zaxxer" level="${thirdLogLevel}"/>
+    <logger name="com.sun" level="${thirdLogLevel}"/>
+
+    <logger name="org.springframework" level="${thirdLogLevel}"/>
+    <logger name="org.hibernate" level="${thirdLogLevel}"/>
+    <logger name="org.mybatis" level="${thirdLogLevel}"/>
+    <logger name="org.apache" level="${thirdLogLevel}"/>
+    <logger name="org.jboss" level="${thirdLogLevel}"/>
+    <logger name="org.xnio" level="${thirdLogLevel}"/>
+
+    <logger name="io.undertow" level="${thirdLogLevel}"/>
+    <logger name="io.lettuce" level="${thirdLogLevel}"/>
+    <logger name="io.netty" level="${thirdLogLevel}"/>
+    <logger name="reactor" level="${thirdLogLevel}"/>
+
+
+    <springProfile name="dev">
+        <include resource="org/springframework/boot/logging/logback/defaults.xml" />
+        <property name="CONSOLE_LOG_PATTERN" value="%n[%X{receiveTime}%d] [${PID:- } %t\\(%logger\\) : %p]%X{requestInfo}%n%class.%method\\(%file:%line\\)%n%m%n"/>
+        <include resource="org/springframework/boot/logging/logback/console-appender.xml" />
+
+        <root level="${logLevel}">
+            <appender-ref ref="CONSOLE"/>
+        </root>
+    </springProfile>
+
+
+    <!-- 输出到文件时的格式 -->
+    <property name="LOG_PATTERN" value="[%X{receiveTime}%d] [${PID:- } %t\\(%logger\\) : %p]%X{requestInfo} %class{30}#%method\\(%file:%line\\) %m%n"/>
+
+    <!--
+    或者用「!(dev | prod)」, 用 & 貌似有问题
+    见: https://docs.spring.io/spring-framework/docs/5.3.1/reference/html/core.html#beans-definition-profiles-java
+    -->
+    <springProfile name="test">
+        <property name="FILE_PATH" value="${filePath}/${applicationName}-test"/>
+        <property name="SQL_PATTERN" value="%n[%d] [${PID:- } %t\\(%logger\\) : %p] %class.%method\\(%file:%line\\) %m%n"/>
+
+        <appender name="PROJECT" class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <file>${FILE_PATH}.log</file>
+            <!-- yyyy-MM-dd_HH 每小时建一个, yyyy-MM-dd_HH-mm 每分钟建一个 -->
+            <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                <fileNamePattern>${FILE_PATH}-%d{yyyy-MM-dd}.log</fileNamePattern>
+                <maxHistory>${fileMaxHistory}</maxHistory>
+            </rollingPolicy>
+            <!-- 开启了下面的配置将会在文件达到 10MB 的时候才新建文件, 将会按上面的规则一天建一个  -->
+            <!--<triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+                <MaxFileSize>10MB</MaxFileSize>
+            </triggeringPolicy>-->
+            <encoder>
+                <pattern>${LOG_PATTERN}</pattern>
+            </encoder>
+        </appender>
+
+        <appender name="SQL" class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <file>${FILE_PATH}-sql.log</file>
+            <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                <fileNamePattern>${FILE_PATH}-sql-%d{yyyy-MM-dd}.log</fileNamePattern>
+                <maxHistory>${fileMaxHistory}</maxHistory>
+            </rollingPolicy>
+            <encoder>
+                <pattern>${SQL_PATTERN}</pattern>
+            </encoder>
+        </appender>
+        <logger name="sqlLog" level="debug" additivity="false">
+            <appender-ref ref="SQL" />
+        </logger>
+
+        <root level="debug">
+            <appender-ref ref="PROJECT"/>
+        </root>
+    </springProfile>
+
+    <springProfile name="prod">
+        <property name="FILE_PATH" value="${filePath}/${applicationName}-prod"/>
+
+        <appender name="PROJECT" class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <file>${FILE_PATH}.log</file>
+            <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                <fileNamePattern>${FILE_PATH}-%d{yyyy-MM-dd}.log</fileNamePattern>
+                <maxHistory>${fileMaxHistory}</maxHistory>
+            </rollingPolicy>
+            <encoder>
+                <pattern>${LOG_PATTERN}</pattern>
+            </encoder>
+        </appender>
+        <appender name="ASYNC" class="ch.qos.logback.classic.AsyncAppender">
+            <discardingThreshold>0</discardingThreshold>
+            <includeCallerData>true</includeCallerData>
+            <appender-ref ref ="PROJECT"/>
+        </appender>
+
+        <appender name="PROJECT-ERROR" class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+                <level>${thirdLogLevel}</level><!-- 只输出 thirdLogLevel 及以上级别的日志 -->
+            </filter>
+            <file>${FILE_PATH}-error.log</file>
+            <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                <fileNamePattern>${FILE_PATH}-error-%d{yyyy-MM-dd}.log</fileNamePattern>
+                <maxHistory>${fileMaxHistory}</maxHistory>
+            </rollingPolicy>
+            <encoder>
+                <pattern>${LOG_PATTERN}</pattern>
+            </encoder>
+        </appender>
+        <appender name="ASYNC-ERROR" class="ch.qos.logback.classic.AsyncAppender">
+            <discardingThreshold>0</discardingThreshold>
+            <includeCallerData>true</includeCallerData>
+            <appender-ref ref ="PROJECT-ERROR"/>
+        </appender>
+
+        <root level="${logLevel}">
+            <appender-ref ref="ASYNC"/>
+            <appender-ref ref="ASYNC-ERROR"/>
+        </root>
+    </springProfile>
+</configuration>
