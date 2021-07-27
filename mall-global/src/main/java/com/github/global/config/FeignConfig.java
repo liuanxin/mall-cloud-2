@@ -76,8 +76,7 @@ public class FeignConfig {
     /**
      * 处理日志打印: 需要配置 feign.client.config.default.loggerLevel 的值才能进入下面的日志打印,
      * 这个值默认是 NONE, 只要不是 NONE 就行(可以设置为 BASIC、HEADERS、FULL),
-     * 默认的日志打印会打印出很多条, 见 {@link Logger},
-     * 当前处理是只在请求前打印一条, 有响应时打印一条, io 异常时打印一条
+     * 默认的日志会输出很多条, 见 {@link Logger}, 当前处理是只在请求前打印一条, 有响应时打印一条, io 异常时打印一条
      */
     @Bean
     public Logger handleLog() {
