@@ -1,5 +1,6 @@
 package com.github.common.util;
 
+import com.github.common.Const;
 import com.github.common.date.DateUtil;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -24,6 +25,9 @@ public final class LogUtil {
     /** 请求信息: 包括 ip、url, param 等  */
     private static final String REQUEST_INFO = "requestInfo";
 
+    public static void bindTraceId(String traceId) {
+        MDC.put(Const.TRACE, traceId);
+    }
     /** 将 当前时间 和 请求上下文信息 放进日志的 ThreadLocal 中 */
     public static void bind(RequestLogContext logContextInfo) {
         recordTime();
@@ -53,7 +57,9 @@ public final class LogUtil {
     public static void recordTime() {
         MDC.put(RECEIVE_TIME, DateUtil.nowDateTimeMs() + " -> ");
     }
-
+    public static String getTraceId() {
+        return MDC.get(Const.TRACE);
+    }
 
     @Setter
     @Getter

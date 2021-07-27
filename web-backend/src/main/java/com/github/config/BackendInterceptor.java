@@ -1,10 +1,13 @@
 package com.github.config;
 
+import com.github.common.Const;
 import com.github.common.annotation.NeedLogin;
 import com.github.common.util.LogUtil;
 import com.github.common.util.RequestUtils;
+import com.github.common.util.U;
 import com.github.util.BackendSessionUtil;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
@@ -18,7 +21,17 @@ public class BackendInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response,
                              Object handler) throws Exception {
+        // 跟子线程共享请求上下文, 这样之后 FeignInterceptor 中调用 RequestContextHolder.getRequestAttributes() 才不是 null
+        RequestContextHolder.setRequestAttributes(RequestContextHolder.getRequestAttributes(), true);
+
+        String requestTraceId = request.getHeader(Const.TRACE);
+        String traceId = U.isBlank(requestTraceId) ? U.uuid16() : requestTraceId;
+        LogUtil.bindTraceId(traceId);
+        // MDC 无法跟子线程共享上下文, spring 可以做到共享 request, 所以把 traceId 放到请求上下步, 这样 feignClient 处可以获取到
+        request.setAttribute(Const.TRACE, traceId);
+
         bindParam();
+
         checkLoginAndPermission(handler);
         return true;
     }
