@@ -39,6 +39,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+/** 处理 feign 的请求头、日志打印、MDC 上下文 */
 @Configuration
 @ConditionalOnClass({HttpServletRequest.class, FeignClient.class, Feign.class})
 public class FeignConfig {
