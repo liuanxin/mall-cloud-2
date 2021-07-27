@@ -61,7 +61,7 @@ public class FeignConfig {
                     }
                 }
 
-                // 将跟踪号放到请求上下文
+                // 将跟踪号放到请求上下文(上面的请求头中如果没有就从 request 的属性中获取)
                 if (U.isBlank(request.getHeader(Const.TRACE))) {
                     String traceId = U.toStr(request.getAttribute(Const.TRACE));
                     if (U.isNotEmpty(traceId)) {
