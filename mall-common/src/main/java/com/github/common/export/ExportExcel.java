@@ -141,7 +141,7 @@ final class ExportExcel {
                         // 标题列
                         cell = row.createCell(cellIndex);
                         cell.setCellStyle(headStyle);
-                        cell.setCellValue(U.getNil(titleMapEntry.getValue().split("\\|")[0]));
+                        cell.setCellValue(U.toStr(titleMapEntry.getValue().split("\\|")[0]));
                         cellIndex++;
                     }
                     // 冻结标题

@@ -58,7 +58,7 @@ public final class Render {
                 path = version(path);
             }
         }
-        return url(U.getNil(path));
+        return url(U.toStr(path));
     }
 
     /** 给 url 加上版本 */

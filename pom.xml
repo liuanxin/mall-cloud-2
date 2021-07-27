@@ -79,6 +79,7 @@
         <elasticsearch.version>6.3.2</elasticsearch.version>
         <hikaricp.version>3.4.5</hikaricp.version>
         <mybatis.version>3.5.6</mybatis.version>
+        <mybatis-plus.version>3.4.3</mybatis-plus.version>
         <mybatis-spring.version>2.0.5</mybatis-spring.version>
         <mybatis-page.version>1.2.8</mybatis-page.version>
         <mybatis-redis-cache.version>1.2.7</mybatis-redis-cache.version>
@@ -331,6 +332,16 @@
                 <groupId>org.mybatis</groupId>
                 <artifactId>mybatis</artifactId>
                 <version>${mybatis.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.baomidou</groupId>
+                <artifactId>mybatis-plus-annotation</artifactId>
+                <version>${mybatis-plus.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.baomidou</groupId>
+                <artifactId>mybatis-plus-boot-starter</artifactId>
+                <version>${mybatis-plus.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.mybatis</groupId>

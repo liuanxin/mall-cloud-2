@@ -17,15 +17,14 @@ import java.util.List;
  * 此实体类在 Controller 和 Service 中用到分页时使用.
  *
  * &#064;Controller --> request 请求中带过来的参数使用 Page 进行接收(如果前端不传, 此处接收则程序会使用默认值)
- * public JsonResult xx(xxx, Page page) {
- *     PageInfo pageInfo = xxxService.page(xxx, page);
- *     return success("xxx", (page.isWasMobile() ? pageInfo.getList() : pageInfo));
+ * public JsonResult xx(xxx, PageParam page) {
+ *     PageReturn PageReturn = xxxService.page(xxx, page);
+ *     return success("xxx", (page.isWasMobile() ? PageReturn.getList() : PageReturn));
  * }
  *
- * &#064;Service --> 调用方法使用 Page 进行传递, 返回 PageInfo
- * public PageInfo page(xxx, Page page) {
- *     PageBounds pageBounds = Pages.param(page);
- *     List&lt;XXX> xxxList = xxxMapper.selectByExample(xxxxx, pageBounds);
+ * &#064;Service --> 调用方法使用 Page 进行传递, 返回 PageReturn
+ * public PageReturn page(xxx, PageParam page) {
+ *     List&lt;XXX> xxxList = xxxMapper.selectPage(Pages.param(page), xxxxx);
  *     return Pages.returnPage(xxxList);
  * }
  *
@@ -37,30 +36,34 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
-public class PageInfo<T> implements Serializable {
+public class PageReturn<T> implements Serializable {
     private static final long serialVersionUID = 0L;
 
+    @ApiReturn("使用 es 查询时会返回此值, 请求下一页(仅下一页, 不能跳页, 也不能上一页)时这个如果有值, 带上即可")
+    private String searchAfter;
+
     @ApiReturn("SELECT COUNT(*) FROM ... 的结果")
-    private int total;
+    private long total;
 
     @ApiReturn("SELECT ... FROM ... LIMIT 0, 10 的结果")
     private List<T> list;
 
-    public static <T> PageInfo<T> emptyReturn() {
-        return new PageInfo<T>(0, Collections.emptyList());
+    public static <T> PageReturn<T> emptyReturn() {
+        return new PageReturn<>(null, 0, Collections.emptyList());
     }
-    public static <T> PageInfo<T> returnPage(int total, List<T> list) {
-        return new PageInfo<T>(total, list);
+    public static <T> PageReturn<T> returnPage(long total, List<T> list) {
+        return new PageReturn<>(null, total, list);
     }
 
     /** 在 Controller 中调用 --> 组装不同的 vo 时使用此方法 */
-    public static <S,T> PageInfo<T> convert(PageInfo<S> pageInfo) {
-        if (U.isBlank(pageInfo)) {
+    public static <S,T> PageReturn<T> convert(PageReturn<S> PageReturn) {
+        if (U.isBlank(PageReturn)) {
             return emptyReturn();
         } else {
             // 只要总条数
-            PageInfo<T> info = new PageInfo<T>();
-            info.setTotal(pageInfo.getTotal());
+            PageReturn<T> info = new PageReturn<>();
+            info.setTotal(PageReturn.getTotal());
+            info.setSearchAfter(PageReturn.getSearchAfter());
             return info;
         }
     }

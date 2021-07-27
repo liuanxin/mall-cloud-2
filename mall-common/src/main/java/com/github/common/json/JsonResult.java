@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
+
 /** <span style="color:red;">!!!此实体类请只在 Controller 中使用, 且只调用其 static 方法!!!</span> */
 @Setter
 @Getter
@@ -15,16 +17,18 @@ public class JsonResult<T> {
     // 只有响应编码就可以了, 当前实体表示处理成功后的返回. 说明: 这里是有争议的, 确定后使用一种即可
     // 如果确定后给所有的接口都返回了 200, 在接口内返回 code
     //  则将下面 和 最下面 public static <T> JsonResult<T> 段解开, 使用 GlobalException2, 去掉 GlobalException
-    // @ApiReturn("返回码")
-    // private JsonCode code;
+    @ApiReturn("返回码")
+    private JsonCode code;
 
-    /** 返回说明. 如: 用户名密码错误, 收货地址添加成功 等 */
-    @ApiReturn("返回说明. 如: 用户名密码错误, 收货地址添加成功 等")
+    @ApiReturn(value = "返回说明", example = "用户名密码错误 | 收货地址添加成功")
     private String msg;
 
-    /** 返回的数据. 具体是返回实体 {"id":1} 还是列表 [{"id":1},{"id":2}] 依具体的业务而定 */
-    @ApiReturn("返回的数据. 实体 {\"id\":1} 还是列表 [{\"id\":1},{\"id\":2}] 依具体的业务而定")
-    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @ApiReturn(value = "错误信息", example = "当非生产时返回")
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    private List<String> errorMsgListWithDebug;
+
+    @ApiReturn("返回数据, 实体 {\"id\":1} | 列表 [{\"id\":1},{\"id\":2}] 看具体的业务")
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private T data;
 
     /*
@@ -35,8 +39,12 @@ public class JsonResult<T> {
     */
 
     private JsonResult(JsonCode code, String msg) {
-        // this.code = code;
+        this.code = code;
         this.msg = msg;
+    }
+    private JsonResult(JsonCode code, String msg, List<String> errorMsgList) {
+        this(code, msg);
+        this.errorMsgListWithDebug = errorMsgList;
     }
     private JsonResult(JsonCode code, String msg, T data) {
         this(code, msg);
@@ -54,28 +62,27 @@ public class JsonResult<T> {
         return new JsonResult<>(JsonCode.SUCCESS,msg, data);
     }
 
-    /*
+
     public static <T> JsonResult<T> badRequest(String msg) {
-        // return new JsonResult<T>(JsonCode.BAD_REQUEST, msg);
-        return new JsonResult<T>(JsonCode.FAIL, msg);
+        return new JsonResult<>(JsonCode.BAD_REQUEST, msg);
     }
 
     public static <T> JsonResult<T> needLogin(String msg) {
-        return new JsonResult<T>(JsonCode.NOT_LOGIN, msg);
+        return new JsonResult<>(JsonCode.NOT_LOGIN, msg);
     }
 
     public static <T> JsonResult<T> needPermission(String msg) {
-        // return new JsonResult<T>(JsonCode.NOT_PERMISSION, msg);
-        return new JsonResult<T>(JsonCode.FAIL, msg);
+        return new JsonResult<>(JsonCode.NOT_PERMISSION, msg);
     }
 
     public static <T> JsonResult<T> notFound(String msg) {
-        // return new JsonResult<T>(JsonCode.NOT_FOUND, msg);
-        return new JsonResult<T>(JsonCode.FAIL, msg);
+        return new JsonResult<>(JsonCode.NOT_FOUND, msg);
     }
 
     public static <T> JsonResult<T> fail(String msg) {
-        return new JsonResult<T>(JsonCode.FAIL, msg);
+        return new JsonResult<>(JsonCode.FAIL, msg);
     }
-    */
+    public static <T> JsonResult<T> fail(String msg, List<String> errorMsgList) {
+        return new JsonResult<>(JsonCode.FAIL, msg, errorMsgList);
+    }
 }

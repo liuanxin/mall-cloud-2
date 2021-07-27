@@ -1,9 +1,7 @@
 package com.github.common.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.common.mvc.SpringMvc;
 import com.github.common.mvc.VersionRequestMappingHandlerMapping;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -20,14 +18,6 @@ import java.util.List;
  */
 @Configuration
 public class CommonWebConfig extends WebMvcConfigurationSupport {
-
-    @Value("${online:false}")
-    private boolean online;
-
-    private final ObjectMapper objectMapper;
-    public CommonWebConfig(ObjectMapper objectMapper) {
-        this.objectMapper = objectMapper;
-    }
 
     @Override
     protected RequestMappingHandlerMapping createRequestMappingHandlerMapping() {
@@ -46,7 +36,7 @@ public class CommonWebConfig extends WebMvcConfigurationSupport {
 
     @Override
     public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
-        SpringMvc.handlerConvert(converters, online, objectMapper);
+        SpringMvc.handlerConvert(converters);
     }
 
     @Override

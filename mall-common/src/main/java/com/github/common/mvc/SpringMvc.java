@@ -1,23 +1,16 @@
 package com.github.common.mvc;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.common.converter.*;
-import com.github.common.page.Page;
-import com.github.common.util.LogUtil;
-import com.github.common.util.RequestUtils;
-import com.github.common.util.U;
+import com.github.common.page.PageParam;
 import org.springframework.core.MethodParameter;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.List;
@@ -33,9 +26,8 @@ public final class SpringMvc {
         registry.addConverter(new StringToMoneyConverter());
     }
 
-    public static void handlerConvert(List<HttpMessageConverter<?>> converters, boolean online, ObjectMapper objectMapper) {
+    public static void handlerConvert(List<HttpMessageConverter<?>> converters) {
         handlerStringConvert(converters, StringHttpMessageConverter.class, new StringHttpMessageConverter(StandardCharsets.UTF_8));
-        handlerStringConvert(converters, MappingJackson2HttpMessageConverter.class, new CustomizeJacksonConverter(online, objectMapper));
     }
     private static void handlerStringConvert(List<HttpMessageConverter<?>> converters,
                                              Class<? extends HttpMessageConverter> clazz,
@@ -52,82 +44,47 @@ public final class SpringMvc {
         // 先删再加, 删的时候记下索引, 保证还在原来的位置
         converters.add(i, httpMessageConverter);
     }
-    public static class CustomizeJacksonConverter extends MappingJackson2HttpMessageConverter {
-        private final boolean online;
-        private final ObjectMapper objectMapper;
-        public CustomizeJacksonConverter(boolean online, ObjectMapper objectMapper) {
-            this.online = online;
-            this.objectMapper = objectMapper;
-        }
-        @Override
-        protected void writeSuffix(JsonGenerator generator, Object object) throws IOException {
-            super.writeSuffix(generator, object);
-
-            if (LogUtil.ROOT_LOG.isInfoEnabled()) {
-                String json;
-                try {
-                    json = objectMapper.writeValueAsString(object);
-                } catch (Exception ignore) {
-                    return;
-                }
-                if (U.isNotBlank(json)) {
-                    boolean notRequestInfo = LogUtil.hasNotRequestInfo();
-                    try {
-                        if (notRequestInfo) {
-                            LogUtil.bind(RequestUtils.logContextInfo());
-                        }
-                        // 如果在生产环境, 太长就只输出前后, 不全部输出
-                        LogUtil.ROOT_LOG.info("return: ({})", (online ? U.toStr(json, 1000, 200) : json));
-                    } finally {
-                        if (notRequestInfo) {
-                            LogUtil.unbind();
-                        }
-                    }
-                }
-            }
-        }
-    }
 
     public static void handlerArgument(List<HandlerMethodArgumentResolver> argumentResolvers) {
         // 参数是 Page 对象时
         argumentResolvers.add(new HandlerMethodArgumentResolver() {
             @Override
             public boolean supportsParameter(MethodParameter parameter) {
-                return Page.class.isAssignableFrom(parameter.getParameterType());
+                return PageParam.class.isAssignableFrom(parameter.getParameterType());
             }
 
             @Override
             public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
                                           NativeWebRequest request, WebDataBinderFactory factory) throws Exception {
-                Page page = new Page(request.getParameter(Page.GLOBAL_PAGE), request.getParameter(Page.GLOBAL_LIMIT));
-                page.setWasMobile(RequestUtils.isMobileRequest());
-                return page;
+                // PageParam page = new PageParam(request.getParameter(PageParam.GLOBAL_PAGE), request.getParameter(PageParam.GLOBAL_LIMIT));
+                // page.setWasMobile(RequestUtils.isMobileRequest());
+                return new PageParam(request.getParameter(PageParam.GLOBAL_PAGE), request.getParameter(PageParam.GLOBAL_LIMIT));
             }
         });
         // 参数是 page 名称时
         argumentResolvers.add(new HandlerMethodArgumentResolver() {
             @Override
             public boolean supportsParameter(MethodParameter parameter) {
-                return Page.GLOBAL_PAGE.equals(parameter.getParameterName());
+                return PageParam.GLOBAL_PAGE.equals(parameter.getParameterName());
             }
 
             @Override
             public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
                                           NativeWebRequest request, WebDataBinderFactory factory) throws Exception {
-                return Page.handlerPage(request.getParameter(Page.GLOBAL_PAGE));
+                return PageParam.handlerPage(request.getParameter(PageParam.GLOBAL_PAGE));
             }
         });
         // 参数是 limit 名称时
         argumentResolvers.add(new HandlerMethodArgumentResolver() {
             @Override
             public boolean supportsParameter(MethodParameter parameter) {
-                return Page.GLOBAL_LIMIT.equals(parameter.getParameterName());
+                return PageParam.GLOBAL_LIMIT.equals(parameter.getParameterName());
             }
 
             @Override
             public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
                                           NativeWebRequest request, WebDataBinderFactory factory) throws Exception {
-                return Page.handlerLimit(request.getParameter(Page.GLOBAL_LIMIT));
+                return PageParam.handlerLimit(request.getParameter(PageParam.GLOBAL_LIMIT));
             }
         });
     }

@@ -4,17 +4,26 @@ import com.github.common.Money;
 import com.github.common.date.DateUtil;
 import com.github.common.exception.*;
 import com.github.common.json.JsonUtil;
+import com.google.common.collect.Maps;
 
+import java.beans.PropertyDescriptor;
+import java.io.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.nio.ByteBuffer;
+import java.nio.channels.ReadableByteChannel;
+import java.nio.channels.WritableByteChannel;
 import java.nio.charset.StandardCharsets;
 import java.security.CodeSource;
 import java.security.ProtectionDomain;
 import java.util.*;
 import java.util.regex.Pattern;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 /** 工具类 */
 public final class U {
@@ -23,6 +32,14 @@ public final class U {
 
     /** 本机的 cpu 核心数 */
     public static final int PROCESSORS = Runtime.getRuntime().availableProcessors();
+
+    /**
+     * 大于这个值, 才进行字符串压缩.
+     *
+     * 字符串压缩时, 将字符串的 byte[] 基于 gzip 进行压缩, 将压缩后的 byte[] 编码成 base64 字符串
+     * 解压字符串时, 将字符串解码 base64 成 byte[], 再基于 gzip 解压, 将解压后的 byte[] 返回
+     */
+    private static final int COMPRESS_MIN_LEN = 1000;
 
     public static final String EMPTY = "";
     public static final String BLANK = " ";
@@ -227,10 +244,20 @@ public final class U {
         return obj != null && obj.doubleValue() > 0;
     }
     /** 传入的数为 null 或 小于等于 0 就返回 true */
-    public static boolean less0(Number obj) {
+    public static boolean lessAndEquals0(Number obj) {
         return !greater0(obj);
     }
 
+    /** 传入的数不为 null 且 大于等于 0 就返回 true */
+    public static boolean greaterAndEquals0(Number obj) {
+        return obj != null && obj.doubleValue() >= 0;
+    }
+    /** 传入的数为 null 或 小于 0 就返回 true(等于 0 时返回 false) */
+    public static boolean less0(Number obj) {
+        return !greaterAndEquals0(obj);
+    }
+
+    /** 转换成 int, 非数字则返回 0 */
     public static int toInt(Object obj) {
         if (isBlank(obj)) {
             return 0;
@@ -244,6 +271,8 @@ public final class U {
             return 0;
         }
     }
+
+    /** 转换成 long, 非数字则返回 0L */
     public static long toLong(Object obj) {
         if (isBlank(obj)) {
             return 0L;
@@ -257,6 +286,8 @@ public final class U {
             return 0L;
         }
     }
+
+    /** 转换成 float, 非数字则返回 0F */
     public static float toFloat(Object obj) {
         if (isBlank(obj)) {
             return 0F;
@@ -270,6 +301,8 @@ public final class U {
             return 0F;
         }
     }
+
+    /** 转换成 double, 非数字则返回 0D */
     public static double toDouble(Object obj) {
         if (isBlank(obj)) {
             return 0D;
@@ -283,6 +316,8 @@ public final class U {
             return 0D;
         }
     }
+
+    /** 是数字则返回 true */
     public static boolean isNumber(Object obj) {
         if (isBlank(obj)) {
             return false;
@@ -297,6 +332,8 @@ public final class U {
             return false;
         }
     }
+
+    /** 不是数字则返回 true */
     public static boolean isNotNumber(Object obj) {
         return !isNumber(obj);
     }
@@ -418,6 +455,20 @@ public final class U {
         return sbd.append(str).toString();
     }
 
+    /** 对象长度: 中文字符的长度为 2, 其他字符的长度为 1 */
+    public static int toLen(Object obj) {
+        if (isNull(obj)) {
+            return 0;
+        }
+
+        int count = 0;
+        String str = obj.toString();
+        for (int i = 0; i < str.length(); i++) {
+            count += (str.substring(i, i + 1).matches(CHINESE) ? 2 : 1);
+        }
+        return count;
+    }
+
     /** 去掉所有的制表符 和 换行符 */
     public static String replaceTabAndWrap(String str) {
         return isBlank(str) ? EMPTY : str.replace("\t", EMPTY).replace("\n", EMPTY);
@@ -429,8 +480,31 @@ public final class U {
                 : MULTI_SPACE_REGEX.matcher(str.replace("\r", EMPTY).replace("\n", BLANK)).replaceAll(BLANK).trim();
     }
 
-    /** 对象为 null, 或者其字符串形态为 空白符, "null", "undefined" 时返回 true */
+    /** 对象为 null 时返回 true */
+    public static boolean isNull(Object obj) {
+        return obj == null;
+    }
+    /** 对象不为 null 时返回 true */
+    public static boolean isNotNull(Object obj) {
+        return obj != null;
+    }
+
+    /** 对象为空 或 其字符串形态是空字符 时返回 true */
     public static boolean isBlank(Object obj) {
+        if (obj == null) {
+            return true;
+        }
+
+        String str = obj.toString().trim();
+        return EMPTY.equals(str);
+    }
+    /** 对象非空 且 其字符串形态不是空字符 时返回 true */
+    public static boolean isNotBlank(Object obj) {
+        return !isBlank(obj);
+    }
+
+    /** 对象为空 或 其字符串形态为 空白符、null、undefined 时返回 true */
+    public static boolean isEmpty(Object obj) {
         if (obj == null) {
             return true;
         }
@@ -443,9 +517,9 @@ public final class U {
         String lower = str.toLowerCase();
         return "null".equals(lower) || "undefined".equals(lower);
     }
-    /** 对象非空时返回 true */
-    public static boolean isNotBlank(Object obj) {
-        return !isBlank(obj);
+    /** 对象非空 且 其字符串形态不是 空白符、null、undefined 时返回 true */
+    public static boolean isNotEmpty(Object obj) {
+        return !isEmpty(obj);
     }
 
     /** 对象长度在指定的数值以内(不包含边距)就返回 true */
@@ -477,11 +551,11 @@ public final class U {
         return checkPhone(phone) ? phone.substring(0, 3) + " **** " + phone.substring(phone.length() - 4) : phone;
     }
     public static String foggyIdCard(String idCard) {
-        // 是标准的 15 或 18 位身份证就返回「前面 6 位 + 后面 4 位」. 只有 6 位尾数则只返回「后面 2 位」
+        // 是标准的 15 或 18 位身份证就返回「前面 3 位 + 后面 2 位」. 只有 6 位尾数则只返回「后面 2 位」
         if (isBlank(idCard)) {
             return idCard;
         } else if (isIdCard(idCard)) {
-            return idCard.substring(0, 6) + " **** " + idCard.substring(idCard.length() - 4);
+            return idCard.substring(0, 3) + " **** " + idCard.substring(idCard.length() - 2);
         } else if (idCard.length() == 6) {
             return "**** " + idCard.substring(2);
         } else {
@@ -648,6 +722,10 @@ public final class U {
     public static String uuid() {
         return UUID.randomUUID().toString().replace("-", EMPTY);
     }
+    /** 生成 16 的 uuid */
+    public static String uuid16() {
+        return uuid().substring(8, 24);
+    }
 
     /** 获取后缀(包含点 .) */
     public static String getSuffix(String file) {
@@ -701,11 +779,6 @@ public final class U {
         return url.substring(url.lastIndexOf("/") + 1, last);
     }
 
-    /** 当值为 null, 空白符, "null" 时, 返回空字符串 */
-    public static String getNil(Object obj) {
-        return isBlank(obj) ? EMPTY : obj.toString().trim();
-    }
-
     /** 属性转换成方法, 加上 get 并首字母大写 */
     public static String fieldToMethod(String field) {
         if (isBlank(field)) {
@@ -736,7 +809,11 @@ public final class U {
         if (data instanceof Map) {
             value = ((Map) data).get(split[0]);
         } else {
-            value = getMethod(data, fieldToMethod(split[0]));
+            try {
+                value = new PropertyDescriptor(field, data.getClass()).getReadMethod().invoke(data);
+            } catch (Exception e) {
+                value = getMethod(data, fieldToMethod(split[0]));
+            }
         }
 
         if (isBlank(value)) {
@@ -745,16 +822,167 @@ public final class U {
         } else if (value.getClass().isEnum()) {
             // 如果是枚举, 则调用其 getValue 方法, getValue 没有值则使用枚举的 name
             Object enumValue = getMethod(value, "getValue");
-            return getNil(enumValue != null ? enumValue : value);
+            return toStr(enumValue != null ? enumValue : value);
         } else if (value instanceof Date) {
             // 如果是日期, 则格式化
             if (split.length > 1 && isNotBlank(split[1])) {
-                return getNil(DateUtil.format((Date) value, split[1]));
+                return toStr(DateUtil.format((Date) value, split[1]));
             } else {
-                return getNil(DateUtil.formatDateTime((Date) value));
+                return toStr(DateUtil.formatDateTime((Date) value));
             }
         } else {
-            return getNil(value);
+            return toStr(value);
+        }
+    }
+
+    /**
+     * <pre>
+     * 将 source 中字段的值填充到 target 中, 如果已经有值了就忽略 set
+     *
+     * if (target.getName() != null) {
+     *     target.setName(source.getName());
+     * }
+     *
+     * PS1: 字段类型如果是基础数据类型, 会有默认值 boolean: false, int, long, double: 0
+     * 判断是否为空将总是返回 true, 因此请使用包装类型
+     *
+     * PS2: 如果 target 有 extends 某个父类且只用 @lombok.Data 进行标注, 此时返回的 target 直接输出是没有父类的属性的
+     * 但实际已经 set 进去了, toJson 或在类上标注 @lombok.ToString(callSuper = true) 才会将父类的属性也输出</pre>
+     *
+     * @param source 源对象
+     * @param target 目标对象
+     */
+    public static <S,T> void fillData(S source, T target) {
+        fillData(source, target, true);
+    }
+
+    /**
+     * 将 source 中字段的值填充到 target 中: target.setName(source.getName())
+     *
+     * @param source 源对象
+     * @param target 目标对象
+     * @param ignoreAlready true: target 有值则不操作 set. PS: 基础数据类型将总是返回 true
+     */
+    public static <S,T> void fillData(S source, T target, boolean ignoreAlready) {
+        Method[] targetMethods = target.getClass().getMethods();
+
+        Map<String, Method> targetMethodMap = Maps.newHashMap();
+        for (Method method : targetMethods) {
+            targetMethodMap.put(method.getName(), method);
+        }
+
+        Method[] sourceMethods = source.getClass().getMethods();
+        Map<String, Method> sourceMethodMap = Maps.newHashMap();
+        for (Method method : sourceMethods) {
+            sourceMethodMap.put(method.getName(), method);
+        }
+        for (Method method : targetMethods) {
+            String methodName = method.getName();
+            if (methodName.startsWith("set")) {
+                String getMethodName = "get" + methodName.substring(3);
+                if (!sourceMethodMap.containsKey(getMethodName) &&
+                        (method.getReturnType().isAssignableFrom(boolean.class) || method.getReturnType().isAssignableFrom(Boolean.class))) {
+                    getMethodName = "is" + methodName.substring(2);
+                }
+                if (sourceMethodMap.containsKey(getMethodName)) {
+                    if (ignoreAlready) {
+                        try {
+                            Object oldResult = targetMethodMap.get(getMethodName).invoke(target);
+                            if (oldResult != null) {
+                                continue;
+                            }
+                        } catch (IllegalAccessException | InvocationTargetException ignore) {
+                            continue;
+                        }
+                    }
+
+                    Object dataResult;
+                    try {
+                        dataResult = sourceMethodMap.get(getMethodName).invoke(source);
+                    } catch (IllegalAccessException | InvocationTargetException ignore) {
+                        continue;
+                    }
+                    if (dataResult != null) {
+                        try {
+                            method.invoke(target, dataResult);
+                        } catch (IllegalAccessException | InvocationTargetException ignore) {
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /** 将长字符串进行 gzip 压缩后再转成 base64 编码返回 */
+    public static String compress(final String str) {
+        if (str == null) {
+            return null;
+        }
+        String trim = str.trim();
+        if (EMPTY.equals(trim) || trim.length() < COMPRESS_MIN_LEN) {
+            return trim;
+        }
+
+        try (
+                ByteArrayOutputStream output = new ByteArrayOutputStream();
+                GZIPOutputStream gzip = new GZIPOutputStream(output)
+        ) {
+            gzip.write(trim.getBytes(StandardCharsets.UTF_8));
+            gzip.finish();
+            return new String(Base64.getEncoder().encode(output.toByteArray()), StandardCharsets.UTF_8);
+        } catch (Exception e) {
+            if (LogUtil.ROOT_LOG.isErrorEnabled()) {
+                LogUtil.ROOT_LOG.error("压缩字符串异常", e);
+            }
+            return trim;
+        }
+    }
+
+    /** 将压缩的字符串用 base64 解码再进行 gzip 解压 */
+    public static String decompress(String str) {
+        if (isNull(str)) {
+            return null;
+        }
+        String trim = str.trim();
+        if (EMPTY.equals(trim)) {
+            return trim;
+        }
+        // 如果字符串以 { 开头且以 } 结尾, 或者以 [ 开头以 ] 结尾(json)则不解压, 直接返回
+        if ((str.startsWith("{") && str.endsWith("}")) || (str.startsWith("[") && str.endsWith("]"))) {
+            return trim;
+        }
+
+        byte[] bytes;
+        try {
+            bytes = Base64.getDecoder().decode(str.getBytes(StandardCharsets.UTF_8));
+        } catch (Exception e) {
+            if (LogUtil.ROOT_LOG.isDebugEnabled()) {
+                LogUtil.ROOT_LOG.debug("字符串解码异常", e);
+            }
+            return trim;
+        }
+        if (bytes.length == 0) {
+            return trim;
+        }
+
+        try (
+                ByteArrayInputStream input = new ByteArrayInputStream(bytes);
+                GZIPInputStream gis = new GZIPInputStream(input);
+
+                InputStreamReader in = new InputStreamReader(gis, StandardCharsets.UTF_8);
+                final BufferedReader bufferedReader = new BufferedReader(in)
+        ) {
+            StringBuilder sbd = new StringBuilder();
+            String line;
+            while ((line = bufferedReader.readLine()) != null) {
+                sbd.append(line);
+            }
+            return sbd.toString();
+        } catch (Exception e) {
+            if (LogUtil.ROOT_LOG.isErrorEnabled()) {
+                LogUtil.ROOT_LOG.error("解压字符串异常", e);
+            }
+            return trim;
         }
     }
 
@@ -776,21 +1004,27 @@ public final class U {
 
     public static Class<?> getFieldType(Object obj, String field) {
         if (isNotBlank(field)) {
+            Class<?> clazz = obj.getClass();
             try {
-                Field f = obj.getClass().getDeclaredField(field);
+                Field f = clazz.getDeclaredField(field);
                 if (isNotBlank(f)) {
                     return f.getType();
                 }
             } catch (NoSuchFieldException ignore) {
             }
-            // getMethod 会将从父类继承过来的 public 方法也查询出来
             try {
-                Field f = obj.getClass().getField(field);
+                Field f = clazz.getField(field);
                 if (isNotBlank(f)) {
                     return f.getType();
                 }
             } catch (NoSuchFieldException ignore) {
             }
+
+            Class<?> superclass = clazz.getSuperclass();
+            if (superclass == Object.class) {
+                return null;
+            }
+            return getFieldType(superclass, field);
         }
         return null;
     }
@@ -835,6 +1069,59 @@ public final class U {
         return null;
     }
 
+    /**
+     * <pre>
+     * try (
+     *     InputStream input = ...;
+     *     OutputStream output = ...;
+     * ) {
+     *     inputToOutput(input, output);
+     * }
+     * </pre>
+     */
+    public static void inputToOutput(InputStream input, OutputStream output) {
+        try {
+            // guava
+            // ByteStreams.copy(inputStream, outputStream);
+            // jdk-8
+            byte[] buf = new byte[8192];
+            int length;
+            while ((length = input.read(buf)) != -1) {
+                output.write(buf, 0, length);
+            }
+            // jdk-9
+            // inputStream.transferTo(outputStream);
+        } catch (IOException e) {
+            throw new RuntimeException("input to output exception", e);
+        }
+    }
+
+    /**
+     * <pre>
+     * try (
+     *         InputStream inputStream = ...;
+     *         OutputStream outputStream = ...;
+     *
+     *         ReadableByteChannel input = Channels.newChannel(inputStream);
+     *         WritableByteChannel output = Channels.newChannel(outputStream);
+     * ) {
+     *     inputToOutputWithChannel(input, output);
+     * }
+     * </pre>
+     */
+    public static void inputToOutputWithChannel(ReadableByteChannel input, WritableByteChannel output) {
+        try {
+            ByteBuffer buffer = ByteBuffer.allocateDirect(8192);
+            while (input.read(buffer) != -1) {
+                buffer.flip();
+                output.write(buffer);
+                buffer.clear();
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("input to output with channel exception", e);
+        }
+    }
+
 
     /** 对象为 null、空白符、"null" 字符串时, 则抛出异常 */
     public static void assertNil(Object obj, String msg) {
@@ -866,7 +1153,7 @@ public final class U {
 
     /** 数值为空或小于等于 0 则抛出异常 */
     public static void assert0(Number number, String msg) {
-        if (less0(number)) {
+        if (lessAndEquals0(number)) {
             assertException(msg);
         }
     }

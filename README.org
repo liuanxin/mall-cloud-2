@@ -10,7 +10,7 @@
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd">
     <!-- <localRepository>仓库地址. 默认是 ${user.home}/.m2/repository </localRepository> -->
-    
+
     <mirrors>
         <mirror>
             <id>aliyun</id>
@@ -55,9 +55,9 @@
 #+BEGIN_SRC java
 // 如果不传 page 和 limit, 或者传的是 page=a&limit=-100 时, Page 将会有默认值 page=1&limit=10
 @GetMapping("/demo")  // 如果参数不多的话, 不需要构建 dto, 直接写在这里就好了, 返回只有一个字段直接返回就好了, 也不用新建 vo
-public JsonResult<PageInfo<DemoVo>> demoList(DemoDto dto, Page page) {
+public JsonResult<PageReturn<DemoVo>> demoList(DemoDto dto, PageParam page) {
     // dto 中写方法来生成跟数据库对应的 model, 方法中可以先做 web 层的数据校验
-    PageInfo<Demo> demoPageInfo = demoService.pageList(dto.demo(), "abc", page);
+    PageReturn<Demo> demoPageReturn = demoService.pageList(dto.demo(), "abc", page);
     XXX x = xxxService.xyz(dto.xxx()); // 不同的模块区分开
     return JsonResult.success("用户列表", DemoVo.assemblyData(demoInfo, x));
 }
@@ -67,7 +67,7 @@ service 中的接口及实现类
 #+BEGIN_SRC java
 public interface DemoService {
     /** 获取分页数据 */   // dto 和 vo 是 controller 层的对象, 在 service 层使用跟数据库对应的 model 实体 或者 包装类型 进行接收
-    PageInfo<Demo> pageList(Demo param, String name, Page page);
+    PageReturn<Demo> pageList(Demo param, String name, PageParam page);
 }
 
 @Service
@@ -77,7 +77,7 @@ public class DemoServiceImpl implements DemoService {
     private DemoMapper demoMapper;
 
     @Override
-    public PageInfo<Demo> pageList(Demo param, Page page) {
+    public PageReturn<Demo> pageList(Demo param, PageParam page) {
         DemoExample example = new DemoExample();
         if (U.isNotBlank(param)) {
             DemoExample.Criteria criteria = example.or();

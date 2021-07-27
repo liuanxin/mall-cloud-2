@@ -170,7 +170,7 @@ class Client {
 
     private static final String FALLBACK = "package " + PACKAGE + ".%s.hystrix;\n" +
             "\n" +
-            "import " + PACKAGE + ".common.page.PageInfo;\n" +
+            "import " + PACKAGE + ".common.page.PageReturn;\n" +
             "import " + PACKAGE + ".common.page.Pages;\n" +
             "import " + PACKAGE + ".common.util.LogUtil;\n" +
             "import " + PACKAGE + ".%s.client.%sClient;\n" +
@@ -184,11 +184,11 @@ class Client {
             "public class %sClientFallback implements %sClient {\n" +
             "\n" +
             "    @Override\n" +
-            "    public PageInfo demo(String xx, Integer page, Integer limit) {\n" +
+            "    public PageReturn demo(String xx, Integer page, Integer limit) {\n" +
             "        if (LogUtil.ROOT_LOG.isDebugEnabled()) {\n" +
             "            LogUtil.ROOT_LOG.debug(\"调用断路器\");\n" +
             "        }\n" +
-            "        return Pages.returnPage(null);\n" +
+            "        return null;\n" +
             "    }\n" +
             "}\n";
 
@@ -283,7 +283,7 @@ class Model {
 
     private static final String INTERFACE = "package " + PACKAGE + ".%s.service;\n" +
             "\n" +
-            "import " + PACKAGE + ".common.page.PageInfo;\n" +
+            "import " + PACKAGE + ".common.page.PageReturn;\n" +
             "import " + PACKAGE + ".%s.constant.%sConst;\n" +
             "import org.springframework.web.bind.annotation.GetMapping;\n" +
             "import org.springframework.web.bind.annotation.RequestParam;\n" +
@@ -303,7 +303,7 @@ class Model {
             "     * @return 分页信息\n" +
             "     */\n" +
             "    @GetMapping(%sConst.%s_DEMO)\n" +
-            "    PageInfo demo(@RequestParam(value = \"xx\", required = false) String xx,\n" +
+            "    PageReturn demo(@RequestParam(value = \"xx\", required = false) String xx,\n" +
             "                  @RequestParam(value = \"page\", required = false) Integer page,\n" +
             "                  @RequestParam(value = \"limit\", required = false) Integer limit);\n" +
             "}\n";
@@ -604,14 +604,6 @@ class Server {
             "@Configuration\n" +
             "public class %sWebConfig extends WebMvcConfigurationSupport {\n" +
             "\n" +
-            "    @Value(\"${online:false}\")\n" +
-            "    private boolean online;\n" +
-            "\n" +
-            "    private final ObjectMapper objectMapper;\n" +
-            "    public %sWebConfig(ObjectMapper objectMapper) {\n" +
-            "        this.objectMapper = objectMapper;\n" +
-            "    }\n" +
-            "\n" +
             "    @Override\n" +
             "    protected RequestMappingHandlerMapping createRequestMappingHandlerMapping() {\n" +
             "        return new VersionRequestMappingHandlerMapping();\n" +
@@ -630,7 +622,7 @@ class Server {
             "\n" +
             "    @Override\n" +
             "    public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {\n" +
-            "        SpringMvc.handlerConvert(converters, online, objectMapper);\n" +
+            "        SpringMvc.handlerConvert(converters);\n" +
             "    }\n" +
             "\n" +
             "    @Override\n" +
@@ -647,7 +639,7 @@ class Server {
     private static final String SERVICE = "package " + PACKAGE + ".%s.service;\n" +
             "\n" +
             "import " + PACKAGE + ".common.json.JsonResult;\n" +
-            "import " + PACKAGE + ".common.page.PageInfo;\n" +
+            "import " + PACKAGE + ".common.page.PageReturn;\n" +
             "import " + PACKAGE + ".common.page.Pages;\n" +
             "import " + PACKAGE + ".common.util.LogUtil;\n" +
             "import org.springframework.web.bind.annotation.GetMapping;\n" +
@@ -661,11 +653,11 @@ class Server {
             "public class %sServiceImpl implements %sService {\n" +
             "    \n" +
             "    @Override\n" +
-            "    public PageInfo demo(String xx, Integer page, Integer limit) {\n" +
+            "    public PageReturn demo(String xx, Integer page, Integer limit) {\n" +
             "        if (LogUtil.ROOT_LOG.isDebugEnabled()) {\n" +
             "            LogUtil.ROOT_LOG.debug(\"调用实现类\" + xx + \", page:\" + page + \", limit:\" + limit);\n" +
             "        }\n" +
-            "        return Pages.returnPage(null);\n" +
+            "        return null;\n" +
             "    }\n" +
             "\n" +
             "    @GetMapping(\"/\")\n" +

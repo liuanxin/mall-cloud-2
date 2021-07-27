@@ -24,22 +24,20 @@ public final class LogUtil {
     /** 请求信息: 包括 ip、url, param 等  */
     private static final String REQUEST_INFO = "requestInfo";
 
-    /** 将当前请求的上下文信息放进日志 */
+    /** 将 当前时间 和 请求上下文信息 放进日志的 ThreadLocal 中 */
     public static void bind(RequestLogContext logContextInfo) {
         recordTime();
+        bindContext(logContextInfo);
+    }
+    /** 日志的 ThreadLocal 中没有 请求上下文信息 则返回 true */
+    public static boolean hasNotRequestInfo() {
+        return U.isBlank(MDC.get(REQUEST_INFO));
+    }
+    /** 将 请求上下文信息 放进日志的 ThreadLocal 中 */
+    public static void bindContext(RequestLogContext logContextInfo) {
         MDC.put(REQUEST_INFO, logContextInfo.requestInfo());
     }
-    /**
-     * <pre>
-     * 使用 &#064;RequestBody 注解时, 想要输出请求参数, 需要在 Control 第一行调用此方法
-     *
-     * &#064;XxxMapping("/xxx")
-     * public JsonResult&lt;XXX&gt; xxx(&#064;RequestBody XXX xxx) {
-     *     LogUtil.bindRequestBody(JsonUtil.toJson(xxx));
-     *     ...
-     * }
-     * </pre>
-     */
+    /** 将 RequestBody 的请求内容放进日志 */
     public static void bindRequestBody(String requestBody) {
         if (U.isNotBlank(requestBody)) {
             String requestInfo = MDC.get(REQUEST_INFO);
@@ -50,9 +48,6 @@ public final class LogUtil {
     }
     public static void unbind() {
         MDC.clear();
-    }
-    public static boolean hasNotRequestInfo() {
-        return U.isBlank(MDC.get(REQUEST_INFO));
     }
 
     public static void recordTime() {

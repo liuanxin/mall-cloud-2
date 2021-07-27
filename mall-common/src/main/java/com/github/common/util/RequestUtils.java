@@ -1,8 +1,12 @@
 package com.github.common.util;
 
 import com.github.common.json.JsonUtil;
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.web.servlet.LocaleResolver;
+import org.springframework.web.servlet.support.RequestContextUtils;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -11,6 +15,7 @@ import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Locale;
 
 /** <span style="color:red;">!!!此工具类请只在 Controller 中调用!!!</span> */
 public final class RequestUtils {
@@ -18,9 +23,9 @@ public final class RequestUtils {
     private static final String USER_AGENT = "user-agent";
     private static final String REFERRER = "referer";
 
-    private static final String HTTP = "http://";
-    private static final String HTTPS = "https://";
     private static final String SCHEME = "//";
+    private static final String HTTP = "http:" + SCHEME;
+    private static final String HTTPS = "https:" + SCHEME;
     private static final String URL_SPLIT = "/";
     private static final String WWW = "www.";
 
@@ -189,6 +194,12 @@ public final class RequestUtils {
         return upload ? "uploading file" : U.formatParam(request.getParameterMap());
     }
 
+    /** 从 cookie 中获取值, 为空就从请求头中取, 为空再从参数中取 */
+    public static String getCookieOrHeaderOrParam(String name) {
+        String value = getCookieValue(name);
+        return U.isBlank(value) ? getHeaderOrParam(name) : value;
+    }
+
     /** 先从请求头中查, 为空再从参数中查 */
     public static String getHeaderOrParam(String param) {
         HttpServletRequest request = getRequest();
@@ -202,7 +213,7 @@ public final class RequestUtils {
     /** 从 cookie 中获取值 */
     public static String getCookieValue(String name) {
         Cookie cookie = getCookie(name);
-        return U.isBlank(cookie) ? U.EMPTY : cookie.getValue();
+        return U.isNull(cookie) ? U.EMPTY : cookie.getValue();
     }
     private static Cookie getCookie(String name) {
         HttpServletRequest request = getRequest();
@@ -290,6 +301,51 @@ public final class RequestUtils {
         String param = formatParam();
         String headParam = formatHeadParam();
         return new LogUtil.RequestLogContext(ip, method, url, param, headParam);
+    }
+
+    /**
+     * 基于下面的优先级依次获取语言, 都没有就使用 简体中文 做为默认语言<br>
+     * 1. 头里的 langParamName(默认是 lang)<br>
+     * 2. 参数里的 langParamName(默认是 lang)<br>
+     * 3. 头里的 Accept-Language<br>
+     * 4. request.getLocale()<br><br>
+     *
+     * 在需要手动处理国际化的地方使用 {@link LocaleContextHolder#getLocale } 或 {@link RequestContextUtils#getLocale}
+     */
+    public static void handleLocal(String langParamName) {
+        if (U.isBlank(langParamName)) {
+            langParamName = "lang";
+        }
+        try {
+            HttpServletRequest request = getRequest();
+            String lan = request.getHeader(langParamName);
+            if (U.isBlank(lan)) {
+                lan = request.getParameter(langParamName);
+            }
+            if (U.isBlank(lan)) {
+                lan = request.getHeader("Accept-Language");
+            }
+
+            Locale locale = null;
+            if (U.isBlank(lan)) {
+                locale = StringUtils.parseLocale(lan);
+            }
+            if (U.isNull(locale)) {
+                locale = request.getLocale();
+            }
+            if (U.isNull(locale)) {
+                locale = Locale.SIMPLIFIED_CHINESE;
+            }
+            LocaleContextHolder.setLocale(locale);
+            LocaleResolver localeResolver = RequestContextUtils.getLocaleResolver(request);
+            if (localeResolver != null) {
+                localeResolver.setLocale(request, getResponse(), locale);
+            }
+        } catch (Exception e) {
+            if (LogUtil.ROOT_LOG.isErrorEnabled()) {
+                LogUtil.ROOT_LOG.error("handle local exception", e);
+            }
+        }
     }
 
 
