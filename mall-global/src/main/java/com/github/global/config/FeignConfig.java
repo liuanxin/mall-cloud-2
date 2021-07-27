@@ -62,9 +62,11 @@ public class FeignConfig {
                 }
 
                 // 将跟踪号放到请求上下文
-                String traceId = String.valueOf(request.getAttribute(Const.TRACE));
-                if (U.isNotEmpty(traceId)) {
-                    template.header(Const.TRACE, traceId);
+                if (U.isBlank(request.getHeader(Const.TRACE))) {
+                    String traceId = U.toStr(request.getAttribute(Const.TRACE));
+                    if (U.isNotEmpty(traceId)) {
+                        template.header(Const.TRACE, traceId);
+                    }
                 }
             }
         };
