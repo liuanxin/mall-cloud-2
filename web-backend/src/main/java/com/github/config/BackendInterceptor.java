@@ -27,8 +27,6 @@ public class BackendInterceptor implements HandlerInterceptor {
         String requestTraceId = request.getHeader(Const.TRACE);
         String traceId = U.isBlank(requestTraceId) ? U.uuid16() : requestTraceId;
         LogUtil.bindTraceId(traceId);
-        // MDC 无法跟子线程共享上下文, spring 可以做到共享 request, 所以把 traceId 放到请求上下步, 这样 feignClient 处可以获取到
-        request.setAttribute(Const.TRACE, traceId);
 
         bindParam();
 
