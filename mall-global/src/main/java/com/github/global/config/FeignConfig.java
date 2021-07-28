@@ -41,13 +41,14 @@ import java.util.concurrent.TimeUnit;
 
 /** 处理 feign 的请求头、日志打印、MDC 上下文 */
 @Configuration
-@ConditionalOnClass({HttpServletRequest.class, FeignClient.class, Feign.class})
+@ConditionalOnClass({ FeignClient.class, Feign.class })
 public class FeignConfig {
 
     private static final Set<String> IGNORE_HEADER_SET = Sets.newHashSet("content-length", "accept");
 
     /** 处理请求头: 把请求上下文的头放到 Feign 的请求上下文中去 */
     @Bean
+    @ConditionalOnClass(HttpServletRequest.class)
     public RequestInterceptor handleHeader() {
         return template -> {
             // 将当前请求上下文的 header 的信息放到请求 feign 的 header 中去
