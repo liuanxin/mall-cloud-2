@@ -4,8 +4,6 @@ import com.github.common.Const;
 import com.github.common.util.A;
 import com.github.common.util.LogUtil;
 import com.github.common.util.U;
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import com.google.common.io.CharStreams;
 import com.netflix.hystrix.HystrixThreadPoolKey;
@@ -33,10 +31,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
-import java.util.Collection;
-import java.util.Enumeration;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -49,7 +44,7 @@ public class FeignConfig {
 
     private static final Set<String> IGNORE_HEADER_SET = Sets.newHashSet("content-length", "accept");
 
-    /** 处理请求头: 把请求上下文的头放到 Feign 的请求上下文中去 */
+    /** 处理请求头: 把 trace_id 放到 Feign 的请求上下文中去(feign 默认会将当前上下文中的头放到自身的头里) */
     @Bean
     @ConditionalOnClass(HttpServletRequest.class)
     public RequestInterceptor handleHeader() {
@@ -57,26 +52,27 @@ public class FeignConfig {
             // 将当前请求上下文的 header 的信息放到请求 feign 的 header 中去
             RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
             if (requestAttributes instanceof ServletRequestAttributes) {
-                Multimap<String, String> headerMap = ArrayListMultimap.create();
-
                 HttpServletRequest request = ((ServletRequestAttributes) requestAttributes).getRequest();
+
                 Enumeration<String> headers = request.getHeaderNames();
+                Map<String, Collection<String>> feignHeaderMap = template.headers();
                 while (headers.hasMoreElements()) {
                     String headName = headers.nextElement();
                     if (!IGNORE_HEADER_SET.contains(headName.toLowerCase())) {
-                        headerMap.put(headName, request.getHeader(headName));
+                        String headerValue = request.getHeader(headName);
+                        if (U.isNotBlank(headerValue) && !headerValue.equals(A.first(feignHeaderMap.get(headName)))) {
+                            // 先清空再设置
+                            template.header(headName, Collections.emptyList()).header(headName, request.getHeader(headName));
+                        }
                     }
                 }
                 // 将跟踪号放到请求上下文(上面的请求头中如果没有就从 request 的属性中获取)
                 if (U.isEmpty(request.getHeader(Const.TRACE))) {
                     String traceId = LogUtil.getTraceId();
                     if (U.isNotEmpty(traceId)) {
-                        headerMap.put(Const.TRACE, traceId);
+                        // 先清空再设置
+                        template.header(Const.TRACE, Collections.emptyList()).header(Const.TRACE, traceId);
                     }
-                }
-                // 先清空再设置
-                if (!headerMap.isEmpty()) {
-                    template.headers(null).headers(headerMap.asMap());
                 }
             }
         };
