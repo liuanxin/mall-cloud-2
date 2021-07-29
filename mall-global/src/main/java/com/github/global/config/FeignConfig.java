@@ -1,8 +1,11 @@
 package com.github.global.config;
 
 import com.github.common.Const;
+import com.github.common.util.A;
 import com.github.common.util.LogUtil;
 import com.github.common.util.U;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import com.google.common.io.CharStreams;
 import com.netflix.hystrix.HystrixThreadPoolKey;
@@ -54,21 +57,26 @@ public class FeignConfig {
             // 将当前请求上下文的 header 的信息放到请求 feign 的 header 中去
             RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
             if (requestAttributes instanceof ServletRequestAttributes) {
+                Multimap<String, String> headerMap = ArrayListMultimap.create();
+
                 HttpServletRequest request = ((ServletRequestAttributes) requestAttributes).getRequest();
                 Enumeration<String> headers = request.getHeaderNames();
                 while (headers.hasMoreElements()) {
                     String headName = headers.nextElement();
                     if (!IGNORE_HEADER_SET.contains(headName.toLowerCase())) {
-                        template.header(headName, request.getHeader(headName));
+                        headerMap.put(headName, request.getHeader(headName));
                     }
                 }
-
                 // 将跟踪号放到请求上下文(上面的请求头中如果没有就从 request 的属性中获取)
                 if (U.isEmpty(request.getHeader(Const.TRACE))) {
                     String traceId = LogUtil.getTraceId();
                     if (U.isNotEmpty(traceId)) {
-                        template.header(Const.TRACE, traceId);
+                        headerMap.put(Const.TRACE, traceId);
                     }
+                }
+                // 先清空再设置
+                if (!headerMap.isEmpty()) {
+                    template.headers(null).headers(headerMap.asMap());
                 }
             }
         };
@@ -173,6 +181,9 @@ public class FeignConfig {
         @Override
         public <T> Callable<T> wrapCallable(Callable<T> callable) {
             Map<String, String> contextMap = MDC.getCopyOfContextMap();
+            if (A.isEmpty(contextMap)) {
+                return callable;
+            }
             // 把主线程运行时的日志上下文放到 feign 的日志上下文去
             return () -> {
                 try {
