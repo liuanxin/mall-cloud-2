@@ -52,10 +52,10 @@ public class FeignConfig {
             // 将当前请求上下文的 header 的信息放到请求 feign 的 header 中去
             RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
             if (requestAttributes instanceof ServletRequestAttributes) {
+                Map<String, Collection<String>> feignHeaderMap = template.headers();
                 HttpServletRequest request = ((ServletRequestAttributes) requestAttributes).getRequest();
 
                 Enumeration<String> headers = request.getHeaderNames();
-                Map<String, Collection<String>> feignHeaderMap = template.headers();
                 while (headers.hasMoreElements()) {
                     String headName = headers.nextElement();
                     if (!IGNORE_HEADER_SET.contains(headName.toLowerCase())) {
