@@ -42,7 +42,7 @@ import java.util.concurrent.TimeUnit;
 @ConditionalOnClass({ FeignClient.class, Feign.class })
 public class FeignConfig {
 
-    private static final Set<String> IGNORE_HEADER_SET = Sets.newHashSet("content-length", "accept");
+    private static final Set<String> IGNORE_HEADER_SET = Sets.newHashSet("content-length");
 
     /** 处理请求头: 把 trace_id 放到 Feign 的请求上下文中去(feign 默认会将当前上下文中的头放到自身的头里) */
     @Bean
@@ -60,7 +60,7 @@ public class FeignConfig {
                     String headName = headers.nextElement();
                     if (!IGNORE_HEADER_SET.contains(headName.toLowerCase())) {
                         String headerValue = request.getHeader(headName);
-                        if (U.isNotBlank(headerValue) && !headerValue.equals(A.first(feignHeaderMap.get(headName)))) {
+                        if (U.isNotEmpty(headerValue) && !headerValue.equals(A.first(feignHeaderMap.get(headName)))) {
                             // 先清空再设置
                             template.header(headName, Collections.emptyList()).header(headName, request.getHeader(headName));
                         }
