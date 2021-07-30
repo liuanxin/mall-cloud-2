@@ -65,7 +65,7 @@ public class FeignConfig {
                             if (A.isEmpty(feignHeader)) {
                                 // feign 头中如果没有则直接设置
                                 template.header(headName, headerValue);
-                            } else if (!feignHeader.contains(headName)) {
+                            } else if (!feignHeader.contains(headerValue)) {
                                 // feign 头中如果没有 request 中的头, 则以 request 中的为主
                                 template.header(headName, Collections.emptyList()).header(headName, headerValue);
                             }
