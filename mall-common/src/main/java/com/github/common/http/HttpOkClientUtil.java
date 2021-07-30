@@ -175,7 +175,7 @@ public class HttpOkClientUtil {
         if (U.isNotBlank(requestHeaders)) {
             sbd.append(" request headers(");
             for (String name : requestHeaders.names()) {
-                sbd.append("<").append(name).append(" : ").append(requestHeaders.get(name)).append(">");
+                sbd.append("<").append(name).append(": ").append(requestHeaders.get(name)).append(">");
             }
             sbd.append(")");
         }
@@ -185,7 +185,7 @@ public class HttpOkClientUtil {
         if (U.isNotBlank(responseHeaders)) {
             sbd.append(" response headers(");
             for (String name : responseHeaders.names()) {
-                sbd.append("<").append(name).append(" : ").append(responseHeaders.get(name)).append(">");
+                sbd.append("<").append(name).append(": ").append(responseHeaders.get(name)).append(">");
             }
             sbd.append(")");
         }

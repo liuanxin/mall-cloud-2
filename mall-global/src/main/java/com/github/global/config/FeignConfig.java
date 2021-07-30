@@ -104,7 +104,7 @@ public class FeignConfig {
                 StringBuilder sbd = new StringBuilder("req:[");
                 sbd.append("header(");
                 for (Map.Entry<String, Collection<String>> entry : request.headers().entrySet()) {
-                    sbd.append("<").append(entry.getKey()).append(" : ").append(entry.getValue()).append(">");
+                    sbd.append("<").append(entry.getKey()).append(": ").append(entry.getValue()).append(">");
                 }
                 sbd.append(")");
 

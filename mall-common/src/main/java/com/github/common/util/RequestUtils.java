@@ -255,7 +255,7 @@ public final class RequestUtils {
         Enumeration<String> headers = request.getHeaderNames();
         while (headers.hasMoreElements()) {
             String headName = headers.nextElement();
-            sbd.append("<").append(headName).append(" : ").append(request.getHeader(headName)).append(">");
+            sbd.append("<").append(headName).append(": ").append(request.getHeader(headName)).append(">");
         }
         return sbd.toString();
     }
