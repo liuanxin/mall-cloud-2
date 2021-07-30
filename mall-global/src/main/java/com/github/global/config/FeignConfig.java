@@ -19,6 +19,7 @@ import com.netflix.hystrix.strategy.properties.HystrixPropertiesStrategy;
 import com.netflix.hystrix.strategy.properties.HystrixProperty;
 import feign.*;
 import org.slf4j.MDC;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.context.annotation.Bean;
@@ -43,6 +44,9 @@ import java.util.concurrent.TimeUnit;
 public class FeignConfig {
 
     private static final Set<String> IGNORE_HEADER_SET = Sets.newHashSet("content-length");
+
+    @Value("${json.logPrintHeader:false}")
+    private boolean printHeader;
 
     /** 处理请求头: 把 trace_id 放到 Feign 的请求上下文中去(feign 默认会将当前上下文中的头放到自身的头里) */
     @Bean
@@ -90,6 +94,7 @@ public class FeignConfig {
      * 默认的日志会输出很多条, 见 {@link Logger}, 当前处理是只在请求前打印一条, 有响应时打印一条, io 异常时打印一条
      */
     @Bean
+    @SuppressWarnings("DuplicatedCode")
     public Logger handleLog() {
         return new Logger() {
             @Override
@@ -102,11 +107,13 @@ public class FeignConfig {
             @Override
             protected void logRequest(String configKey, Level logLevel, Request request) {
                 StringBuilder sbd = new StringBuilder("req:[");
-                sbd.append("header(");
-                for (Map.Entry<String, Collection<String>> entry : request.headers().entrySet()) {
-                    sbd.append("<").append(entry.getKey()).append(": ").append(entry.getValue()).append(">");
+                if (printHeader) {
+                    sbd.append("header(");
+                    for (Map.Entry<String, Collection<String>> entry : request.headers().entrySet()) {
+                        sbd.append("<").append(entry.getKey()).append(": ").append(entry.getValue()).append(">");
+                    }
+                    sbd.append(")");
                 }
-                sbd.append(")");
 
                 byte[] body = request.body();
                 if (body != null && body.length > 0) {
@@ -123,6 +130,13 @@ public class FeignConfig {
                 sbd.append("time(").append(useTime).append(" ms) ").append(response.status());
                 if (U.isNotBlank(response.reason())) {
                     sbd.append(' ').append(response.reason());
+                }
+                if (printHeader) {
+                    sbd.append("header(");
+                    for (Map.Entry<String, Collection<String>> entry : response.headers().entrySet()) {
+                        sbd.append("<").append(entry.getKey()).append(": ").append(entry.getValue()).append(">");
+                    }
+                    sbd.append(")");
                 }
                 if (response.body() != null && response.body().isRepeatable()) {
                     sbd.append(" return(");
