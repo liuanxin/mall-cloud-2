@@ -60,9 +60,15 @@ public class FeignConfig {
                     String headName = headers.nextElement();
                     if (!IGNORE_HEADER_SET.contains(headName.toLowerCase())) {
                         String headerValue = request.getHeader(headName);
-                        if (U.isNotEmpty(headerValue) && !headerValue.equals(A.first(feignHeaderMap.get(headName)))) {
-                            // 先清空再设置
-                            template.header(headName, Collections.emptyList()).header(headName, request.getHeader(headName));
+                        if (U.isNotEmpty(headerValue)) {
+                            Collection<String> feignHeader = feignHeaderMap.get(headName);
+                            if (A.isEmpty(feignHeader)) {
+                                // feign 头中如果没有则直接设置
+                                template.header(headName, headerValue);
+                            } else if (!feignHeader.contains(headName)) {
+                                // feign 头中如果没有 request 中的头, 则以 request 中的为主
+                                template.header(headName, Collections.emptyList()).header(headName, headerValue);
+                            }
                         }
                     }
                 }
