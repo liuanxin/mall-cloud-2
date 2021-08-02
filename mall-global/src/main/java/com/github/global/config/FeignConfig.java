@@ -198,22 +198,25 @@ public class FeignConfig {
         @Override
         public <T> Callable<T> wrapCallable(Callable<T> callable) {
             RequestAttributes attributes = RequestContextHolder.getRequestAttributes();
+            boolean hasRequest = (attributes instanceof ServletRequestAttributes);
+
             Map<String, String> contextMap = MDC.getCopyOfContextMap();
-            Map<String, String> contextInMap = A.isEmpty(contextMap) ? Collections.emptyMap() : contextMap;
 
             // 把主线程运行时的日志上下文放到 feign 的日志上下文去
             return () -> {
                 try {
-                    if (attributes instanceof ServletRequestAttributes) {
+                    if (hasRequest) {
                         LocaleContextHolder.setLocale(((ServletRequestAttributes) attributes).getRequest().getLocale());
                         RequestContextHolder.setRequestAttributes(attributes);
                     }
-                    MDC.setContextMap(contextInMap);
+                    MDC.setContextMap(A.isEmpty(contextMap) ? Collections.emptyMap() : contextMap);
                     return callable.call();
                 } finally {
+                    if (hasRequest) {
+                        LocaleContextHolder.resetLocaleContext();
+                        RequestContextHolder.resetRequestAttributes();
+                    }
                     MDC.clear();
-                    LocaleContextHolder.resetLocaleContext();
-                    RequestContextHolder.resetRequestAttributes();
                 }
             };
         }
