@@ -24,6 +24,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -56,8 +57,8 @@ public class FeignConfig {
             // 将当前请求上下文的 header 的信息放到请求 feign 的 header 中去
             RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
             if (requestAttributes instanceof ServletRequestAttributes) {
-                Map<String, Collection<String>> feignHeaderMap = template.headers();
                 HttpServletRequest request = ((ServletRequestAttributes) requestAttributes).getRequest();
+                Map<String, Collection<String>> feignHeaderMap = template.headers();
 
                 Enumeration<String> headers = request.getHeaderNames();
                 while (headers.hasMoreElements()) {
@@ -196,17 +197,23 @@ public class FeignConfig {
 
         @Override
         public <T> Callable<T> wrapCallable(Callable<T> callable) {
+            RequestAttributes attributes = RequestContextHolder.getRequestAttributes();
             Map<String, String> contextMap = MDC.getCopyOfContextMap();
-            if (A.isEmpty(contextMap)) {
-                return callable;
-            }
+            Map<String, String> contextInMap = A.isEmpty(contextMap) ? Collections.emptyMap() : contextMap;
+
             // 把主线程运行时的日志上下文放到 feign 的日志上下文去
             return () -> {
                 try {
-                    MDC.setContextMap(contextMap);
+                    if (attributes instanceof ServletRequestAttributes) {
+                        LocaleContextHolder.setLocale(((ServletRequestAttributes) attributes).getRequest().getLocale());
+                        RequestContextHolder.setRequestAttributes(attributes);
+                    }
+                    MDC.setContextMap(contextInMap);
                     return callable.call();
                 } finally {
                     MDC.clear();
+                    LocaleContextHolder.resetLocaleContext();
+                    RequestContextHolder.resetRequestAttributes();
                 }
             };
         }
