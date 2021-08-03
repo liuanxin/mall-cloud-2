@@ -202,7 +202,7 @@ public class FeignConfig {
 
             Map<String, String> contextMap = MDC.getCopyOfContextMap();
 
-            // 把主线程运行时的日志上下文放到 feign 的日志上下文去
+            // 把主线程运行时的请求和日志上下文放到 feign 的请求和日志上下文去
             return () -> {
                 try {
                     if (hasRequest) {
