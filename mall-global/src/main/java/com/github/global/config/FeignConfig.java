@@ -18,6 +18,7 @@ import com.netflix.hystrix.strategy.metrics.HystrixMetricsPublisher;
 import com.netflix.hystrix.strategy.properties.HystrixPropertiesStrategy;
 import com.netflix.hystrix.strategy.properties.HystrixProperty;
 import feign.*;
+import lombok.AllArgsConstructor;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -40,6 +41,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /** 处理 feign 的请求头、日志打印、MDC 上下文 */
+@AllArgsConstructor
 @Configuration
 @ConditionalOnClass({ FeignClient.class, Feign.class })
 public class FeignConfig {
@@ -48,6 +50,8 @@ public class FeignConfig {
 
     @Value("${json.logPrintHeader:false}")
     private boolean printHeader;
+
+    private final JsonDesensitization jsonDesensitization;
 
     /** 处理请求头: 把 trace_id 放到 Feign 的请求上下文中去(feign 默认会将当前上下文中的头放到自身的头里) */
     @Bean
@@ -116,7 +120,7 @@ public class FeignConfig {
                 byte[] body = request.body();
                 if (body != null && body.length > 0) {
                     String data = request.isBinary() ? "Binary data" : new String(body, request.charset());
-                    sbd.append(" body(").append(data).append(")");
+                    sbd.append(" body(").append(jsonDesensitization.toJson(data)).append(")");
                 }
                 sbd.append("]");
                 if (LogUtil.ROOT_LOG.isInfoEnabled()) {
@@ -141,7 +145,7 @@ public class FeignConfig {
                 if (response.body() != null && response.body().isRepeatable()) {
                     sbd.append(" return(");
                     try (Reader reader = response.body().asReader(StandardCharsets.UTF_8)) {
-                        sbd.append(CharStreams.toString(reader));
+                        sbd.append(jsonDesensitization.toJson(CharStreams.toString(reader)));
                     } catch (Exception ignore) {
                     }
                     sbd.append(")");
