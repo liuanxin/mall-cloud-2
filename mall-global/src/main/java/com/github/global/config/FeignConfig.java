@@ -129,6 +129,13 @@ public class FeignConfig {
             }
 
             @Override
+            protected void logRetry(String configKey, Level logLevel) {
+                if (LogUtil.ROOT_LOG.isInfoEnabled()) {
+                    LogUtil.ROOT_LOG.info("feignClient --> {} -> retrying...", methodTag(configKey));
+                }
+            }
+
+            @Override
             protected Response logAndRebufferResponse(String configKey, Level level, Response response, long useTime) {
                 StringBuilder sbd = new StringBuilder("response:[");
                 sbd.append("time(").append(useTime).append(" ms) ").append(response.status());
