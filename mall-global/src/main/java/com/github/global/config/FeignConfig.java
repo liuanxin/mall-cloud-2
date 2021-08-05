@@ -99,15 +99,11 @@ public class FeignConfig {
     public Logger handleLog() {
         return new Logger() {
             @Override
-            protected void log(String configKey, String format, Object... args) {
-                if (LogUtil.ROOT_LOG.isInfoEnabled()) {
-                    LogUtil.ROOT_LOG.info("feignClient --> " + methodTag(configKey) + "-> " + format);
-                }
-            }
+            protected void log(String configKey, String format, Object... args) {}
 
             @Override
             protected void logRequest(String configKey, Level logLevel, Request request) {
-                StringBuilder sbd = new StringBuilder("req:[");
+                StringBuilder sbd = new StringBuilder("request:[");
                 if (printHeader) {
                     sbd.append("header(");
                     for (Map.Entry<String, Collection<String>> entry : request.headers().entrySet()) {
@@ -122,12 +118,14 @@ public class FeignConfig {
                     sbd.append(" body(").append(data).append(")");
                 }
                 sbd.append("]");
-                log(configKey, sbd.toString());
+                if (LogUtil.ROOT_LOG.isInfoEnabled()) {
+                    LogUtil.ROOT_LOG.info("feignClient --> {} -> {}", methodTag(configKey), sbd);
+                }
             }
 
             @Override
             protected Response logAndRebufferResponse(String configKey, Level level, Response response, long useTime) {
-                StringBuilder sbd = new StringBuilder("res:[");
+                StringBuilder sbd = new StringBuilder("response:[");
                 sbd.append("time(").append(useTime).append(" ms) ").append(response.status());
                 if (U.isNotBlank(response.reason())) {
                     sbd.append(' ').append(response.reason());
@@ -148,18 +146,20 @@ public class FeignConfig {
                     sbd.append(")");
                 }
                 sbd.append("]");
-                log(configKey, sbd.toString());
+                if (LogUtil.ROOT_LOG.isInfoEnabled()) {
+                    LogUtil.ROOT_LOG.info("feignClient <-- {} <- {}", methodTag(configKey), sbd);
+                }
                 return response;
             }
 
             @Override
-            protected IOException logIOException(String configKey, Level logLevel, IOException e, long useTime) {
-                StringBuilder sbd = new StringBuilder("error:[");
+            protected IOException logIOException(String configKey, Level level, IOException e, long useTime) {
+                StringBuilder sbd = new StringBuilder("exception:[");
                 sbd.append("time(").append(useTime).append(" ms) ");
                 sbd.append(e.getClass().getSimpleName()).append(":").append(e.getMessage());
                 sbd.append("]");
                 if (LogUtil.ROOT_LOG.isInfoEnabled()) {
-                    LogUtil.ROOT_LOG.info("feignClient --> " + methodTag(configKey) + "-> " + sbd, e);
+                    LogUtil.ROOT_LOG.info(String.format("feignClient <--> %s <-> %s", methodTag(configKey), sbd), e);
                 }
                 return e;
             }
