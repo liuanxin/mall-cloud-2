@@ -54,7 +54,7 @@ public class FeignConfig {
     @ConditionalOnClass(HttpServletRequest.class)
     public RequestInterceptor handleHeader() {
         return template -> {
-            // 将当前请求上下文的 header 的信息放到请求 feign 的 header 中去
+            // 将当前请求上下文的 header 信息放到请求 feign 的 header 中去
             RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
             if (requestAttributes instanceof ServletRequestAttributes) {
                 HttpServletRequest request = ((ServletRequestAttributes) requestAttributes).getRequest();
@@ -104,6 +104,7 @@ public class FeignConfig {
             @Override
             protected void logRequest(String configKey, Level logLevel, Request request) {
                 StringBuilder sbd = new StringBuilder("request:[");
+                sbd.append("url(").append(request.url()).append(")");
                 if (printHeader) {
                     sbd.append("header(");
                     for (Map.Entry<String, Collection<String>> entry : request.headers().entrySet()) {
@@ -156,7 +157,7 @@ public class FeignConfig {
             protected IOException logIOException(String configKey, Level level, IOException e, long useTime) {
                 StringBuilder sbd = new StringBuilder("exception:[");
                 sbd.append("time(").append(useTime).append(" ms) ");
-                sbd.append(e.getClass().getSimpleName()).append(":").append(e.getMessage());
+                sbd.append(e.getClass().getSimpleName()).append(": ").append(e.getMessage());
                 sbd.append("]");
                 if (LogUtil.ROOT_LOG.isInfoEnabled()) {
                     LogUtil.ROOT_LOG.info(String.format("feignClient <--> %s <-> %s", methodTag(configKey), sbd), e);
