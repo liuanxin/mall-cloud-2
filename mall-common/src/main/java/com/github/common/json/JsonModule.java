@@ -12,7 +12,7 @@ import com.github.common.util.U;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.text.DecimalFormat;
+import java.math.RoundingMode;
 import java.util.Date;
 
 public class JsonModule {
@@ -22,15 +22,20 @@ public class JsonModule {
         return new SimpleModule().addSerializer(BigDecimal.class, new JsonSerializer<BigDecimal>() {
             @Override
             public void serialize(BigDecimal value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
-                String data;
                 if (U.isNull(value)) {
-                    data = U.EMPTY;
-                } else if (value.scale() < 2) {
-                    data = new DecimalFormat("0.00").format(value);
-                } else {
-                    data = value.toString();
+                    gen.writeString(U.EMPTY);
+                    return;
                 }
-                gen.writeString(data);
+
+                // 去掉尾数上的 0, 如果最终是可以转换成整数的, 则只返回整数
+                BigDecimal num = value.stripTrailingZeros();
+                if (num.scale() == 0) {
+                    gen.writeString(num.toString());
+                    return;
+                }
+
+                // 只要有小数位, 则只保留 2 位小数, 多的直接舍掉, 少的会补 0
+                gen.writeString(value.setScale(2, RoundingMode.HALF_DOWN).toString());
             }
         });
     }
@@ -40,11 +45,7 @@ public class JsonModule {
         return new SimpleModule().addSerializer(String.class, new JsonSerializer<String>() {
             @Override
             public void serialize(String value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
-                if (U.isNull(value)) {
-                    return;
-                }
-                if ("".equals(value.trim())) {
-                    gen.writeString(value);
+                if (U.isBlank(value)) {
                     return;
                 }
                 String key = gen.getOutputContext().getCurrentName();
