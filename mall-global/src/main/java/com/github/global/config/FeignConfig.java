@@ -5,6 +5,7 @@ import com.github.common.util.A;
 import com.github.common.util.LogUtil;
 import com.github.common.util.U;
 import com.google.common.collect.Sets;
+import com.google.common.io.ByteStreams;
 import com.google.common.io.CharStreams;
 import com.netflix.hystrix.HystrixThreadPoolKey;
 import com.netflix.hystrix.HystrixThreadPoolProperties;
@@ -32,6 +33,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -47,6 +49,9 @@ import java.util.concurrent.TimeUnit;
 public class FeignConfig {
 
     private static final Set<String> IGNORE_HEADER_SET = Sets.newHashSet("content-length");
+
+    @Value("${json.sufferErrorRequest:true}")
+    private boolean sufferErrorRequest;
 
     @Value("${json.logPrintHeader:false}")
     private boolean printHeader;
@@ -157,6 +162,33 @@ public class FeignConfig {
                     }
                     sbd.append(")");
                 }
+
+                if (response.body() != null) {
+                    if (response.body().isRepeatable()) {
+                        sbd.append(" return(");
+                        try (Reader reader = response.body().asReader(StandardCharsets.UTF_8)) {
+                            sbd.append(jsonDesensitization.toJson(CharStreams.toString(reader)));
+                        } catch (Exception ignore) {
+                        }
+                        sbd.append(")");
+                    } else if (sufferErrorRequest) {
+                        try (InputStream inputStream = response.body().asInputStream()) {
+                            byte[] bytes = ByteStreams.toByteArray(inputStream);
+
+                            sbd.append(" return(");
+                            sbd.append(jsonDesensitization.toJson(new String(bytes)));
+                            sbd.append(")");
+
+                            response = Response.builder().status(response.status()).reason(response.reason())
+                                    .headers(response.headers()).request(response.request()).body(bytes).build();
+                        } catch (Exception e) {
+                            if (LogUtil.ROOT_LOG.isErrorEnabled()) {
+                                LogUtil.ROOT_LOG.error("feignClient 数据转换失败", e);
+                            }
+                        }
+                    }
+                }
+
                 sbd.append("]");
                 if (LogUtil.ROOT_LOG.isInfoEnabled()) {
                     LogUtil.ROOT_LOG.info("feignClient <-- {} <- {}", methodTag(configKey), sbd);
