@@ -53,7 +53,7 @@ public final class A {
     }
 
     public static boolean isEmpty(Collection<?> collection) {
-        if (collection == null || collection.size() == 0) {
+        if (collection == null || collection.isEmpty()) {
             return true;
         }
         // 如果每一项都是 null, 也返回 true
