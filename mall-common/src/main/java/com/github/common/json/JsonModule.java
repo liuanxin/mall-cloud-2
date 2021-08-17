@@ -17,35 +17,16 @@ import java.util.Date;
 
 public class JsonModule {
 
-    /** 序列化 BigDecimal 小数位不足 2 位的返回 2 位 */
-    public static SimpleModule bigDecimalSerializer() {
-        return new SimpleModule().addSerializer(BigDecimal.class, new JsonSerializer<BigDecimal>() {
-            @Override
-            public void serialize(BigDecimal value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
-                if (U.isNull(value)) {
-                    gen.writeString(U.EMPTY);
-                    return;
-                }
-
-                // 去掉尾数上的 0, 如果最终是可以转换成整数的, 则只返回整数
-                BigDecimal num = value.stripTrailingZeros();
-                if (num.scale() == 0) {
-                    gen.writeString(num.toString());
-                    return;
-                }
-
-                // 只要有小数位, 则只保留 2 位小数, 多的直接舍掉, 少的会补 0
-                gen.writeString(value.setScale(2, RoundingMode.HALF_DOWN).toString());
-            }
-        });
-    }
+    private static final int DES_MAX = 1000;
+    private static final int DES_LEN = 200;
 
     /** 字符串脱敏 */
-    public static SimpleModule stringDesensitization(int max, int len) {
+    public static SimpleModule stringDesensitization() {
         return new SimpleModule().addSerializer(String.class, new JsonSerializer<String>() {
             @Override
             public void serialize(String value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
-                if (U.isBlank(value)) {
+                if (U.isNull(value)) {
+                    gen.writeNull();
                     return;
                 }
                 String key = gen.getOutputContext().getCurrentName();
@@ -59,9 +40,29 @@ public class JsonModule {
                     data = "***";
                 } else {
                     int length = value.length();
-                    data = (length <= max) ? value : (value.substring(0, len) + " *** " + value.substring(length - len));
+                    data = (length <= DES_MAX) ? value : (value.substring(0, DES_LEN) + " *** " + value.substring(length - DES_LEN));
                 }
                 gen.writeString(data);
+            }
+        });
+    }
+
+    /** 序列化 BigDecimal 小数位不足 2 位的返回 2 位 */
+    public static SimpleModule bigDecimalSerializer() {
+        return new SimpleModule().addSerializer(BigDecimal.class, new JsonSerializer<BigDecimal>() {
+            @Override
+            public void serialize(BigDecimal value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+                if (U.isNull(value)) {
+                    gen.writeString(U.EMPTY);
+                    return;
+                }
+
+                // 不足 2 位则输出 2 位小数
+                if (value.scale() < 2) {
+                    gen.writeString(value.setScale(2, RoundingMode.UNNECESSARY).toString());
+                } else {
+                    gen.writeString(value.toString());
+                }
             }
         });
     }
