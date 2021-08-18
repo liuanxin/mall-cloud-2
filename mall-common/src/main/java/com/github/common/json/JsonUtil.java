@@ -73,7 +73,7 @@ public class JsonUtil {
 
     /** 对象转换, 失败将会返回 null */
     public static <S,T> T convertBasic(S source, Class<T> clazz) {
-        return U.isBlank(source) ? null : toObjectNil(toJsonNil(source), clazz);
+        return U.isNull(source) ? null : toObjectNil(toJsonNil(source), clazz);
     }
     /** 集合转换, 失败将会返回 null */
     public static <S,T> List<T> convertListBasic(Collection<S> sourceList, Class<T> clazz) {
@@ -82,7 +82,7 @@ public class JsonUtil {
 
     /** 对象转换(忽略 class 类属性上的 @Json... 注解), 失败将会返回 null */
     public static <S,T> T convert(S source, Class<T> clazz) {
-        if (U.isBlank(source)) {
+        if (U.isNull(source)) {
             return null;
         }
 
@@ -142,7 +142,7 @@ public class JsonUtil {
     }
 
     public static <T,S> T convertType(S source, TypeReference<T> type) {
-        if (U.isBlank(source)) {
+        if (U.isNull(source)) {
             return null;
         }
         return toObjectNil((source instanceof String) ? ((String) source) : toJsonNil(source), type);
@@ -150,7 +150,7 @@ public class JsonUtil {
 
     /** 对象转换成 json 字符串 */
     public static String toJson(Object obj) {
-        if (U.isBlank(obj)) {
+        if (U.isNull(obj)) {
             return null;
         }
         try {
@@ -161,7 +161,7 @@ public class JsonUtil {
     }
     /** 对象转换成 json 字符串 */
     public static String toJsonNil(Object obj) {
-        if (U.isBlank(obj)) {
+        if (U.isNull(obj)) {
             return null;
         }
         if (obj instanceof String) {
