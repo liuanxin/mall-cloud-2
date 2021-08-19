@@ -19,7 +19,7 @@ import com.netflix.hystrix.strategy.metrics.HystrixMetricsPublisher;
 import com.netflix.hystrix.strategy.properties.HystrixPropertiesStrategy;
 import com.netflix.hystrix.strategy.properties.HystrixProperty;
 import feign.*;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -43,12 +43,12 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /** 处理 feign 的请求头、日志打印、MDC 上下文 */
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Configuration
 @ConditionalOnClass({ FeignClient.class, Feign.class })
 public class FeignConfig {
 
-    private static final Set<String> IGNORE_HEADER_SET = Sets.newHashSet("content-length");
+    private static final Set<String> IGNORE_HEADER_SET = Sets.newHashSet("content-type", "content-length");
 
     @Value("${json.sufferErrorRequest:true}")
     private boolean sufferErrorRequest;
