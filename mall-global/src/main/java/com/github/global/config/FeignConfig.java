@@ -79,6 +79,7 @@ public class FeignConfig {
                             Collection<String> feignHeader = feignHeaderMap.get(headName);
                             if (A.isEmpty(feignHeader)) {
                                 // feign 头中如果没有则直接设置
+                                // 使用 Lists.newArrayList, 如果不加里面会使用 Arrays.asList, 当其他地方想要操作 header 时将会出错
                                 template.header(headName, Lists.newArrayList(headerValue));
                             } else if (!feignHeader.contains(headerValue)) {
                                 // feign 头中的值如果没有 request 头中的值, 则以 request 头中的值为主
