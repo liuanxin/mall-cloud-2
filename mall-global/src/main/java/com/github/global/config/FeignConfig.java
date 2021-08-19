@@ -4,6 +4,7 @@ import com.github.common.Const;
 import com.github.common.util.A;
 import com.github.common.util.LogUtil;
 import com.github.common.util.U;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.io.ByteStreams;
 import com.google.common.io.CharStreams;
@@ -78,10 +79,10 @@ public class FeignConfig {
                             Collection<String> feignHeader = feignHeaderMap.get(headName);
                             if (A.isEmpty(feignHeader)) {
                                 // feign 头中如果没有则直接设置
-                                template.header(headName, headerValue);
+                                template.header(headName, Lists.newArrayList(headerValue));
                             } else if (!feignHeader.contains(headerValue)) {
                                 // feign 头中的值如果没有 request 头中的值, 则以 request 头中的值为主
-                                template.header(headName, Collections.emptyList()).header(headName, headerValue);
+                                template.header(headName, Collections.emptyList()).header(headName, Lists.newArrayList(headerValue));
                             }
                         }
                     }
@@ -91,7 +92,7 @@ public class FeignConfig {
                     String traceId = LogUtil.getTraceId();
                     if (U.isNotEmpty(traceId)) {
                         // 先清空再设置
-                        template.header(Const.TRACE, Collections.emptyList()).header(Const.TRACE, traceId);
+                        template.header(Const.TRACE, Collections.emptyList()).header(Const.TRACE, Lists.newArrayList(traceId));
                     }
                 }
             }
