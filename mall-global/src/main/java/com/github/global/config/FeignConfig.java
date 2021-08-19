@@ -4,7 +4,6 @@ import com.github.common.Const;
 import com.github.common.util.A;
 import com.github.common.util.LogUtil;
 import com.github.common.util.U;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.io.ByteStreams;
 import com.google.common.io.CharStreams;
@@ -68,7 +67,6 @@ public class FeignConfig {
             RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
             if (requestAttributes instanceof ServletRequestAttributes) {
                 HttpServletRequest request = ((ServletRequestAttributes) requestAttributes).getRequest();
-                Map<String, Collection<String>> feignHeaderMap = template.headers();
 
                 Enumeration<String> headers = request.getHeaderNames();
                 while (headers.hasMoreElements()) {
@@ -76,15 +74,7 @@ public class FeignConfig {
                     if (!IGNORE_HEADER_SET.contains(headName.toLowerCase())) {
                         String headerValue = request.getHeader(headName);
                         if (U.isNotEmpty(headerValue)) {
-                            Collection<String> feignHeader = feignHeaderMap.get(headName);
-                            if (A.isEmpty(feignHeader)) {
-                                // feign 头中如果没有则直接设置
-                                // 使用 Lists.newArrayList, 如果不加里面会使用 Arrays.asList, 当其他地方想要操作 header 时将会出错
-                                template.header(headName, Lists.newArrayList(headerValue));
-                            } else if (!feignHeader.contains(headerValue)) {
-                                // feign 头中的值如果没有 request 头中的值, 则以 request 头中的值为主
-                                template.header(headName, Collections.emptyList()).header(headName, Lists.newArrayList(headerValue));
-                            }
+                            template.header(headName, Collections.emptyList()).header(headName, headerValue);
                         }
                     }
                 }
@@ -93,7 +83,7 @@ public class FeignConfig {
                     String traceId = LogUtil.getTraceId();
                     if (U.isNotEmpty(traceId)) {
                         // 先清空再设置
-                        template.header(Const.TRACE, Collections.emptyList()).header(Const.TRACE, Lists.newArrayList(traceId));
+                        template.header(Const.TRACE, Collections.emptyList()).header(Const.TRACE, traceId);
                     }
                 }
             }
