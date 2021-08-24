@@ -48,10 +48,10 @@ public final class Const {
 
     /** pc 端传过来的 token 的 key */
     public static final String TOKEN = "X-Token";
-    /** pc 端传过来的 version 的 key */
-    public static final String VERSION = "X-Version";
     /** pc 端放在 cookie 中的跟踪号 */
     public static final String TRACE = "X-Trace";
+    /** pc 端传过来的 version 的 key */
+    public static final String VERSION = "X-Version";
 
     /** @see org.springframework.http.HttpMethod */
     public static final String[] SUPPORT_METHODS = new String[] { "GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "TRACE" };

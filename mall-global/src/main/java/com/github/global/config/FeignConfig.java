@@ -48,7 +48,9 @@ import java.util.concurrent.TimeUnit;
 @ConditionalOnClass({ FeignClient.class, Feign.class })
 public class FeignConfig {
 
-    private static final Set<String> IGNORE_HEADER_SET = Sets.newHashSet("content-type", "content-length");
+    private static final Set<String> HEADER_SET = Sets.newHashSet(
+            Const.TOKEN.toLowerCase(), "user-agent", "accept-language", "cookie", "referer"
+    );
 
     @Value("${json.sufferErrorRequest:true}")
     private boolean sufferErrorRequest;
@@ -71,7 +73,7 @@ public class FeignConfig {
                 Enumeration<String> headers = request.getHeaderNames();
                 while (headers.hasMoreElements()) {
                     String headName = headers.nextElement();
-                    if (!IGNORE_HEADER_SET.contains(headName.toLowerCase())) {
+                    if (HEADER_SET.contains(headName.toLowerCase())) {
                         String headerValue = request.getHeader(headName);
                         if (U.isNotEmpty(headerValue)) {
                             template.header(headName, Collections.emptyList()).header(headName, headerValue);
