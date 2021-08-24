@@ -49,7 +49,7 @@ import java.util.concurrent.TimeUnit;
 public class FeignConfig {
 
     private static final Set<String> HEADER_SET = Sets.newHashSet(
-            Const.TOKEN.toLowerCase(), "user-agent", "accept-language", "cookie", "referer"
+            Const.TOKEN.toLowerCase(), "cookie", "user-agent", "accept-language"
     );
 
     @Value("${json.sufferErrorRequest:true}")
