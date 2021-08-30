@@ -42,7 +42,7 @@
         `mr`.`update_time` AS `mr_update_time`
     </sql>
 
-    <insert id="insertOrUpdate" parameterType="com.zt.fbg.inbound.service.entity.MqReceiveEntity"
+    <insert id="insertOrUpdate" parameterType="com.github.message.model.MqReceiveEntity"
             keyColumn="id" keyProperty="id" useGeneratedKeys="true">
         INSERT INTO `t_mq_receive`
         <trim prefix="(" suffix=")" suffixOverrides=",">

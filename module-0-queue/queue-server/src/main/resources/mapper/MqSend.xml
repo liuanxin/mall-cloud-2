@@ -47,7 +47,7 @@
         `ms`.`update_time` AS `ms_update_time`
     </sql>
 
-    <insert id="insertOrUpdate" parameterType="com.zt.fbg.inbound.service.entity.MqSendEntity"
+    <insert id="insertOrUpdate" parameterType="com.github.message.model.MqSendEntity"
             keyColumn="id" keyProperty="id" useGeneratedKeys="true">
         INSERT INTO `t_mq_send`
         <trim prefix="(" suffix=")" suffixOverrides=",">
