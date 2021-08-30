@@ -77,6 +77,7 @@
         <poi-ooxml.version>4.1.2</poi-ooxml.version>
 
         <elasticsearch.version>6.3.2</elasticsearch.version>
+        <redisson.version>3.15.6</redisson.version>
         <hikaricp.version>3.4.5</hikaricp.version>
         <mybatis.version>3.5.6</mybatis.version>
         <mybatis-plus.version>3.4.3</mybatis-plus.version>
@@ -313,6 +314,11 @@
                 <version>${poi-ooxml.version}</version>
             </dependency>
 
+            <dependency>
+                <groupId>org.redisson</groupId>
+                <artifactId>redisson-spring-boot-starter</artifactId>
+                <version>${redisson.version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.elasticsearch.client</groupId>
                 <artifactId>transport</artifactId>

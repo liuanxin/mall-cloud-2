@@ -1,0 +1,312 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.github.message.dao.MqReceiveDao">
+    <resultMap id="MqReceiveMap" type="com.github.message.model.MqReceiveEntity">
+        <id column="id" jdbcType="BIGINT" property="id" />
+        <result column="queue" jdbcType="VARCHAR" property="queue" />
+        <result column="msg_id" jdbcType="VARCHAR" property="msgId" />
+        <result column="app_code" jdbcType="VARCHAR" property="appCode" />
+        <result column="business_type" jdbcType="VARCHAR" property="businessType" />
+        <result column="status" jdbcType="TINYINT" property="status" />
+        <result column="retry_count" jdbcType="INTEGER" property="retryCount" />
+        <result column="msg_json" jdbcType="LONGVARCHAR" property="msgJson" />
+        <result column="remark" jdbcType="VARCHAR" property="remark" />
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+    </resultMap>
+    <resultMap id="MqReceiveMapAlias" type="com.github.message.model.MqReceiveEntity">
+        <id column="mr_id" jdbcType="BIGINT" property="id" />
+        <result column="mr_queue" jdbcType="VARCHAR" property="queue" />
+        <result column="mr_msg_id" jdbcType="VARCHAR" property="msgId" />
+        <result column="mr_app_code" jdbcType="VARCHAR" property="appCode" />
+        <result column="mr_business_type" jdbcType="VARCHAR" property="businessType" />
+        <result column="mr_status" jdbcType="TINYINT" property="status" />
+        <result column="mr_retry_count" jdbcType="INTEGER" property="retryCount" />
+        <result column="mr_msg_json" jdbcType="LONGVARCHAR" property="msgJson" />
+        <result column="mr_remark" jdbcType="VARCHAR" property="remark" />
+        <result column="mr_create_time" jdbcType="TIMESTAMP" property="createTime" />
+        <result column="mr_update_time" jdbcType="TIMESTAMP" property="updateTime" />
+    </resultMap>
+
+    <sql id="mq_receive_column">
+        `id`, `queue`, `msg_id`, `app_code`, `business_type`,
+        `status`, `retry_count`, `msg_json`, `remark`, `create_time`,
+        `update_time`
+    </sql>
+    <sql id="mq_receive_column_alias">
+        `mr`.`id` AS `mr_id`, `mr`.`queue` AS `mr_queue`,
+        `mr`.`msg_id` AS `mr_msg_id`, `mr`.`app_code` AS `mr_app_code`,
+        `mr`.`business_type` AS `mr_business_type`, `mr`.`status` AS `mr_status`,
+        `mr`.`retry_count` AS `mr_retry_count`, `mr`.`msg_json` AS `mr_msg_json`,
+        `mr`.`remark` AS `mr_remark`, `mr`.`create_time` AS `mr_create_time`,
+        `mr`.`update_time` AS `mr_update_time`
+    </sql>
+
+    <insert id="insertOrUpdate" parameterType="com.zt.fbg.inbound.service.entity.MqReceiveEntity"
+            keyColumn="id" keyProperty="id" useGeneratedKeys="true">
+        INSERT INTO `t_mq_receive`
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                `id`,
+            </if>
+            <if test="queue != null">
+                `queue`,
+            </if>
+            <if test="msgId != null">
+                `msg_id`,
+            </if>
+            <if test="appCode != null">
+                `app_code`,
+            </if>
+            <if test="businessType != null">
+                `business_type`,
+            </if>
+            <if test="status != null">
+                `status`,
+            </if>
+            <if test="retryCount != null">
+                `retry_count`,
+            </if>
+            <if test="msgJson != null">
+                `msg_json`,
+            </if>
+            <if test="remark != null">
+                `remark`,
+            </if>
+            <if test="createTime != null">
+                `create_time`,
+            </if>
+            <if test="updateTime != null">
+                `update_time`,
+            </if>
+        </trim>
+        <trim prefix="VALUES (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=BIGINT},
+            </if>
+            <if test="queue != null">
+                #{queue,jdbcType=VARCHAR},
+            </if>
+            <if test="msgId != null">
+                #{msgId,jdbcType=VARCHAR},
+            </if>
+            <if test="appCode != null">
+                #{appCode,jdbcType=VARCHAR},
+            </if>
+            <if test="businessType != null">
+                #{businessType,jdbcType=VARCHAR},
+            </if>
+            <if test="status != null">
+                #{status,jdbcType=TINYINT},
+            </if>
+            <if test="retryCount != null">
+                #{retryCount,jdbcType=INTEGER},
+            </if>
+            <if test="msgJson != null">
+                #{msgJson,jdbcType=LONGVARCHAR},
+            </if>
+            <if test="remark != null">
+                #{remark,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null">
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="updateTime != null">
+                #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+        </trim>
+        <trim prefix="ON DUPLICATE KEY UPDATE" suffixOverrides=",">
+            <if test="id != null">
+                `id` = VALUES(`id`),
+            </if>
+            <if test="queue != null">
+                `queue` = VALUES(`queue`),
+            </if>
+            <if test="msgId != null">
+                `msg_id` = VALUES(`msg_id`),
+            </if>
+            <if test="appCode != null">
+                `app_code` = VALUES(`app_code`),
+            </if>
+            <if test="businessType != null">
+                `business_type` = VALUES(`business_type`),
+            </if>
+            <if test="status != null">
+                `status` = VALUES(`status`),
+            </if>
+            <if test="retryCount != null">
+                `retry_count` = VALUES(`retry_count`),
+            </if>
+            <if test="msgJson != null">
+                `msg_json` = VALUES(`msg_json`),
+            </if>
+            <if test="remark != null">
+                `remark` = VALUES(`remark`),
+            </if>
+            <if test="createTime != null">
+                `create_time` = VALUES(`create_time`),
+            </if>
+            <if test="updateTime != null">
+                `update_time` = VALUES(`update_time`),
+            </if>
+        </trim>
+    </insert>
+
+    <insert id="batchInsert" keyColumn="id" keyProperty="id" parameterType="map" useGeneratedKeys="true">
+        INSERT INTO `t_mq_receive`
+        <foreach collection="list" index="index" item="item">
+            <if test="index == 0">
+                <trim prefix="(" suffix=") VALUES" suffixOverrides=",">
+                    <if test="item.id != null">
+                        `id`,
+                    </if>
+                    <if test="item.queue != null">
+                        `queue`,
+                    </if>
+                    <if test="item.msgId != null">
+                        `msg_id`,
+                    </if>
+                    <if test="item.appCode != null">
+                        `app_code`,
+                    </if>
+                    <if test="item.businessType != null">
+                        `business_type`,
+                    </if>
+                    <if test="item.status != null">
+                        `status`,
+                    </if>
+                    <if test="item.retryCount != null">
+                        `retry_count`,
+                    </if>
+                    <if test="item.msgJson != null">
+                        `msg_json`,
+                    </if>
+                    <if test="item.remark != null">
+                        `remark`,
+                    </if>
+                    <if test="item.createTime != null">
+                        `create_time`,
+                    </if>
+                    <if test="item.updateTime != null">
+                        `update_time`,
+                    </if>
+                </trim>
+            </if>
+
+            <trim prefix="(" suffix=")" suffixOverrides=",">
+                <if test="item.id != null">
+                    #{item.id,jdbcType=BIGINT},
+                </if>
+                <if test="item.queue != null">
+                    #{item.queue,jdbcType=VARCHAR},
+                </if>
+                <if test="item.msgId != null">
+                    #{item.msgId,jdbcType=VARCHAR},
+                </if>
+                <if test="item.appCode != null">
+                    #{item.appCode,jdbcType=VARCHAR},
+                </if>
+                <if test="item.businessType != null">
+                    #{item.businessType,jdbcType=VARCHAR},
+                </if>
+                <if test="item.status != null">
+                    #{item.status,jdbcType=TINYINT},
+                </if>
+                <if test="item.retryCount != null">
+                    #{item.retryCount,jdbcType=INTEGER},
+                </if>
+                <if test="item.msgJson != null">
+                    #{item.msgJson,jdbcType=LONGVARCHAR},
+                </if>
+                <if test="item.remark != null">
+                    #{item.remark,jdbcType=VARCHAR},
+                </if>
+                <if test="item.createTime != null">
+                    #{item.createTime,jdbcType=TIMESTAMP},
+                </if>
+                <if test="item.updateTime != null">
+                    #{item.updateTime,jdbcType=TIMESTAMP},
+                </if>
+            </trim>
+        </foreach>
+    </insert>
+
+    <insert id="batchReplace" keyColumn="id" keyProperty="id" parameterType="map" useGeneratedKeys="true">
+        REPLACE INTO `t_mq_receive`
+        <foreach collection="list" index="index" item="item">
+            <if test="index == 0">
+                <trim prefix="(" suffix=") VALUES" suffixOverrides=",">
+                    <if test="item.id != null">
+                        `id`,
+                    </if>
+                    <if test="item.queue != null">
+                        `queue`,
+                    </if>
+                    <if test="item.msgId != null">
+                        `msg_id`,
+                    </if>
+                    <if test="item.appCode != null">
+                        `app_code`,
+                    </if>
+                    <if test="item.businessType != null">
+                        `business_type`,
+                    </if>
+                    <if test="item.status != null">
+                        `status`,
+                    </if>
+                    <if test="item.retryCount != null">
+                        `retry_count`,
+                    </if>
+                    <if test="item.msgJson != null">
+                        `msg_json`,
+                    </if>
+                    <if test="item.remark != null">
+                        `remark`,
+                    </if>
+                    <if test="item.createTime != null">
+                        `create_time`,
+                    </if>
+                    <if test="item.updateTime != null">
+                        `update_time`,
+                    </if>
+                </trim>
+            </if>
+
+            <trim prefix="(" suffix=")" suffixOverrides=",">
+                <if test="item.id != null">
+                    #{item.id,jdbcType=BIGINT},
+                </if>
+                <if test="item.queue != null">
+                    #{item.queue,jdbcType=VARCHAR},
+                </if>
+                <if test="item.msgId != null">
+                    #{item.msgId,jdbcType=VARCHAR},
+                </if>
+                <if test="item.appCode != null">
+                    #{item.appCode,jdbcType=VARCHAR},
+                </if>
+                <if test="item.businessType != null">
+                    #{item.businessType,jdbcType=VARCHAR},
+                </if>
+                <if test="item.status != null">
+                    #{item.status,jdbcType=TINYINT},
+                </if>
+                <if test="item.retryCount != null">
+                    #{item.retryCount,jdbcType=INTEGER},
+                </if>
+                <if test="item.msgJson != null">
+                    #{item.msgJson,jdbcType=LONGVARCHAR},
+                </if>
+                <if test="item.remark != null">
+                    #{item.remark,jdbcType=VARCHAR},
+                </if>
+                <if test="item.createTime != null">
+                    #{item.createTime,jdbcType=TIMESTAMP},
+                </if>
+                <if test="item.updateTime != null">
+                    #{item.updateTime,jdbcType=TIMESTAMP},
+                </if>
+            </trim>
+        </foreach>
+    </insert>
+</mapper>
