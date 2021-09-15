@@ -66,6 +66,7 @@ public class FeignConfig {
     @ConditionalOnClass(HttpServletRequest.class)
     public RequestInterceptor handleHeader() {
         return template -> {
+            String traceId = null;
             // 将当前请求上下文的 header 信息放到请求 feign 的 header 中去
             RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
             if (requestAttributes instanceof ServletRequestAttributes) {
@@ -77,17 +78,28 @@ public class FeignConfig {
                     if (HEADER_SET.contains(headName.toLowerCase())) {
                         String headerValue = request.getHeader(headName);
                         if (U.isNotEmpty(headerValue)) {
+                            // 先清空再设置
                             template.header(headName, Collections.emptyList()).header(headName, headerValue);
                         }
                     }
                 }
-                // 将跟踪号放到请求上下文(上面的请求头中如果没有就从 request 的属性中获取)
-                if (U.isEmpty(request.getHeader(Const.TRACE))) {
-                    String traceId = LogUtil.getTraceId();
-                    if (U.isNotEmpty(traceId)) {
-                        // 先清空再设置
+                // 从请求上获取跟踪号
+                traceId = request.getHeader(Const.TRACE);
+            }
+
+            // 跟踪号如果为空则从日志获取跟踪号
+            if (U.isEmpty(traceId)) {
+                traceId = LogUtil.getTraceId();
+            }
+            if (U.isNotEmpty(traceId)) {
+                Map<String, Collection<String>> headers = template.headers();
+                if (A.isNotEmpty(headers)) {
+                    // 头里面没有就放到头
+                    if (!headers.get(Const.TRACE).contains(traceId)) {
                         template.header(Const.TRACE, Collections.emptyList()).header(Const.TRACE, traceId);
                     }
+                } else {
+                    template.header(Const.TRACE, Collections.emptyList()).header(Const.TRACE, traceId);
                 }
             }
         };
