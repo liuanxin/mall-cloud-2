@@ -60,7 +60,7 @@ public class FeignConfig {
 
     private final JsonDesensitization jsonDesensitization;
 
-    /** 处理请求头: 把 trace_id 放到 Feign 的请求上下文中去(feign 默认会将当前上下文中的头放到自身的头里) */
+    /** 处理请求头: 把 trace_id 放到 Feign 的请求上下文中去(feign 默认会放 Content-Length : xxx 和 Content-Type : application/json 到请求头里去) */
     @Bean
     @ConditionalOnClass(HttpServletRequest.class)
     public RequestInterceptor handleHeader() {
