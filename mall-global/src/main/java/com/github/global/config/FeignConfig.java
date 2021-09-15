@@ -200,9 +200,9 @@ public class FeignConfig {
         };
     }
 
-    /** 处理 mdc: 把主线程的日志上下文放到 feign 的日志上下文中去 */
+    /** 处理上下文: 把主线程的请求和日志上下文放到 feign 的上下文去 */
     @Bean
-    public HystrixConcurrencyStrategy handleMdc() {
+    public HystrixConcurrencyStrategy handleContext() {
         return new ContextFeignConcurrencyStrategy();
     }
 
