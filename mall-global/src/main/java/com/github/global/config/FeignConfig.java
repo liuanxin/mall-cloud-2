@@ -237,7 +237,6 @@ public class FeignConfig {
         public <T> Callable<T> wrapCallable(Callable<T> callable) {
             RequestAttributes attributes = RequestContextHolder.getRequestAttributes();
             boolean hasRequest = (attributes instanceof ServletRequestAttributes);
-
             Map<String, String> contextMap = MDC.getCopyOfContextMap();
 
             // 把主线程运行时的请求和日志上下文放到 feign 的请求和日志上下文去
