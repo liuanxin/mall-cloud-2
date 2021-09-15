@@ -48,6 +48,7 @@ import java.util.concurrent.TimeUnit;
 @ConditionalOnClass({ FeignClient.class, Feign.class })
 public class FeignConfig {
 
+    /** 要放到 feign 请求头里的键 */
     private static final Set<String> HEADER_SET = Sets.newHashSet(
             Const.TOKEN.toLowerCase(), "cookie", "user-agent", "accept-language"
     );
