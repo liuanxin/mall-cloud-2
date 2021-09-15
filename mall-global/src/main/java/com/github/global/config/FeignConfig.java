@@ -149,15 +149,6 @@ public class FeignConfig {
                     }
                     sbd.append(")");
                 }
-                if (response.body() != null && response.body().isRepeatable()) {
-                    sbd.append(" return(");
-                    try (Reader reader = response.body().asReader(StandardCharsets.UTF_8)) {
-                        sbd.append(jsonDesensitization.toJson(CharStreams.toString(reader)));
-                    } catch (Exception ignore) {
-                    }
-                    sbd.append(")");
-                }
-
                 if (response.body() != null) {
                     if (response.body().isRepeatable()) {
                         sbd.append(" return(");
@@ -169,11 +160,7 @@ public class FeignConfig {
                     } else if (sufferErrorRequest) {
                         try (InputStream inputStream = response.body().asInputStream()) {
                             byte[] bytes = ByteStreams.toByteArray(inputStream);
-
-                            sbd.append(" return(");
-                            sbd.append(jsonDesensitization.toJson(new String(bytes)));
-                            sbd.append(")");
-
+                            sbd.append(" return(").append(jsonDesensitization.toJson(new String(bytes))).append(")");
                             response = Response.builder().status(response.status()).reason(response.reason())
                                     .headers(response.headers()).request(response.request()).body(bytes).build();
                         } catch (Exception e) {
@@ -183,7 +170,6 @@ public class FeignConfig {
                         }
                     }
                 }
-
                 sbd.append("]");
                 if (LogUtil.ROOT_LOG.isInfoEnabled()) {
                     LogUtil.ROOT_LOG.info("feignClient <-- {} <- {}", methodTag(configKey), sbd);
