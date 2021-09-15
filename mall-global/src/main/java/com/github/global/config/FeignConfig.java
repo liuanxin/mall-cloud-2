@@ -164,7 +164,7 @@ public class FeignConfig {
                                     .headers(response.headers()).request(response.request()).body(bytes).build();
                         } catch (Exception e) {
                             if (LogUtil.ROOT_LOG.isErrorEnabled()) {
-                                LogUtil.ROOT_LOG.error("feignClient 数据转换失败", e);
+                                LogUtil.ROOT_LOG.error(String.format("feignClient <--> %s <-> read data exception", methodTag(configKey)), e);
                             }
                         }
                     }
@@ -182,8 +182,8 @@ public class FeignConfig {
                 sbd.append("time(").append(useTime).append(" ms) ");
                 sbd.append(e.getClass().getSimpleName()).append(": ").append(e.getMessage());
                 sbd.append("]");
-                if (LogUtil.ROOT_LOG.isInfoEnabled()) {
-                    LogUtil.ROOT_LOG.info(String.format("feignClient <--> %s <-> %s", methodTag(configKey), sbd), e);
+                if (LogUtil.ROOT_LOG.isErrorEnabled()) {
+                    LogUtil.ROOT_LOG.error(String.format("feignClient <--> %s <-> %s", methodTag(configKey), sbd), e);
                 }
                 return e;
             }
