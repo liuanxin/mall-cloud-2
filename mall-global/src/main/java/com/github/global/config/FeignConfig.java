@@ -99,7 +99,6 @@ public class FeignConfig {
      * 默认的日志会输出很多条, 见 {@link Logger}, 当前处理是只在请求前打印一条, 有响应时打印一条, io 异常时打印一条
      */
     @Bean
-    @SuppressWarnings("DuplicatedCode")
     public Logger handleLog() {
         return new Logger() {
             @Override
@@ -109,13 +108,7 @@ public class FeignConfig {
             protected void logRequest(String configKey, Level logLevel, Request request) {
                 StringBuilder sbd = new StringBuilder("request:[");
                 sbd.append("url(").append(request.url()).append(")");
-                if (printHeader) {
-                    sbd.append("header(");
-                    for (Map.Entry<String, Collection<String>> entry : request.headers().entrySet()) {
-                        sbd.append("<").append(entry.getKey()).append(": ").append(entry.getValue()).append(">");
-                    }
-                    sbd.append(")");
-                }
+                collectHeader(sbd, request.headers());
 
                 byte[] body = request.body();
                 if (body != null && body.length > 0) {
@@ -142,13 +135,7 @@ public class FeignConfig {
                 if (U.isNotBlank(response.reason())) {
                     sbd.append(' ').append(response.reason());
                 }
-                if (printHeader) {
-                    sbd.append("header(");
-                    for (Map.Entry<String, Collection<String>> entry : response.headers().entrySet()) {
-                        sbd.append("<").append(entry.getKey()).append(": ").append(entry.getValue()).append(">");
-                    }
-                    sbd.append(")");
-                }
+                collectHeader(sbd, response.headers());
                 if (response.body() != null) {
                     if (response.body().isRepeatable()) {
                         sbd.append(" return(");
@@ -187,6 +174,16 @@ public class FeignConfig {
                     LogUtil.ROOT_LOG.info(String.format("feignClient <--> %s <-> %s", methodTag(configKey), sbd), e);
                 }
                 return e;
+            }
+
+            private void collectHeader(StringBuilder sbd, Map<String, Collection<String>> headers) {
+                if (printHeader) {
+                    sbd.append("header(");
+                    for (Map.Entry<String, Collection<String>> entry : headers.entrySet()) {
+                        sbd.append("<").append(entry.getKey()).append(": ").append(entry.getValue()).append(">");
+                    }
+                    sbd.append(")");
+                }
             }
         };
     }
