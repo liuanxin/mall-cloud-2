@@ -208,13 +208,13 @@ public class FeignConfig {
     /** 处理 mdc: 把主线程的日志上下文放到 feign 的日志上下文中去 */
     @Bean
     public HystrixConcurrencyStrategy handleMdc() {
-        return new AfterSaleFeignConcurrencyStrategy();
+        return new ContextFeignConcurrencyStrategy();
     }
 
-    public static class AfterSaleFeignConcurrencyStrategy extends HystrixConcurrencyStrategy {
+    public static class ContextFeignConcurrencyStrategy extends HystrixConcurrencyStrategy {
         private final HystrixConcurrencyStrategy originalStrategy;
 
-        public AfterSaleFeignConcurrencyStrategy() {
+        public ContextFeignConcurrencyStrategy() {
             // 用原来的策略返回
             this.originalStrategy = HystrixPlugins.getInstance().getConcurrencyStrategy();
 
