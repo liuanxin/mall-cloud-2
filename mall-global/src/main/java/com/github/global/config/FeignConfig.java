@@ -53,8 +53,8 @@ public class FeignConfig {
             Const.TOKEN.toLowerCase(), "cookie", "user-agent", "accept-language"
     );
 
-    @Value("${json.sufferErrorRequest:true}")
-    private boolean sufferErrorRequest;
+    @Value("${json.logPrintComplete:false}")
+    private boolean printComplete;
 
     @Value("${json.logPrintHeader:false}")
     private boolean printHeader;
@@ -157,7 +157,7 @@ public class FeignConfig {
                         } catch (Exception ignore) {
                         }
                         sbd.append(")");
-                    } else if (sufferErrorRequest) {
+                    } else if (printComplete) {
                         try (InputStream inputStream = response.body().asInputStream()) {
                             byte[] bytes = ByteStreams.toByteArray(inputStream);
                             sbd.append(" return(").append(jsonDesensitization.toJson(new String(bytes))).append(")");
