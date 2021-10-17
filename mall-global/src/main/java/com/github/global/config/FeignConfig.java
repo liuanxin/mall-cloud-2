@@ -53,10 +53,10 @@ public class FeignConfig {
             Const.TOKEN.toLowerCase(), "cookie", "user-agent", "accept-language"
     );
 
-    @Value("${json.logPrintComplete:false}")
+    @Value("${log.printComplete:false}")
     private boolean printComplete;
 
-    @Value("${json.logPrintHeader:false}")
+    @Value("${log.rintHeader:false}")
     private boolean printHeader;
 
     private final JsonDesensitization jsonDesensitization;
