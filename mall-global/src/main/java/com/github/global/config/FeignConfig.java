@@ -21,7 +21,6 @@ import com.netflix.hystrix.strategy.properties.HystrixProperty;
 import feign.*;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.MDC;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.context.annotation.Bean;
@@ -52,12 +51,6 @@ public class FeignConfig {
     private static final Set<String> HEADER_SET = Sets.newHashSet(
             Const.TOKEN.toLowerCase(), "cookie", "user-agent", "accept-language"
     );
-
-    @Value("${log.printComplete:false}")
-    private boolean printComplete;
-
-    @Value("${log.rintHeader:false}")
-    private boolean printHeader;
 
     private final JsonDesensitization jsonDesensitization;
 
@@ -119,17 +112,17 @@ public class FeignConfig {
 
             @Override
             protected void logRequest(String configKey, Level logLevel, Request request) {
-                StringBuilder sbd = new StringBuilder("request:[");
-                sbd.append("url(").append(request.url()).append(")");
-                collectHeader(sbd, request.headers());
-
-                byte[] body = request.body();
-                if (body != null && body.length > 0) {
-                    String data = request.isBinary() ? "Binary data" : new String(body, request.charset());
-                    sbd.append(" body(").append(jsonDesensitization.toJson(data)).append(")");
-                }
-                sbd.append("]");
                 if (LogUtil.ROOT_LOG.isInfoEnabled()) {
+                    StringBuilder sbd = new StringBuilder("request:[");
+                    sbd.append("url(").append(request.url()).append(")");
+                    collectHeader(sbd, request.headers());
+
+                    byte[] body = request.body();
+                    if (body != null && body.length > 0) {
+                        String data = request.isBinary() ? "Binary data" : new String(body, request.charset());
+                        sbd.append(" body(").append(jsonDesensitization.toJson(data)).append(")");
+                    }
+                    sbd.append("]");
                     LogUtil.ROOT_LOG.info("feignClient --> {} -> {}", methodTag(configKey), sbd);
                 }
             }
@@ -143,35 +136,38 @@ public class FeignConfig {
 
             @Override
             protected Response logAndRebufferResponse(String configKey, Level level, Response response, long useTime) {
-                StringBuilder sbd = new StringBuilder("response:[");
-                sbd.append("time(").append(useTime).append(" ms) ").append(response.status());
-                if (U.isNotBlank(response.reason())) {
-                    sbd.append(' ').append(response.reason());
-                }
-                collectHeader(sbd, response.headers());
-                if (response.body() != null) {
-                    if (response.body().isRepeatable()) {
-                        sbd.append(" return(");
-                        try (Reader reader = response.body().asReader(StandardCharsets.UTF_8)) {
-                            sbd.append(jsonDesensitization.toJson(CharStreams.toString(reader)));
-                        } catch (Exception ignore) {
-                        }
-                        sbd.append(")");
-                    } else if (printComplete) {
-                        try (InputStream inputStream = response.body().asInputStream()) {
-                            byte[] bytes = ByteStreams.toByteArray(inputStream);
-                            sbd.append(" return(").append(jsonDesensitization.toJson(new String(bytes))).append(")");
-                            response = Response.builder().status(response.status()).reason(response.reason())
-                                    .headers(response.headers()).request(response.request()).body(bytes).build();
-                        } catch (Exception e) {
-                            if (LogUtil.ROOT_LOG.isErrorEnabled()) {
-                                LogUtil.ROOT_LOG.error(String.format("feignClient <--> %s <-> read data exception", methodTag(configKey)), e);
+                if (LogUtil.ROOT_LOG.isInfoEnabled()) {
+                    StringBuilder sbd = new StringBuilder("response:[");
+                    sbd.append("time(").append(useTime).append(" ms) ").append(response.status());
+                    if (U.isNotBlank(response.reason())) {
+                        sbd.append(' ').append(response.reason());
+                    }
+                    collectHeader(sbd, response.headers());
+                    if (response.body() != null) {
+                        if (response.body().isRepeatable()) {
+                            sbd.append(" return(");
+                            try (Reader reader = response.body().asReader(StandardCharsets.UTF_8)) {
+                                sbd.append(jsonDesensitization.toJson(CharStreams.toString(reader)));
+                            } catch (Exception e) {
+                                if (LogUtil.ROOT_LOG.isErrorEnabled()) {
+                                    LogUtil.ROOT_LOG.error(String.format("feignClient <--> %s <-> read data exception", methodTag(configKey)), e);
+                                }
+                            }
+                            sbd.append(")");
+                        } else {
+                            try (InputStream inputStream = response.body().asInputStream()) {
+                                byte[] bytes = ByteStreams.toByteArray(inputStream);
+                                sbd.append(" return(").append(jsonDesensitization.toJson(new String(bytes))).append(")");
+                                response = Response.builder().status(response.status()).reason(response.reason())
+                                        .headers(response.headers()).request(response.request()).body(bytes).build();
+                            } catch (Exception e) {
+                                if (LogUtil.ROOT_LOG.isErrorEnabled()) {
+                                    LogUtil.ROOT_LOG.error(String.format("feignClient <--> %s <-> read data exception", methodTag(configKey)), e);
+                                }
                             }
                         }
                     }
-                }
-                sbd.append("]");
-                if (LogUtil.ROOT_LOG.isInfoEnabled()) {
+                    sbd.append("]");
                     LogUtil.ROOT_LOG.info("feignClient <-- {} <- {}", methodTag(configKey), sbd);
                 }
                 return response;
@@ -179,24 +175,20 @@ public class FeignConfig {
 
             @Override
             protected IOException logIOException(String configKey, Level level, IOException e, long useTime) {
-                StringBuilder sbd = new StringBuilder("exception:[");
-                sbd.append("time(").append(useTime).append(" ms) ");
-                sbd.append(e.getClass().getSimpleName()).append(": ").append(e.getMessage());
-                sbd.append("]");
                 if (LogUtil.ROOT_LOG.isErrorEnabled()) {
+                    String clazzName = e.getClass().getSimpleName();
+                    String sbd = String.format("exception:[time(%sms) %s: %s]", useTime, clazzName, e.getMessage());
                     LogUtil.ROOT_LOG.error(String.format("feignClient <--> %s <-> %s", methodTag(configKey), sbd), e);
                 }
                 return e;
             }
 
             private void collectHeader(StringBuilder sbd, Map<String, Collection<String>> headers) {
-                if (printHeader) {
-                    sbd.append("header(");
-                    for (Map.Entry<String, Collection<String>> entry : headers.entrySet()) {
-                        sbd.append("<").append(entry.getKey()).append(": ").append(entry.getValue()).append(">");
-                    }
-                    sbd.append(")");
+                sbd.append("header(");
+                for (Map.Entry<String, Collection<String>> entry : headers.entrySet()) {
+                    sbd.append("<").append(entry.getKey()).append(": ").append(entry.getValue()).append(">");
                 }
+                sbd.append(")");
             }
         };
     }
