@@ -26,7 +26,7 @@ public final class AsyncUti {
             return runnable;
         }
 
-        // 把主线程运行时的请求和日志上下文放到异步任务的请求和日志上下文去
+        // 把主线程运行时的请求和日志上下文放到子线程的请求和日志上下文去
         return () -> {
             try {
                 MDC.setContextMap(mdcMap);
@@ -58,7 +58,7 @@ public final class AsyncUti {
             return callable;
         }
 
-        // 把主线程运行时的请求和日志上下文放到异步任务的请求和日志上下文去
+        // 把主线程运行时的请求和日志上下文放到子线程的请求和日志上下文去
         return () -> {
             try {
                 MDC.setContextMap(mdcMap);
