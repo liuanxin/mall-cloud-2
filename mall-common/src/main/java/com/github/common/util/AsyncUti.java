@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
+@SuppressWarnings("DuplicatedCode")
 public final class AsyncUti {
 
     public static Runnable wrapRun(Runnable runnable) {
