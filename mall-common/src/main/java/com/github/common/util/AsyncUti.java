@@ -13,22 +13,26 @@ import java.util.concurrent.Callable;
 public final class AsyncUti {
 
     public static Runnable wrapRun(Runnable runnable) {
-        if (runnable == null) {
+        if (U.isNull(runnable)) {
             return null;
         }
 
         RequestAttributes attributes = RequestContextHolder.getRequestAttributes();
         boolean hasWeb = (attributes instanceof ServletRequestAttributes);
         Map<String, String> contextMap = MDC.getCopyOfContextMap();
+        Map<String, String> mdcMap = A.isEmpty(contextMap) ? Collections.emptyMap() : contextMap;
+        if (!hasWeb && A.isEmpty(mdcMap)) {
+            return runnable;
+        }
 
         // 把主线程运行时的请求和日志上下文放到异步任务的请求和日志上下文去
         return () -> {
             try {
+                MDC.setContextMap(mdcMap);
                 if (hasWeb) {
                     LocaleContextHolder.setLocale(((ServletRequestAttributes) attributes).getRequest().getLocale());
                     RequestContextHolder.setRequestAttributes(attributes);
                 }
-                MDC.setContextMap(A.isEmpty(contextMap) ? Collections.emptyMap() : contextMap);
                 runnable.run();
             } finally {
                 if (hasWeb) {
@@ -41,22 +45,26 @@ public final class AsyncUti {
     }
 
     public static <T> Callable<T> wrapCall(Callable<T> callable) {
-        if (callable == null) {
+        if (U.isNull(callable)) {
             return null;
         }
 
         RequestAttributes attributes = RequestContextHolder.getRequestAttributes();
         boolean hasWeb = (attributes instanceof ServletRequestAttributes);
         Map<String, String> contextMap = MDC.getCopyOfContextMap();
+        Map<String, String> mdcMap = A.isEmpty(contextMap) ? Collections.emptyMap() : contextMap;
+        if (!hasWeb && A.isEmpty(mdcMap)) {
+            return callable;
+        }
 
         // 把主线程运行时的请求和日志上下文放到异步任务的请求和日志上下文去
         return () -> {
             try {
+                MDC.setContextMap(mdcMap);
                 if (hasWeb) {
                     LocaleContextHolder.setLocale(((ServletRequestAttributes) attributes).getRequest().getLocale());
                     RequestContextHolder.setRequestAttributes(attributes);
                 }
-                MDC.setContextMap(A.isEmpty(contextMap) ? Collections.emptyMap() : contextMap);
                 return callable.call();
             } finally {
                 if (hasWeb) {
