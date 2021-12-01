@@ -2,6 +2,7 @@ package com.github.global.config;
 
 import com.github.common.Const;
 import com.github.common.util.A;
+import com.github.common.util.AsyncUti;
 import com.github.common.util.LogUtil;
 import com.github.common.util.U;
 import com.google.common.collect.Sets;
@@ -20,12 +21,10 @@ import com.netflix.hystrix.strategy.properties.HystrixPropertiesStrategy;
 import com.netflix.hystrix.strategy.properties.HystrixProperty;
 import feign.*;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.MDC;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -224,27 +223,7 @@ public class FeignConfig {
 
         @Override
         public <T> Callable<T> wrapCallable(Callable<T> callable) {
-            RequestAttributes attributes = RequestContextHolder.getRequestAttributes();
-            boolean hasRequest = (attributes instanceof ServletRequestAttributes);
-            Map<String, String> contextMap = MDC.getCopyOfContextMap();
-
-            // 把主线程运行时的请求和日志上下文放到 feign 的请求和日志上下文去
-            return () -> {
-                try {
-                    if (hasRequest) {
-                        LocaleContextHolder.setLocale(((ServletRequestAttributes) attributes).getRequest().getLocale());
-                        RequestContextHolder.setRequestAttributes(attributes);
-                    }
-                    MDC.setContextMap(A.isEmpty(contextMap) ? Collections.emptyMap() : contextMap);
-                    return callable.call();
-                } finally {
-                    if (hasRequest) {
-                        LocaleContextHolder.resetLocaleContext();
-                        RequestContextHolder.resetRequestAttributes();
-                    }
-                    MDC.clear();
-                }
-            };
+            return AsyncUti.wrapCall(callable);
         }
 
 
