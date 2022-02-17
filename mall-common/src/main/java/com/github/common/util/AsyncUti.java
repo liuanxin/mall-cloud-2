@@ -6,7 +6,6 @@ import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
@@ -20,15 +19,17 @@ public final class AsyncUti {
 
         RequestAttributes attributes = RequestContextHolder.getRequestAttributes();
         boolean hasWeb = (attributes instanceof ServletRequestAttributes);
-        Map<String, String> contextMap = MDC.getCopyOfContextMap();
-        Map<String, String> mdcMap = A.isEmpty(contextMap) ? Collections.emptyMap() : contextMap;
 
-        boolean needWrap = hasWeb || A.isEmpty(mdcMap);
-        if (needWrap) {
+        Map<String, String> contextMap = MDC.getCopyOfContextMap();
+        boolean hasLogContext = A.isNotEmpty(contextMap);
+
+        if (hasWeb || hasLogContext) {
             // 把主线程运行时的请求和日志上下文放到子线程的请求和日志上下文去
             return () -> {
                 try {
-                    MDC.setContextMap(mdcMap);
+                    if (hasLogContext) {
+                        MDC.setContextMap(contextMap);
+                    }
                     if (hasWeb) {
                         LocaleContextHolder.setLocale(((ServletRequestAttributes) attributes).getRequest().getLocale());
                         RequestContextHolder.setRequestAttributes(attributes);
@@ -39,7 +40,9 @@ public final class AsyncUti {
                         LocaleContextHolder.resetLocaleContext();
                         RequestContextHolder.resetRequestAttributes();
                     }
-                    MDC.clear();
+                    if (hasLogContext) {
+                        MDC.clear();
+                    }
                 }
             };
         } else {
@@ -54,15 +57,17 @@ public final class AsyncUti {
 
         RequestAttributes attributes = RequestContextHolder.getRequestAttributes();
         boolean hasWeb = (attributes instanceof ServletRequestAttributes);
-        Map<String, String> contextMap = MDC.getCopyOfContextMap();
-        Map<String, String> mdcMap = A.isEmpty(contextMap) ? Collections.emptyMap() : contextMap;
 
-        boolean needWrap = hasWeb || A.isEmpty(mdcMap);
-        if (needWrap) {
+        Map<String, String> contextMap = MDC.getCopyOfContextMap();
+        boolean hasLogContext = A.isNotEmpty(contextMap);
+
+        if (hasWeb || hasLogContext) {
             return () -> {
                 // 把主线程运行时的请求和日志上下文放到子线程的请求和日志上下文去
                 try {
-                    MDC.setContextMap(mdcMap);
+                    if (hasLogContext) {
+                        MDC.setContextMap(contextMap);
+                    }
                     if (hasWeb) {
                         LocaleContextHolder.setLocale(((ServletRequestAttributes) attributes).getRequest().getLocale());
                         RequestContextHolder.setRequestAttributes(attributes);
@@ -73,7 +78,9 @@ public final class AsyncUti {
                         LocaleContextHolder.resetLocaleContext();
                         RequestContextHolder.resetRequestAttributes();
                     }
-                    MDC.clear();
+                    if (hasLogContext) {
+                        MDC.clear();
+                    }
                 }
             };
         } else {
