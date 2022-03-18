@@ -137,26 +137,24 @@ public class FeignConfig {
             protected Response logAndRebufferResponse(String configKey, Level level, Response response, long useTime) {
                 if (LogUtil.ROOT_LOG.isInfoEnabled()) {
                     StringBuilder sbd = new StringBuilder("response:[");
-                    sbd.append("time(").append(useTime).append(" ms) ").append(response.status());
+                    sbd.append("time(").append(useTime).append(" ms), status(").append(response.status()).append(")");
                     if (U.isNotBlank(response.reason())) {
-                        sbd.append(' ').append(response.reason());
+                        sbd.append(", reason(").append(response.reason()).append(")");
                     }
                     collectHeader(sbd, response.headers());
                     if (response.body() != null) {
                         if (response.body().isRepeatable()) {
-                            sbd.append(" return(");
                             try (Reader reader = response.body().asReader(StandardCharsets.UTF_8)) {
-                                sbd.append(jsonDesensitization.toJson(CharStreams.toString(reader)));
+                                sbd.append(", return(").append(jsonDesensitization.toJson(CharStreams.toString(reader))).append(")");
                             } catch (Exception e) {
                                 if (LogUtil.ROOT_LOG.isErrorEnabled()) {
-                                    LogUtil.ROOT_LOG.error(String.format("feignClient <--> %s <-> read data exception", methodTag(configKey)), e);
+                                    LogUtil.ROOT_LOG.error(String.format("feignClient <--> %s <-> read body exception", methodTag(configKey)), e);
                                 }
                             }
-                            sbd.append(")");
                         } else {
                             try (InputStream inputStream = response.body().asInputStream()) {
                                 byte[] bytes = ByteStreams.toByteArray(inputStream);
-                                sbd.append(" return(").append(jsonDesensitization.toJson(new String(bytes))).append(")");
+                                sbd.append(", return(").append(jsonDesensitization.toJson(new String(bytes))).append(")");
                                 response = Response.builder().status(response.status()).reason(response.reason())
                                         .headers(response.headers()).request(response.request()).body(bytes).build();
                             } catch (Exception e) {
@@ -185,7 +183,7 @@ public class FeignConfig {
             private void collectHeader(StringBuilder sbd, Map<String, Collection<String>> headers) {
                 sbd.append("header(");
                 for (Map.Entry<String, Collection<String>> entry : headers.entrySet()) {
-                    sbd.append("<").append(entry.getKey()).append(": ").append(entry.getValue()).append(">");
+                    sbd.append("<").append(entry.getKey()).append(" : ").append(entry.getValue()).append(">");
                 }
                 sbd.append(")");
             }
