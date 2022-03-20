@@ -5,18 +5,18 @@ public enum AppVersion {
 
     // !!! 请保证大版本的 code 比小版本的 code 大 !!!
 
-    V100(100, "1.0.0"),
+    V100(100000, "1.0.0"),
 
-    V101(101, "1.0.1"),
+    V101(100100, "1.0.1"),
 
-    V102(102, "1.0.2"),
+    V102(100200, "1.0.2"),
 
-    V103(103, "1.0.3"),
+    V103(100300, "1.0.3"),
 
-    V104(104, "1.0.4");
+    V104(100400, "1.0.4");
 
-    int code;
-    String value;
+    private final int code;
+    private final String value;
     AppVersion(int code, String value) {
         this.code = code;
         this.value = value;

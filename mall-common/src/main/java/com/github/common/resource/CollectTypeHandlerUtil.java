@@ -83,7 +83,7 @@ public final class CollectTypeHandlerUtil {
         return handlerList;
     }
     private static TypeHandler getTypeHandler(String name, String classPackage) {
-        if (U.isNotBlank(name)) {
+        if (U.isNotNull(name)) {
             String className = classPackage + "." + name.replace(".class", "");
             try {
                 Class<?> clazz = Class.forName(className);

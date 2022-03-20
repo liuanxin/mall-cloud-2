@@ -1,5 +1,6 @@
 package com.github.global.config;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.common.json.JsonModule;
 import com.github.common.util.LogUtil;
@@ -15,22 +16,26 @@ import org.springframework.context.annotation.Configuration;
 @AutoConfigureAfter(JacksonAutoConfiguration.class)
 public class JsonDesensitization {
 
-    /** 是否进行脱敏, 默认进行脱敏 */
-    @Value("${json.hasDesensitization:true}")
+    /** 是否进行脱敏 */
+    @Value("${json.hasDesensitization:false}")
     private boolean hasDesensitization;
 
-    /** 是否进行数据压缩, 默认不压缩 */
+    /** 是否进行数据压缩 */
     @Value("${json.hasCompress:false}")
     private boolean hasCompress;
 
 
     private final ObjectMapper objectMapper;
-    private final ObjectMapper desensitizationMapper;
+    private final ObjectMapper desObjectMapper;
 
     public JsonDesensitization(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
-        this.desensitizationMapper = objectMapper.copy();
-        this.desensitizationMapper.registerModule(JsonModule.stringDesensitization());
+
+        this.desObjectMapper = objectMapper.copy();
+        // NON_NULL  : null 值不序列化
+        // NON_EMPTY : null、空字符串、长度为 0 的 list、长度为 0 的 map 都不序列化
+        this.desObjectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+        this.desObjectMapper.registerModule(JsonModule.DES_MODULE);
     }
 
     public String toJson(Object data) {
@@ -39,17 +44,17 @@ public class JsonDesensitization {
         }
 
         String json;
-        try {
-            if (data instanceof String) {
-                json = (String) data;
-            } else {
-                json = (hasDesensitization ? desensitizationMapper : objectMapper).writeValueAsString(data);
+        if (data instanceof String) {
+            json = (String) data;
+        } else {
+            try {
+                json = (hasDesensitization ? desObjectMapper : objectMapper).writeValueAsString(data);
+            } catch (Exception e) {
+                if (LogUtil.ROOT_LOG.isErrorEnabled()) {
+                    LogUtil.ROOT_LOG.error("data desensitization exception", e);
+                }
+                return U.EMPTY;
             }
-        } catch (Exception e) {
-            if (LogUtil.ROOT_LOG.isErrorEnabled()) {
-                LogUtil.ROOT_LOG.error("data desensitization exception", e);
-            }
-            return U.EMPTY;
         }
 
         return (hasCompress && U.isNotBlank(json)) ? U.compress(json) : json;

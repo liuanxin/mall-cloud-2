@@ -48,40 +48,50 @@ public class JsonUtil {
         private static final long serialVersionUID = 0L;
         private RenderObjectMapper() {
             super();
-            // NON_NULL: null 值不序列化, NON_EMPTY: null 空字符串、长度为 0 的 list、map 都不序列化
+            // NON_NULL  : null 值不序列化
+            // NON_EMPTY : null、空字符串、长度为 0 的 list、长度为 0 的 map 都不序列化
             setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
-            // 时间格式. 要想自定义在字段上标 @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8") 即可
-            SimpleDateFormat dateFormat = new SimpleDateFormat(DateFormatType.YYYY_MM_DD_HH_MM_SS.getValue());
-            dateFormat.setTimeZone(TimeZone.getTimeZone("GMT+8"));
-            setDateFormat(dateFormat);
 
-            // 不确定值的枚举返回 null
-            enable(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL);
-            // 允许字符串中包含未加引号的控制字符(值小于 32 的 ASCII 字符, 包括制表符和换行字符)
-            // json 标准要求所有控制符必须使用引号, 因此默认是 false, 遇到此类字符时会抛出异常
-            // enable(JsonParser.Feature.ALLOW_UNQUOTED_CONTROL_CHARS);
-
-            // 日期不用 utc 方式显示(utc 是一个整数值)
-            disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-            // 不确定的属性项上不要失败
-            disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-
-            registerModule(JsonModule.dateDeserializer());
-            registerModule(JsonModule.bigDecimalSerializer());
+            globalConfig(this);
         }
     }
 
+    public static void globalConfig(ObjectMapper objectMapper) {
+        // 时间格式. 要想自定义在字段上标 @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8") 即可
+        SimpleDateFormat dateFormat = new SimpleDateFormat(DateFormatType.YYYY_MM_DD_HH_MM_SS.getValue());
+        dateFormat.setTimeZone(TimeZone.getTimeZone("GMT+8"));
+        objectMapper.setDateFormat(dateFormat);
+
+        // 不确定值的枚举返回 null
+        objectMapper.enable(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL);
+        // 用 BigDecimal 来反序列化浮点数
+        objectMapper.enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS);
+        // 用 BigInteger 来反序列化整数
+        objectMapper.enable(DeserializationFeature.USE_BIG_INTEGER_FOR_INTS);
+        // 允许字符串中包含未加引号的控制字符(值小于 32 的 ASCII 字符, 包括制表符和换行字符)
+        // json 标准要求所有控制符必须使用引号, 因此默认是 false, 遇到此类字符时会抛出异常
+        // objectMapper.enable(JsonReadFeature.ALLOW_UNESCAPED_CONTROL_CHARS.mappedFeature());
+
+        // 日期不用 utc 方式显示(utc 是一个整数值)
+        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        objectMapper.disable(SerializationFeature.WRITE_DURATIONS_AS_TIMESTAMPS);
+        // 不确定的属性项上不要失败
+        objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+
+        objectMapper.registerModule(JsonModule.GLOBAL_MODULE);
+    }
+
     /** 对象转换, 失败将会返回 null */
-    public static <S,T> T convertBasic(S source, Class<T> clazz) {
+    public static <S,T> T convert(S source, Class<T> clazz) {
         return U.isNull(source) ? null : toObjectNil(toJsonNil(source), clazz);
     }
     /** 集合转换, 失败将会返回 null */
-    public static <S,T> List<T> convertListBasic(Collection<S> sourceList, Class<T> clazz) {
+    public static <S,T> List<T> convertList(Collection<S> sourceList, Class<T> clazz) {
         return A.isEmpty(sourceList) ? Collections.emptyList() : toListNil(toJsonNil(sourceList), clazz);
     }
 
     /** 对象转换(忽略 class 类属性上的 @Json... 注解), 失败将会返回 null */
-    public static <S,T> T convert(S source, Class<T> clazz) {
+    public static <S,T> T convertIgnoreAnnotation(S source, Class<T> clazz) {
         if (U.isNull(source)) {
             return null;
         }
@@ -94,26 +104,26 @@ public class JsonUtil {
                 json = IGNORE_PROPERTY_RENDER.writeValueAsString(source);
             } catch (Exception e) {
                 if (LogUtil.ROOT_LOG.isErrorEnabled()) {
-                    LogUtil.ROOT_LOG.error(String.format("Object(%s) to json exception", U.compress(source.toString())), e);
+                    LogUtil.ROOT_LOG.error("obj({}) to json exception", U.compress(source.toString()), e);
                 }
                 return null;
             }
         }
 
-        if (U.isBlank(json)) {
+        if (U.isNull(json)) {
             return null;
         }
         try {
             return IGNORE_PROPERTY_RENDER.readValue(json, clazz);
         } catch (Exception e) {
             if (LogUtil.ROOT_LOG.isErrorEnabled()) {
-                LogUtil.ROOT_LOG.error(String.format("json(%s) to Object(%s) exception", U.compress(json), clazz.getName()), e);
+                LogUtil.ROOT_LOG.error("json({}) to obj({}) exception", U.compress(json), clazz.getName(), e);
             }
             return null;
         }
     }
     /** 集合转换(忽略 class 类属性上的 @Json... 注解), 失败将会返回 null */
-    public static <S,T> List<T> convertList(Collection<S> sourceList, Class<T> clazz) {
+    public static <S,T> List<T> convertListIgnoreAnnotation(Collection<S> sourceList, Class<T> clazz) {
         if (A.isEmpty(sourceList)) {
             return Collections.emptyList();
         }
@@ -123,19 +133,19 @@ public class JsonUtil {
             json = IGNORE_PROPERTY_RENDER.writeValueAsString(sourceList);
         } catch (Exception e) {
             if (LogUtil.ROOT_LOG.isErrorEnabled()) {
-                LogUtil.ROOT_LOG.error(String.format("List(%s) to json exception", U.compress(sourceList.toString())), e);
+                LogUtil.ROOT_LOG.error("List({}) to json exception", U.compress(sourceList.toString()), e);
             }
             return Collections.emptyList();
         }
 
-        if (U.isBlank(json)) {
+        if (U.isNull(json)) {
             return Collections.emptyList();
         }
         try {
             return IGNORE_PROPERTY_RENDER.readValue(json, IGNORE_PROPERTY_RENDER.getTypeFactory().constructCollectionType(List.class, clazz));
         } catch (Exception e) {
             if (LogUtil.ROOT_LOG.isErrorEnabled()) {
-                LogUtil.ROOT_LOG.error(String.format("List(%s) to List<%s> exception", U.compress(json), clazz.getName()), e);
+                LogUtil.ROOT_LOG.error("List({}) to List<{}> exception", U.compress(json), clazz.getName(), e);
             }
             return Collections.emptyList();
         }
@@ -145,7 +155,7 @@ public class JsonUtil {
         if (U.isNull(source)) {
             return null;
         }
-        return toObjectNil((source instanceof String) ? ((String) source) : toJsonNil(source), type);
+        return toObjectType((source instanceof String) ? ((String) source) : toJsonNil(source), type);
     }
 
     /** 对象转换成 json 字符串 */
@@ -179,7 +189,7 @@ public class JsonUtil {
 
     /** 将 json 字符串转换为对象 */
     public static <T> T toObject(String json, Class<T> clazz) {
-        if (U.isBlank(json)) {
+        if (U.isNull(json)) {
             return null;
         }
         try {
@@ -190,28 +200,28 @@ public class JsonUtil {
     }
     /** 将 json 字符串转换为对象, 当转换异常时, 返回 null */
     public static <T> T toObjectNil(String json, Class<T> clazz) {
-        if (U.isBlank(json)) {
+        if (U.isNull(json)) {
             return null;
         }
         try {
             return RENDER.readValue(json, clazz);
         } catch (Exception e) {
             if (LogUtil.ROOT_LOG.isErrorEnabled()) {
-                LogUtil.ROOT_LOG.error(String.format("json(%s) to Object(%s) exception", U.compress(json), clazz.getName()), e);
+                LogUtil.ROOT_LOG.error("json({}) to obj({}) exception", U.compress(json), clazz.getName(), e);
             }
             return null;
         }
     }
     /** 将 json 字符串转换为泛型对象 */
-    public static <T> T toObjectNil(String json, TypeReference<T> type) {
-        if (U.isBlank(json)) {
+    public static <T> T toObjectType(String json, TypeReference<T> type) {
+        if (U.isNull(json)) {
             return null;
         }
         try {
             return RENDER.readValue(json, type);
         } catch (IOException e) {
             if (LogUtil.ROOT_LOG.isErrorEnabled()) {
-                LogUtil.ROOT_LOG.error(String.format("json(%s) to Object(%s) exception", U.compress(json), type.getClass().getName()), e);
+                LogUtil.ROOT_LOG.error("json({}) to obj({}) exception", U.compress(json), type.getClass().getName(), e);
             }
             return null;
         }
@@ -219,7 +229,7 @@ public class JsonUtil {
 
     /** 将 json 字符串转换为指定的数组列表 */
     public static <T> List<T> toList(String json, Class<T> clazz) {
-        if (U.isBlank(json)) {
+        if (U.isNull(json)) {
             return Collections.emptyList();
         }
         try {
@@ -230,14 +240,14 @@ public class JsonUtil {
     }
     /** 将 json 字符串转换为指定的数组列表 */
     public static <T> List<T> toListNil(String json, Class<T> clazz) {
-        if (U.isBlank(json)) {
+        if (U.isNull(json)) {
             return Collections.emptyList();
         }
         try {
             return RENDER.readValue(json, RENDER.getTypeFactory().constructCollectionType(List.class, clazz));
         } catch (Exception e) {
             if (LogUtil.ROOT_LOG.isErrorEnabled()) {
-                LogUtil.ROOT_LOG.error(String.format("json(%s) to List<%s> exception", U.compress(json), clazz.getName()), e);
+                LogUtil.ROOT_LOG.error("json({}) to List<{}> exception", U.compress(json), clazz.getName(), e);
             }
             return Collections.emptyList();
         }

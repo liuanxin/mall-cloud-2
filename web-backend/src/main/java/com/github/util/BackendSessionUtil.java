@@ -3,7 +3,7 @@ package com.github.util;
 import com.github.common.json.JsonUtil;
 import com.github.common.mvc.AppTokenHandler;
 import com.github.common.util.LogUtil;
-import com.github.common.util.RequestUtils;
+import com.github.common.util.RequestUtil;
 import com.github.common.util.U;
 
 /** !!! 操作 session 都基于此, 其他地方不允许操作! 避免 session 被滥用 !!! */
@@ -16,31 +16,31 @@ public class BackendSessionUtil {
 
     /** 将图片验证码的值放入 session */
     public static void putImageCode(String code) {
-        RequestUtils.getSession().setAttribute(CODE, code);
+        RequestUtil.getSession().setAttribute(CODE, code);
         if (LogUtil.ROOT_LOG.isDebugEnabled()) {
-            LogUtil.ROOT_LOG.debug("put image code({}) in session({})", code, RequestUtils.getSession().getId());
+            LogUtil.ROOT_LOG.debug("put image code({}) in session({})", code, RequestUtil.getSession().getId());
         }
     }
     /** 验证图片验证码 */
     public static boolean checkImageCode(String code) {
-        if (U.isBlank(code)) {
+        if (U.isNull(code)) {
             return false;
         }
 
-        Object securityCode = RequestUtils.getSession().getAttribute(CODE);
+        Object securityCode = RequestUtil.getSession().getAttribute(CODE);
         return securityCode != null && code.equalsIgnoreCase(securityCode.toString());
     }
 
     /** 登录之后调用此方法, 将 用户信息 放入 session, app 需要将返回的数据保存到本地 */
     public static <T> String whenLogin(T user) {
-        if (U.isNotBlank(user)) {
+        if (U.isNotNull(user)) {
             BackendSessionModel sessionModel = BackendSessionModel.assemblyData(user);
-            if (U.isNotBlank(sessionModel)) {
+            if (U.isNotNull(sessionModel)) {
                 if (LogUtil.ROOT_LOG.isDebugEnabled()) {
                     LogUtil.ROOT_LOG.debug("put ({}) in session({})",
-                            JsonUtil.toJson(sessionModel), RequestUtils.getSession().getId());
+                            JsonUtil.toJson(sessionModel), RequestUtil.getSession().getId());
                 }
-                RequestUtils.getSession().setAttribute(USER, sessionModel);
+                RequestUtil.getSession().setAttribute(USER, sessionModel);
                 return AppTokenHandler.generateToken(sessionModel);
             }
         }
@@ -52,8 +52,8 @@ public class BackendSessionUtil {
     private static BackendSessionModel getSessionInfo() {
         // 从 token 中读, 为空再从 session 中读
         BackendSessionModel sessionModel = AppTokenHandler.getSessionInfoWithToken(BackendSessionModel.class);
-        if (U.isBlank(sessionModel)) {
-            sessionModel = (BackendSessionModel) RequestUtils.getSession().getAttribute(USER);
+        if (U.isNull(sessionModel)) {
+            sessionModel = (BackendSessionModel) RequestUtil.getSession().getAttribute(USER);
         }
         // 为空则使用默认值
         return sessionModel == null ? BackendSessionModel.defaultUser() : sessionModel;
@@ -82,6 +82,6 @@ public class BackendSessionUtil {
 
     /** 退出登录时调用. 清空 session */
     public static void signOut() {
-        RequestUtils.getSession().invalidate();
+        RequestUtil.getSession().invalidate();
     }
 }

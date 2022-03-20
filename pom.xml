@@ -53,7 +53,7 @@
     </modules>
 
     <properties>
-        <java.version>1.8</java.version>
+        <java.version>11</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
@@ -69,12 +69,13 @@
         <spring-admin.version>2.2.2</spring-admin.version>
 
         <zipkin.version>2.12.9</zipkin.version>
-        <guava.version>30.0-jre</guava.version>
-        <joda.version>2.10.6</joda.version>
+        <guava.version>31.0.1-jre</guava.version>
+        <joda.version>2.10.13</joda.version>
         <okhttp.version>3.14.9</okhttp.version>
         <commons-lang3.version>3.11</commons-lang3.version>
         <commons-fileupload.version>1.4</commons-fileupload.version>
-        <poi-ooxml.version>4.1.2</poi-ooxml.version>
+        <poi-ooxml.version>5.1.0</poi-ooxml.version>
+        <easyexcel.version>3.0.4</easyexcel.version>
 
         <elasticsearch.version>6.3.2</elasticsearch.version>
         <redisson.version>3.15.6</redisson.version>
@@ -312,6 +313,55 @@
                 <groupId>org.apache.poi</groupId>
                 <artifactId>poi-ooxml</artifactId>
                 <version>${poi-ooxml.version}</version>
+                <exclusions>
+                    <exclusion> <!-- 数学曲线 -->
+                        <groupId>com.github.virtuald</groupId>
+                        <artifactId>curvesapi</artifactId>
+                    </exclusion>
+                    <exclusion> <!-- hash 算法, csr 证书 -->
+                        <groupId>org.bouncycastle</groupId>
+                        <artifactId>bcpkix-jdk15on</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.bouncycastle</groupId>
+                        <artifactId>bcprov-jdk15on</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.santuario</groupId>
+                        <artifactId>xmlsec</artifactId>
+                    </exclusion>
+                    <exclusion> <!-- svg -->
+                        <groupId>org.apache.xmlgraphics</groupId>
+                        <artifactId>batik-all</artifactId>
+                    </exclusion>
+                    <exclusion> <!-- pdf -->
+                        <groupId>de.rototor.pdfbox</groupId>
+                        <artifactId>graphics2d</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>easyexcel</artifactId>
+                <version>${easyexcel.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.apache.poi</groupId>
+                        <artifactId>poi</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.poi</groupId>
+                        <artifactId>poi-ooxml</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.poi</groupId>
+                        <artifactId>poi-ooxml-schemas</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-api</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
 
             <dependency>

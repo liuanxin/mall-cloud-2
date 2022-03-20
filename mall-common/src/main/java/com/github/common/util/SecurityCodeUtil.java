@@ -88,7 +88,7 @@ public final class SecurityCodeUtil {
         }
 
         int r = -1, g = -1, b = -1;
-        if (U.isNotBlank(grb)) {
+        if (U.isNotNull(grb)) {
             String[] s = grb.split(",");
             if (s.length == 3) {
                 r = U.toInt(s[0]);

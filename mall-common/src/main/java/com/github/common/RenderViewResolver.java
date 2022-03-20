@@ -24,7 +24,7 @@ public class RenderViewResolver extends FreeMarkerViewResolver {
 
     /** 一些全局的工具类 */
     private static final Class[] CLASSES = new Class[] {
-            A.class, U.class, DateUtil.class, RequestUtils.class, Render.class
+            A.class, U.class, DateUtil.class, RequestUtil.class, Render.class
     };
 
     /** 构造器只加载一次 */

@@ -59,11 +59,11 @@ public class DateUtil {
 
     /** 格式化日期对象成字符串 */
     public static String format(Date date, DateFormatType type) {
-        return (U.isBlank(date) || U.isBlank(type)) ? U.EMPTY : format(date, type.getValue());
+        return (U.isNull(date) || U.isNull(type)) ? U.EMPTY : format(date, type.getValue());
     }
 
     public static String format(Date date, String type) {
-        return (U.isBlank(date) || U.isBlank(type)) ? U.EMPTY : DateTimeFormat.forPattern(type).print(date.getTime());
+        return (U.isNull(date) || U.isNull(type)) ? U.EMPTY : DateTimeFormat.forPattern(type).print(date.getTime());
     }
 
     /**
@@ -72,10 +72,10 @@ public class DateUtil {
      * @see DateFormatType
      */
     public static Date parse(String source) {
-        if (U.isNotBlank(source)) {
+        if (U.isNotNull(source)) {
             for (DateFormatType type : DateFormatType.values()) {
                 Date date = parse(source, type);
-                if (U.isNotBlank(date)) {
+                if (U.isNotNull(date)) {
                     return date;
                 }
             }
@@ -83,7 +83,7 @@ public class DateUtil {
         return null;
     }
     public static Date parse(String source, DateFormatType type) {
-        if (U.isNotBlank(source)) {
+        if (U.isNotNull(source)) {
             source = source.trim();
             try {
                 Date date;
@@ -102,7 +102,7 @@ public class DateUtil {
         return null;
     }
     public static Date parse(String source, String type) {
-        if (U.isNotBlank(source)) {
+        if (U.isNotNull(source)) {
             source = source.trim();
             try {
                 Date date = DateTimeFormat.forPattern(type).parseDateTime(source).toDate();
@@ -211,7 +211,7 @@ public class DateUtil {
 
     /** 获取一个日期所在天的最开始的时间(00:00:00 000), 对日期查询尤其有用 */
     public static Date getDayStart(Date date) {
-        return U.isBlank(date) ? null : getDateTimeStart(date).toDate();
+        return U.isNull(date) ? null : getDateTimeStart(date).toDate();
     }
     private static DateTime getDateTimeStart(Date date) {
         return new DateTime(date)
@@ -222,7 +222,7 @@ public class DateUtil {
     }
     /** 获取一个日期所在天的最晚的时间(23:59:59 999), 对日期查询尤其有用 */
     public static Date getDayEnd(Date date) {
-        return U.isBlank(date) ? null : getDateTimeEnd(date).toDate();
+        return U.isNull(date) ? null : getDateTimeEnd(date).toDate();
     }
     private static DateTime getDateTimeEnd(Date date) {
         return new DateTime(date)
@@ -234,7 +234,7 @@ public class DateUtil {
 
     /** 获取一个日期所在星期天(星期一是第一天)的第一毫秒(00:00:00 000) */
     public static Date getSundayStart(Date date) {
-        return U.isBlank(date) ? null :
+        return U.isNull(date) ? null :
                 new DateTime(date)
                         .plusWeeks(-1)
                         .dayOfWeek().withMaximumValue()
@@ -245,7 +245,7 @@ public class DateUtil {
     }
     /** 获取一个日期所在星期六(星期六是最后一天)的最后一毫秒(23:59:59 999) */
     public static Date getSaturdayEnd(Date date) {
-        return U.isBlank(date) ? null :
+        return U.isNull(date) ? null :
                 new DateTime(date)
                         .withDayOfWeek(6)
                         .hourOfDay().withMaximumValue()
@@ -256,7 +256,7 @@ public class DateUtil {
 
     /** 获取一个日期所在星期一(星期一是第一天)的第一毫秒(00:00:00 000) */
     public static Date getMondayStart(Date date) {
-        return U.isBlank(date) ? null :
+        return U.isNull(date) ? null :
                 new DateTime(date)
                         .withDayOfWeek(1)
                         .hourOfDay().withMinimumValue()
@@ -266,7 +266,7 @@ public class DateUtil {
     }
     /** 获取一个日期所在星期天(星期天是最后一天)的最后一毫秒(23:59:59 999) */
     public static Date getSundayEnd(Date date) {
-        return U.isBlank(date) ? null :
+        return U.isNull(date) ? null :
                 new DateTime(date)
                         .withDayOfWeek(7)
                         .hourOfDay().withMaximumValue()
@@ -277,7 +277,7 @@ public class DateUtil {
 
     /** 获取一个日期所在月的第一毫秒(00:00:00 000) */
     public static Date getMonthStart(Date date) {
-        return U.isBlank(date) ? null :
+        return U.isNull(date) ? null :
                 new DateTime(date)
                         .dayOfMonth().withMinimumValue()
                         .hourOfDay().withMinimumValue()
@@ -287,7 +287,7 @@ public class DateUtil {
     }
     /** 获取一个日期所在月的最后一毫秒(23:59:59 999) */
     public static Date getMonthEnd(Date date) {
-        return U.isBlank(date) ? null :
+        return U.isNull(date) ? null :
                 new DateTime(date)
                         .dayOfMonth().withMaximumValue()
                         .hourOfDay().withMaximumValue()
@@ -298,7 +298,7 @@ public class DateUtil {
 
     /** 获取一个日期所在季度的第一毫秒(00:00:00 000) */
     public static Date getQuarterStart(Date date) {
-        if (U.isBlank(date)) {
+        if (U.isNull(date)) {
             return null;
         }
 
@@ -316,7 +316,7 @@ public class DateUtil {
     }
     /** 获取一个日期所在季度的最后一毫秒(23:59:59 999) */
     public static Date getQuarterEnd(Date date) {
-        if (U.isBlank(date)) {
+        if (U.isNull(date)) {
             return null;
         }
         DateTime dateTime = new DateTime(date);
@@ -334,7 +334,7 @@ public class DateUtil {
 
     /** 获取一个日期所在年的第一毫秒(23:59:59 999) */
     public static Date getYearStart(Date date) {
-        return U.isBlank(date) ? null :
+        return U.isNull(date) ? null :
                 new DateTime(date)
                         .monthOfYear().withMinimumValue()
                         .dayOfMonth().withMinimumValue()
@@ -345,7 +345,7 @@ public class DateUtil {
     }
     /** 获取一个日期所在年的最后一毫秒(23:59:59 999) */
     public static Date getYearEnd(Date date) {
-        return U.isBlank(date) ? null :
+        return U.isNull(date) ? null :
                 new DateTime(date)
                         .monthOfYear().withMaximumValue()
                         .dayOfMonth().withMaximumValue()
@@ -421,7 +421,7 @@ public class DateUtil {
 
     /** 计算两个日期之间相差的天数. 如果 start 比 end 大将会返回负数 */
     public static int betweenDay(Date start, Date end) {
-        if (U.isBlank(start) || U.isBlank(end)) {
+        if (U.isNull(start) || U.isNull(end)) {
             return 0;
         }
         return Days.daysBetween(getDateTimeStart(start), getDateTimeStart(end)).getDays();
@@ -429,7 +429,7 @@ public class DateUtil {
 
     /** 计算两个日期之间相差的秒数. 如果 start 比 end 大将会返回负数 */
     public static int betweenSecond(Date start, Date end) {
-        if (U.isBlank(start) || U.isBlank(end)) {
+        if (U.isNull(start) || U.isNull(end)) {
             return 0;
         }
         return Seconds.secondsBetween(new DateTime(start), new DateTime(end)).getSeconds();

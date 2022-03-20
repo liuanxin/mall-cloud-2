@@ -81,7 +81,7 @@ public final class LoaderClass {
         return classList;
     }
     private static Class<?> getEnum(String name, String classPackage) {
-        if (U.isNotBlank(name)) {
+        if (U.isNotNull(name)) {
             String className = classPackage + "." + name.replace(".class", "");
             try {
                 Class<?> clazz = Class.forName(className);
@@ -97,7 +97,7 @@ public final class LoaderClass {
         return null;
     }
     private static Class<?> getSerializableClass(String name, String classPackage) {
-        if (U.isNotBlank(name)) {
+        if (U.isNotNull(name)) {
             String className = classPackage + "." + name.replace(".class", "");
             try {
                 Class<?> clazz = Class.forName(className);

@@ -26,7 +26,7 @@ public final class Render {
     public static String url(String url) {
         // 前缀改成 // 开头(去掉 http 或 https)
         // domain = domain.replaceFirst("(?i)^http(s?):", "");
-        return U.isBlank(url) ? U.EMPTY : HTTP_PATTERN.matcher(url).replaceFirst("");
+        return U.isNull(url) ? U.EMPTY : HTTP_PATTERN.matcher(url).replaceFirst("");
     }
 
     /**
@@ -49,7 +49,7 @@ public final class Render {
                 }
             }
         }
-        if (U.isNotBlank(path)) {
+        if (U.isNotNull(path)) {
             path = path.startsWith("/") ? path.substring(1) : path;
 
             // 版本只在资源文件中添加
@@ -64,6 +64,6 @@ public final class Render {
     /** 给 url 加上版本 */
     public static String version(String path) {
         String split = path.contains("?") ? "&" : "?";
-        return U.isBlank(path) ? U.EMPTY : (path + split + RenderViewResolver.getVersion());
+        return U.isNull(path) ? U.EMPTY : (path + split + RenderViewResolver.getVersion());
     }
 }

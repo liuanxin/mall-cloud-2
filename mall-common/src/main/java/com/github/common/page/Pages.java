@@ -4,32 +4,31 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.github.common.util.A;
 import com.github.common.util.U;
 
+import java.util.Collections;
 import java.util.List;
 
-/**
- * <pre>
- * 此实体类在 Controller 和 Service 中用到分页时使用.
- *
- * &#064;Controller --> request 请求中带过来的参数使用 Page 进行接收(如果前端不传, 此处接收则程序会使用默认值)
- * public JsonResult xx(xxx, PageParam page) {
- *     PageReturn PageReturn = xxxService.page(xxx, page);
- *     return success("xxx", (page.isWasMobile() ? PageReturn.getList() : PageReturn));
- * }
- *
- * &#064;Service --> 调用方法使用 Page 进行传递, 返回 PageReturn
- * public PageReturn page(xxx, PageParam page) {
- *     List&lt;XXX> xxxList = xxxMapper.selectPage(Pages.param(page), xxxxx);
- *     return Pages.returnPage(xxxList);
- * }
- *
- * 这么做的目的是分页包只需要在服务端引入即可
- * </pre>
- */
+/** 当 controller 层无需引用 mbp 包时只需要在 service 层调用当前工具类 */
 public final class Pages {
 
     /** 在 service 的实现类中调用 --> 当不想查 select count(*) 时用这个 */
     public static <T> Page<T> paramOnlyLimit(long limit) {
         return new Page<>(1, limit, false);
+    }
+
+    public static <T> List<T> returnList(Page<T> pageInfo) {
+        return U.isNull(pageInfo) ? Collections.emptyList() : pageInfo.getRecords();
+    }
+
+    public static <T> T returnOne(Page<T> pageInfo) {
+        return U.isNull(pageInfo) ? null : A.first(pageInfo.getRecords());
+    }
+
+    public static <T> boolean hasExists(Page<T> pageInfo) {
+        return U.isNotNull(pageInfo) && U.isNotNull(A.first(pageInfo.getRecords()));
+    }
+
+    public static <T> boolean notExists(Page<T> pageInfo) {
+        return U.isNull(pageInfo) || U.isNull(A.first(pageInfo.getRecords()));
     }
 
     /** 在 service 的实现类中调用 --> 在 repository 方法上的参数是 mbp 的 Page 对象, service 上的参数是 PageParam, 使用此方法进行转换 */
@@ -42,12 +41,11 @@ public final class Pages {
     }
 
     /** 在 service 的实现类中调用 --> 在 repository 方法上的返回类型是 mbp 的 Page 对象, service 上的返回类型是 PageReturn, 使用此方法进行转换 */
-    public static <T> PageReturn<T> returnPage(Page<T> pageObj) {
-        if (U.isBlank(pageObj)) {
+    public static <T> PageReturn<T> returnPage(Page<T> pageInfo) {
+        if (U.isNull(pageInfo)) {
             return PageReturn.emptyReturn();
         } else {
-            List<T> objList = pageObj.getRecords();
-            return A.isEmpty(objList) ? PageReturn.emptyReturn() : PageReturn.returnPage(pageObj.getTotal(), objList);
+            return PageReturn.returnPage(pageInfo.getTotal(), pageInfo.getRecords());
         }
     }
 }

@@ -5,13 +5,11 @@ import com.github.common.page.PageParam;
 import org.springframework.core.MethodParameter;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
@@ -26,12 +24,9 @@ public final class SpringMvc {
         registry.addConverter(new StringToMoneyConverter());
     }
 
-    public static void handlerConvert(List<HttpMessageConverter<?>> converters) {
-        handlerStringConvert(converters, StringHttpMessageConverter.class, new StringHttpMessageConverter(StandardCharsets.UTF_8));
-    }
-    private static void handlerStringConvert(List<HttpMessageConverter<?>> converters,
-                                             Class<? extends HttpMessageConverter> clazz,
-                                             HttpMessageConverter<?> httpMessageConverter) {
+    public static void handlerConvert(List<HttpMessageConverter<?>> converters,
+                                      Class<? extends HttpMessageConverter<?>> clazz,
+                                      HttpMessageConverter<?> httpMessageConverter) {
         Iterator<HttpMessageConverter<?>> iterator = converters.iterator();
         int i = 0;
         for (; iterator.hasNext(); i++) {
@@ -108,7 +103,7 @@ public final class SpringMvc {
                                           ModelAndViewContainer container, NativeWebRequest request) throws Exception {
                 container.setRequestHandled(true);
                 String token = AppTokenHandler.resetTokenExpireTime();
-                if (U.isNotBlank(token)) {
+                if (U.isNotNull(token)) {
                     ((JsonResult) returnValue).setToken(token);
                 }
             }

@@ -1,13 +1,13 @@
 package com.github.common.util;
 
-import com.github.common.Money;
 import com.github.common.date.DateUtil;
+import com.github.common.encrypt.Encrypt;
 import com.github.common.exception.*;
 import com.github.common.json.JsonUtil;
-import com.google.common.collect.Maps;
 
 import java.beans.PropertyDescriptor;
 import java.io.*;
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -21,6 +21,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.CodeSource;
 import java.security.ProtectionDomain;
 import java.util.*;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
@@ -33,19 +34,12 @@ public final class U {
     /** 本机的 cpu 核心数 */
     public static final int PROCESSORS = Runtime.getRuntime().availableProcessors();
 
-    /**
-     * 大于这个值, 才进行字符串压缩.
-     *
-     * 字符串压缩时, 将字符串的 byte[] 基于 gzip 进行压缩, 将压缩后的 byte[] 编码成 base64 字符串
-     * 解压字符串时, 将字符串解码 base64 成 byte[], 再基于 gzip 解压, 将解压后的 byte[] 返回
-     */
-    private static final int COMPRESS_MIN_LEN = 1000;
-
     public static final String EMPTY = "";
     public static final String BLANK = " ";
-    private static final Pattern MULTI_SPACE_REGEX = Pattern.compile("\\s{2,}");
-
     private static final String LIKE = "%";
+
+    /** 递归时的最大深度, 如果数据本身有自己引用自己, 加一个深度避免无限递归 */
+    public static final int MAX_DEPTH = 10;
 
     /** 手机号. 见: https://zh.wikipedia.org/wiki/%E4%B8%AD%E5%9B%BD%E5%86%85%E5%9C%B0%E7%A7%BB%E5%8A%A8%E7%BB%88%E7%AB%AF%E9%80%9A%E8%AE%AF%E5%8F%B7%E6%AE%B5 */
     private static final String PHONE = "^1[3-9]\\d{9}$";
@@ -58,20 +52,24 @@ public final class U {
     /** 身份证号码 */
     private static final String ID_CARD = "(^[1-9]\\d{5}(18|19|([23]\\d))\\d{2}((0[1-9])|(10|11|12))(([0-2][1-9])|10|20|30|31)\\d{3}[0-9Xx]$)|(^[1-9]\\d{5}\\d{2}((0[1-9])|(10|11|12))(([0-2][1-9])|10|20|30|31)\\d{3}$)";
 
-    /** 字母 */
-    private static final String LETTER = "(?i)[a-z]";
     /** 中文 */
     private static final String CHINESE = "[\\u4e00-\\u9fa5]";
     /** 是否是移动端: https://gist.github.com/dalethedeveloper/1503252 */
     private static final String MOBILE = "(?i)Mobile|iP(hone|od|ad)|Android|BlackBerry|Blazer|PSP|UCWEB|IEMobile|Kindle|NetFront|Silk-Accelerated|(hpw|web)OS|Fennec|Minimo|Opera M(obi|ini)|Dol(f|ph)in|Skyfire|Zune";
-    /** 是否是 iOS 端 */
-    private static final String IOS = "(?i)iP(hone|od|ad)";
-    /** 是否是 android 端 */
-    private static final String ANDROID = "(?i)Mobile|Android";
     /** 是否是 pc 端 */
     private static final String PC = "(?i)AppleWebKit|Mozilla|Chrome|Safari|MSIE|Windows NT";
     /** 是否是本地 ip */
     private static final String LOCAL = "(?i)127.0.0.1|localhost|::1|0:0:0:0:0:0:0:1";
+
+    /**
+     * 字符串长度 >= 这个值, 才进行压缩
+     *
+     * 字符串压缩时, 将字符串先操作 gzip 再编码成 base64 字符串
+     * 解压字符串时, 将字符串先解码 base64 再操作 gzip 解压
+     */
+    private static final int COMPRESS_MIN_LEN = 1000;
+
+    private static final String TMP = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
     /** 生成指定位数的随机数: 纯数字 */
     public static String random(int length) {
@@ -85,8 +83,6 @@ public final class U {
         }
         return sbd.toString();
     }
-
-    private static final String TMP = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
     /** 生成指定位数的随机数: 数字和字母 */
     public static String randomLetterAndNumber(int length) {
         if (length <= 0) {
@@ -109,7 +105,7 @@ public final class U {
      */
     @SuppressWarnings("rawtypes")
     public static <E extends Enum> E toEnum(Class<E> clazz, Object obj) {
-        if (isNotBlank(obj)) {
+        if (isNotNull(obj)) {
             E[] constants = clazz.getEnumConstants();
             if (constants != null && constants.length > 0) {
                 String source = obj.toString().trim();
@@ -120,14 +116,14 @@ public final class U {
                     }
 
                     // 如果传递过来的值跟枚举的 getCode(数字) 相同则返回
-                    Object code = getMethod(em, "getCode");
-                    if (isNotBlank(code) && source.equalsIgnoreCase(code.toString().trim())) {
+                    Object code = invokeMethod(em, "getCode");
+                    if (isNotNull(code) && source.equalsIgnoreCase(code.toString().trim())) {
                         return em;
                     }
 
                     // 如果传递过来的值跟枚举的 getValue(中文) 相同则返回
-                    Object value = getMethod(em, "getValue");
-                    if (isNotBlank(value) && source.equalsIgnoreCase(value.toString().trim())) {
+                    Object value = invokeMethod(em, "getValue");
+                    if (isNotNull(value) && source.equalsIgnoreCase(value.toString().trim())) {
                         return em;
                     }
 
@@ -147,17 +143,13 @@ public final class U {
      *
      * public enum Gender {
      *   Male(0, "男"), Female(1, "女");
-     *   int code;
-     *   String value;
      *
-     *   Gender(int code, String value) {
-     *     this.code = code;
-     *     this.value = value;
-     *   }
-     *   // get etc...
+     *   &#064;EnumValue
+     *   private final int code;
+     *   private final String value;
      *
      *   &#064;JsonValue
-     *   public Map<String, String> serializer() {
+     *   public Map<String, Object> serializer() {
      *     return <span style="color:red">serializerEnum(code, value);</span>
      *   }
      *   &#064;JsonCreator
@@ -170,7 +162,7 @@ public final class U {
      * 反序列化时, 0、男、{ "code": 0, "value": "男" } 都可以反序列化成 Gender.Male
      * </pre>
      */
-    public static Map<String, String> serializerEnum(int code, String value) {
+    public static Map<String, Object> serializerEnum(int code, String value) {
         return A.maps(ENUM_CODE, code, ENUM_VALUE, value);
     }
     /**
@@ -179,22 +171,18 @@ public final class U {
      *
      * public enum Gender {
      *   Male(0, "男"), Female(1, "女");
-     *   int code;
-     *   String value;
      *
-     *   Gender(int code, String value) {
-     *     this.code = code;
-     *     this.value = value;
-     *   }
-     *   // get etc...
+     *   &#064;EnumValue
+     *   private final int code;
+     *   private final String value;
      *
      *   &#064;JsonValue
-     *   public Map<String, String> serializer() {
-     *     return serializerEnum(code, value);
+     *   public Map<String, Object> serializer() {
+     *     return <span style="color:red">serializerEnum(code, value);</span>
      *   }
      *   &#064;JsonCreator
      *   public static Gender deserializer(Object obj) {
-     *     return <span style="color:red">enumDeserializer(obj, Gender.class);</span>
+     *     return enumDeserializer(obj, Gender.class);
      *   }
      * }
      *
@@ -204,7 +192,7 @@ public final class U {
      */
     @SuppressWarnings("rawtypes")
     public static <E extends Enum> E enumDeserializer(Object obj, Class<E> enumClass) {
-        if (isBlank(obj)) {
+        if (isNull(obj)) {
             return null;
         }
 
@@ -218,7 +206,7 @@ public final class U {
             }
         }
 
-        if (isBlank(tmp)) {
+        if (isNull(tmp)) {
             tmp = obj;
         }
         return toEnum(enumClass, tmp);
@@ -227,7 +215,7 @@ public final class U {
     private static Object getEnumInMap(Map map) {
         if (A.isNotEmpty(map)) {
             Object tmp = map.get(ENUM_CODE);
-            if (isBlank(tmp)) {
+            if (isNull(tmp)) {
                 tmp = map.get(ENUM_VALUE);
             }
             return tmp;
@@ -257,9 +245,36 @@ public final class U {
         return !greaterAndEquals0(obj);
     }
 
+    /**
+     * 将 int 转换成 26 进制的数(大写)
+     *
+     * A   <--> 1
+     * Z   <--> 26
+     * AA  <--> 27
+     * AZ  <--> 52
+     * ZZ  <--> 702
+     * AAA <--> 703
+     */
+    public static String numTo26Radix(int n) {
+        StringBuilder s = new StringBuilder();
+        while (n > 0) {
+            int m = n % 26;
+            if (m == 0) {
+                m = 26;
+            }
+            s.insert(0, (char) (m + 64));
+            n = (n - m) / 26;
+        }
+        return s.toString();
+    }
+
+    public static int unixTimestamp() {
+        return (int) (System.currentTimeMillis() / 1000);
+    }
+
     /** 转换成 int, 非数字则返回 0 */
     public static int toInt(Object obj) {
-        if (isBlank(obj)) {
+        if (isNull(obj)) {
             return 0;
         }
         if (obj instanceof Number) {
@@ -274,7 +289,7 @@ public final class U {
 
     /** 转换成 long, 非数字则返回 0L */
     public static long toLong(Object obj) {
-        if (isBlank(obj)) {
+        if (isNull(obj)) {
             return 0L;
         }
         if (obj instanceof Number) {
@@ -289,7 +304,7 @@ public final class U {
 
     /** 转换成 float, 非数字则返回 0F */
     public static float toFloat(Object obj) {
-        if (isBlank(obj)) {
+        if (isNull(obj)) {
             return 0F;
         }
         if (obj instanceof Number) {
@@ -304,7 +319,7 @@ public final class U {
 
     /** 转换成 double, 非数字则返回 0D */
     public static double toDouble(Object obj) {
-        if (isBlank(obj)) {
+        if (isNull(obj)) {
             return 0D;
         }
         if (obj instanceof Number) {
@@ -317,9 +332,25 @@ public final class U {
         }
     }
 
+    public static boolean isInt(Object obj) {
+        if (isNull(obj)) {
+            return false;
+        }
+        if (obj instanceof Number) {
+            double num = ((Number) obj).doubleValue();
+            return Math.abs(num - Math.round(num)) < Double.MIN_VALUE;
+        }
+        try {
+            double num = Double.parseDouble(obj.toString().trim());
+            return Math.abs(num - Math.round(num)) < Double.MIN_VALUE;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
     /** 是数字则返回 true */
     public static boolean isNumber(Object obj) {
-        if (isBlank(obj)) {
+        if (isNull(obj)) {
             return false;
         }
         if (obj instanceof Number) {
@@ -383,39 +414,8 @@ public final class U {
         return THOUSANDS_REGEX.matcher(left).replaceAll("$1,") + right;
     }
 
-    public static boolean equals(Object obj1, Object obj2) {
-        if (obj1 == obj2) {
-            return true;
-        } else if (obj1 != null && obj2 != null) {
-            String s1 = obj1.toString();
-            String s2 = obj2.toString();
-            if (s1.length() != s2.length()) {
-                return false;
-            } else {
-                return s1.equals(s2);
-            }
-        } else {
-            return false;
-        }
-    }
-    public static boolean equalsIgnoreCase(Object obj1, Object obj2) {
-        if (obj1 == obj2) {
-            return true;
-        } else if (obj1 != null && obj2 != null) {
-            String s1 = obj1.toString();
-            String s2 = obj2.toString();
-            if (s1.length() != s2.length()) {
-                return false;
-            } else {
-                return s1.equalsIgnoreCase(s2);
-            }
-        } else {
-            return false;
-        }
-    }
-
     public static String toStr(Object obj) {
-        return isBlank(obj) ? EMPTY : obj.toString();
+        return isNull(obj) ? EMPTY : obj.toString();
     }
 
     /** 如果字符长度大于指定长度, 则只输出头尾的固定字符 */
@@ -446,13 +446,7 @@ public final class U {
         if (length >= minLen) {
             return str;
         }
-
-        StringBuilder sbd = new StringBuilder();
-        int loop = minLen - length;
-        for (int i = 0; i < loop; i++) {
-            sbd.append(completion);
-        }
-        return sbd.append(str).toString();
+        return toStr(completion).repeat(minLen - length) + str;
     }
 
     /** 对象长度: 中文字符的长度为 2, 其他字符的长度为 1 */
@@ -469,15 +463,150 @@ public final class U {
         return count;
     }
 
-    /** 去掉所有的制表符 和 换行符 */
-    public static String replaceTabAndWrap(String str) {
-        return isBlank(str) ? EMPTY : str.replace("\t", EMPTY).replace("\n", EMPTY);
+    /** 字符串转 unicode(中文转成 \\u) */
+    public static String encodeUnicode(String str) {
+        if (isBlank(str)) {
+            return str;
+        }
+
+        StringBuilder sbd = new StringBuilder();
+        for (char c : str.toCharArray()) {
+            String hex = Integer.toHexString(c);
+            sbd.append("\\u").append(hex.length() <= 2 ? ("00" + hex) : hex);
+        }
+        return sbd.toString();
     }
-    /** 将字符串中的多个空白符替换成一个 */
-    public static String replaceBlank(String str) {
-        return isBlank(str)
-                ? EMPTY
-                : MULTI_SPACE_REGEX.matcher(str.replace("\r", EMPTY).replace("\n", BLANK)).replaceAll(BLANK).trim();
+    /** unicode 转字符串(\\u 转成中文) */
+    public static String decodeUnicode(String unicode) {
+        if (isBlank(unicode)) {
+            return unicode;
+        }
+
+        StringBuilder sbd = new StringBuilder();
+        int i;
+        int pos = 0;
+        while ((i = unicode.indexOf("\\u", pos)) != -1) {
+            sbd.append(unicode, pos, i);
+            if (i + 5 < unicode.length()) {
+                pos = i + 6;
+                sbd.append((char) Integer.parseInt(unicode.substring(i + 2, i + 6), 16));
+            }
+        }
+        sbd.append(unicode.substring(pos));
+        return sbd.toString();
+    }
+
+    /** 字符串转 ascii */
+    public static String stringToAscii(String str) {
+        if (isBlank(str)) {
+            return str;
+        }
+
+        StringBuilder sbd = new StringBuilder();
+        for (char c : str.toCharArray()) {
+            sbd.append((int) c).append(" ");
+        }
+        return sbd.toString();
+    }
+    /** ascii 转字符串 */
+    public static String asciiToString(String ascii) {
+        if (isBlank(ascii)) {
+            return ascii;
+        }
+
+        StringBuilder sbd = new StringBuilder();
+        for (String s : ascii.split(" ")) {
+            try {
+                sbd.append((char) Integer.parseInt(s));
+            } catch (NumberFormatException e) {
+                sbd.append(s);
+            }
+        }
+        return sbd.toString();
+    }
+
+    /** 为 null 则返回默认值 */
+    public static <T> T defaultIfNull(T value, T defaultValue) {
+        return isNull(value) ? defaultValue : value;
+    }
+
+    /** 为 null 则返回默认值, 否则调用后返回 */
+    public static <T, R> R callIfNotNull(T obj, Function<T, R> func) {
+        return isNull(obj) ? null : func.apply(obj);
+    }
+    /** 为 null 则返回默认值, 否则调用后返回 */
+    public static <T, R> R callIfNotNull(T obj, Function<T, R> func, R defaultValue) {
+        return isNull(obj) ? defaultValue : defaultIfNull(func.apply(obj), defaultValue);
+    }
+
+    /** 为 null 或 空白符则返回默认值(字符串) */
+    public static String defaultIfBlank(String value, String defaultValue) {
+        return isBlank(value) ? defaultValue : value;
+    }
+
+    /** 为 null 或 空白符则返回默认值, 否则调用后返回(字符串) */
+    public static <T> String callIfNotBlank(T obj, Function<T, String> func) {
+        return isNull(obj) ? null : func.apply(obj);
+    }
+    /** 为 null 或 空白符则返回默认值, 否则调用后返回(字符串) */
+    public static <T> String callIfNotBlank(T obj, Function<T, String> func, String defaultValue) {
+        return isNull(obj) ? defaultValue : defaultIfBlank(func.apply(obj), defaultValue);
+    }
+
+    /** 为 null 或 为 0 则返回默认值(数字) */
+    public static <T extends Number> T defaultIfNullOrLess0(T value, T defaultValue) {
+        return isNull(value) || value.doubleValue() == 0 ? defaultValue : value;
+    }
+
+    /** 为 null 或 为 0 则返回默认值, 否则调用后返回(数字) */
+    public static <T, R extends Number> R callIfNotBlankAndLess0(T obj, Function<T, R> func, R defaultValue) {
+        return isNull(obj) ? defaultValue : defaultIfNullOrLess0(func.apply(obj), defaultValue);
+    }
+
+    /** 安全的字符串比较, 时间上是等价的(避免计时攻击) */
+    public static boolean safeEquals(String a, String b) {
+        if (a != null && b != null) {
+            int al = a.length();
+            if (al != b.length()) {
+                return false;
+            }
+            int equal = 0;
+            for (int i = 0; i < al; i++) {
+                equal |= a.charAt(i) ^ b.charAt(i);
+            }
+            return equal == 0;
+        } else {
+            return false;
+        }
+    }
+    public static boolean isEquals(Object obj1, Object obj2) {
+        if (obj1 == obj2) {
+            return true;
+        } else if (obj1 != null && obj2 != null) {
+            return obj1.equals(obj2);
+        } else {
+            return false;
+        }
+    }
+    public static boolean isNotEquals(Object obj1, Object obj2) {
+        return !isEquals(obj1, obj2);
+    }
+    public static boolean isEqualsIgnoreCase(String str1, String str2) {
+        if (str1 != null && str2 != null) {
+            return str1.equalsIgnoreCase(str2);
+        } else {
+            return false;
+        }
+    }
+    public static boolean isNotEqualsIgnoreCase(String str1, String str2) {
+        return !isEqualsIgnoreCase(str1, str2);
+    }
+
+    public static boolean isTrue(Boolean flag) {
+        return isNotNull(flag) && flag;
+    }
+    public static boolean isNotTrue(Boolean flag) {
+        return !isTrue(flag);
     }
 
     /** 对象为 null 时返回 true */
@@ -489,35 +618,42 @@ public final class U {
         return obj != null;
     }
 
-    /** 对象为空 或 其字符串形态是空字符 时返回 true */
-    public static boolean isBlank(Object obj) {
-        if (obj == null) {
+    /** 为空或是空字符或是 null undefined 时返回 true */
+    public static boolean isBlank(String str) {
+        if (isNull(str)) {
             return true;
+        } else {
+            String trim = str.trim();
+            return trim.isEmpty() || trim.equalsIgnoreCase("null") || trim.equalsIgnoreCase("undefined");
         }
-
-        String str = obj.toString().trim();
-        return EMPTY.equals(str);
     }
-    /** 对象非空 且 其字符串形态不是空字符 时返回 true */
-    public static boolean isNotBlank(Object obj) {
-        return !isBlank(obj);
+    /** 非空且不是空字符时返回 true */
+    public static boolean isNotBlank(String str) {
+        return !isBlank(str);
     }
 
-    /** 对象为空 或 其字符串形态为 空白符、null、undefined 时返回 true */
+    /** 对象为空, 字符串为 null nil undefined, 数组、集合、Map 长度为 0 则返回 true */
     public static boolean isEmpty(Object obj) {
-        if (obj == null) {
+        if (isNull(obj)) {
             return true;
         }
 
-        String str = obj.toString().trim();
-        if (EMPTY.equals(str)) {
-            return true;
+        if (obj instanceof String) {
+            String str = ( (String) obj ).trim();
+            return str.isEmpty() || str.equalsIgnoreCase("null") || str.equalsIgnoreCase("undefined");
+        } else if (obj instanceof Optional) {
+            return ((Optional<?>) obj).isEmpty();
+        } else if (obj.getClass().isArray()) {
+            return Array.getLength(obj) == 0;
+        } else if (obj instanceof Collection) {
+            return ((Collection<?>) obj).isEmpty();
+        } else if (obj instanceof Map) {
+            return ((Map<?, ?>) obj).isEmpty();
+        } else {
+            return false;
         }
-
-        String lower = str.toLowerCase();
-        return "null".equals(lower) || "undefined".equals(lower);
     }
-    /** 对象非空 且 其字符串形态不是 空白符、null、undefined 时返回 true */
+    /** 对象非空, 字符串不为 null nil undefined, 数组、集合、Map 长度不为 0 则返回 true */
     public static boolean isNotEmpty(Object obj) {
         return !isEmpty(obj);
     }
@@ -560,6 +696,20 @@ public final class U {
             return "**** " + idCard.substring(2);
         } else {
             return idCard;
+        }
+    }
+    public static String foggyToken(String value) {
+        return foggyValue(value, 100, 20);
+    }
+    public static String foggyValue(String value, int max, int leftRight) {
+        if (isBlank(value)) {
+            return value.trim();
+        }
+        int valueLen = value.length();
+        if (valueLen > max && max > (leftRight * 2)) {
+            return value.substring(0, leftRight) + " *** " + value.substring(valueLen - leftRight);
+        } else {
+            return value;
         }
     }
 
@@ -633,10 +783,6 @@ public final class U {
         return isNotBlank(param) && Pattern.compile(regex).matcher(param).find();
     }
 
-    /** 传入的参数只要包含字母就返回 true */
-    public static boolean isLetter(String param) {
-        return checkRegexWithRelax(param, LETTER);
-    }
     /** 传入的参数只要包含中文就返回 true */
     public static boolean checkChinese(String param) {
         return checkRegexWithRelax(param, CHINESE);
@@ -644,14 +790,6 @@ public final class U {
     /** 传入的参数只要来自移动端就返回 true */
     public static boolean checkMobile(String param) {
         return checkRegexWithRelax(param, MOBILE);
-    }
-    /** 传入的参数只要是 iOS 端就返回 true */
-    public static boolean checkiOS(String param) {
-        return checkRegexWithRelax(param, IOS);
-    }
-    /** 传入的参数只要是 android 端就返回 true */
-    public static boolean checkAndroid(String param) {
-        return checkRegexWithRelax(param, ANDROID);
     }
     /** 传入的参数只要是 pc 端就返回 true */
     public static boolean checkPc(String param) {
@@ -693,30 +831,6 @@ public final class U {
             return src;
         }
     }
-    /** 给参数中的值转义 */
-    public static String urlEncodeValue(String src) {
-        if (isBlank(src)) {
-            return EMPTY;
-        }
-
-        if (!src.contains("=")) {
-            return src;
-        }
-        StringBuilder sbd = new StringBuilder();
-        String[] sp = src.split("&");
-        for (int i = 0; i < sp.length; i++) {
-            String[] split = sp[i].split("=");
-
-            if (i > 0) {
-                sbd.append("&");
-            }
-            sbd.append(split[0]).append("=");
-            if (split.length == 2) {
-                sbd.append(urlEncode(split[1]));
-            }
-        }
-        return sbd.toString();
-    }
 
     /** 生成不带 - 的 uuid */
     public static String uuid() {
@@ -738,10 +852,6 @@ public final class U {
         return uuid() + getSuffix(fileName);
     }
 
-    /** 拼接 url 和 path */
-    public static String appendUrlAndPath(String url, String path) {
-        return addSuffix(url) + addPrefix(path).substring(1);
-    }
     /** 为空则返回空字符串, 如果传入的 url 中有 ? 则在尾部拼接 &, 否则拼接 ? 返回 */
     public static String appendUrl(String src) {
         if (isBlank(src)) {
@@ -769,15 +879,6 @@ public final class U {
         }
         return src + "/";
     }
-    /** 从 url 中获取最后一个 斜杆(/) 后的内容 */
-    public static String getFileNameInUrl(String url) {
-        if (isBlank(url) || !url.contains("/")) {
-            return EMPTY;
-        }
-        // 只截取到 ? 处, 如果有的话
-        int last = url.contains("?") ? url.lastIndexOf("?") : url.length();
-        return url.substring(url.lastIndexOf("/") + 1, last);
-    }
 
     /** 属性转换成方法, 加上 get 并首字母大写 */
     public static String fieldToMethod(String field) {
@@ -800,54 +901,102 @@ public final class U {
      */
     @SuppressWarnings("rawtypes")
     public static String getField(Object data, String field) {
-        if (isBlank(data) || isBlank(field)) {
+        if (isNull(data) || isBlank(field)) {
             return EMPTY;
         }
 
-        String[] split = field.split("\\|");
         Object value;
         if (data instanceof Map) {
-            value = ((Map) data).get(split[0]);
+            value = ((Map) data).get(field);
         } else {
             try {
                 value = new PropertyDescriptor(field, data.getClass()).getReadMethod().invoke(data);
             } catch (Exception e) {
-                value = getMethod(data, fieldToMethod(split[0]));
+                value = invokeMethod(data, "get" + field.substring(0, 1).toUpperCase() + field.substring(1));
             }
         }
 
-        if (isBlank(value)) {
-            Class<?> fieldType = getFieldType(data, field);
-            return (isNotBlank(fieldType) && fieldType == Money.class) ? "0" : EMPTY;
+        if (isNull(value)) {
+            return EMPTY;
         } else if (value.getClass().isEnum()) {
             // 如果是枚举, 则调用其 getValue 方法, getValue 没有值则使用枚举的 name
-            Object enumValue = getMethod(value, "getValue");
-            return toStr(enumValue != null ? enumValue : value);
+            return toStr(defaultIfNull(invokeMethod(value, "getValue"), value));
         } else if (value instanceof Date) {
             // 如果是日期, 则格式化
-            if (split.length > 1 && isNotBlank(split[1])) {
-                return toStr(DateUtil.format((Date) value, split[1]));
-            } else {
-                return toStr(DateUtil.formatDateTime((Date) value));
-            }
+            return toStr(DateUtil.formatDateTime((Date) value));
         } else {
             return toStr(value);
         }
+    }
+
+    /** 获取类的所有属性(包括父类) */
+    public static Set<Field> getAllField(Class<?> clazz) {
+        return getAllFieldWithDepth(clazz, 0);
+    }
+    private static Set<Field> getAllFieldWithDepth(Class<?> clazz, int depth) {
+        if (clazz.getName().equals(Object.class.getName())) {
+            return Collections.emptySet();
+        }
+
+        Set<Field> fieldSet = new LinkedHashSet<>();
+        fieldSet.addAll(Arrays.asList(clazz.getDeclaredFields()));
+        fieldSet.addAll(Arrays.asList(clazz.getFields()));
+
+        Class<?> superclass = clazz.getSuperclass();
+        if (superclass.getName().equals(Object.class.getName())) {
+            return fieldSet;
+        }
+
+        if (depth <= MAX_DEPTH) {
+            Set<Field> tmpSet = getAllFieldWithDepth(superclass, depth + 1);
+            if (tmpSet.size() > 0) {
+                fieldSet.addAll(tmpSet);
+            }
+        }
+        return fieldSet;
+    }
+
+    /** 获取类的所有方法(包括父类) */
+    public static Set<Method> getAllMethod(Class<?> clazz) {
+        return getAllMethodWithDepth(clazz, 0);
+    }
+    private static Set<Method> getAllMethodWithDepth(Class<?> clazz, int depth) {
+        if (clazz.getName().equals(Object.class.getName())) {
+            return Collections.emptySet();
+        }
+
+        Set<Method> methodSet = new LinkedHashSet<>();
+        methodSet.addAll(Arrays.asList(clazz.getDeclaredMethods()));
+        methodSet.addAll(Arrays.asList(clazz.getMethods()));
+
+        Class<?> superclass = clazz.getSuperclass();
+        if (superclass.getName().equals(Object.class.getName())) {
+            return methodSet;
+        }
+
+        if (depth <= MAX_DEPTH) {
+            Set<Method> tmpSet = getAllMethodWithDepth(superclass, depth + 1);
+            if (tmpSet.size() > 0) {
+                methodSet.addAll(tmpSet);
+            }
+        }
+        return methodSet;
     }
 
     /**
      * <pre>
      * 将 source 中字段的值填充到 target 中, 如果已经有值了就忽略 set
      *
-     * if (target.getName() != null) {
-     *     target.setName(source.getName());
+     * if (target.getXyz() != null) {
+     *     Object xyz = source.getXyz();
+     *     if (xyz != null) {
+     *         target.setXyz(xyz);
+     *     }
      * }
      *
-     * PS1: 字段类型如果是基础数据类型, 会有默认值 boolean: false, int, long, double: 0
-     * 判断是否为空将总是返回 true, 因此请使用包装类型
-     *
-     * PS2: 如果 target 有 extends 某个父类且只用 @lombok.Data 进行标注, 此时返回的 target 直接输出是没有父类的属性的
-     * 但实际已经 set 进去了, toJson 或在类上标注 @lombok.ToString(callSuper = true) 才会将父类的属性也输出</pre>
+     * PS: 字段类型如果是基础数据类型, 会有默认值: boolean 是 false, int、long、float、double 是 0
+     * 因此这时候判断不是空(上面的 target.getXyz() != null)时将总是返回 true, 因此请使用包装类型
+     * </pre>
      *
      * @param source 源对象
      * @param target 目标对象
@@ -857,33 +1006,47 @@ public final class U {
     }
 
     /**
-     * 将 source 中字段的值填充到 target 中: target.setName(source.getName())
+     * 将 source 中字段的值填充到 target 中
+     *
+     * if (ignoreAlready) {
+     *     if (target.getXyz() != null) {
+     *         Object xyz = source.getXyz();
+     *         if (xyz != null) {
+     *             target.setXyz(xyz);
+     *         }
+     *     }
+     * } else {
+     *     Object xyz = source.getXyz();
+     *     if (xyz != null) {
+     *         target.setXyz(xyz);
+     *     }
+     * }
      *
      * @param source 源对象
      * @param target 目标对象
-     * @param ignoreAlready true: target 有值则不操作 set. PS: 基础数据类型将总是返回 true
+     * @param ignoreAlready true: target 中的字段有值则不进行 set 操作
      */
     public static <S,T> void fillData(S source, T target, boolean ignoreAlready) {
-        Method[] targetMethods = target.getClass().getMethods();
+        Class<?> tc = target.getClass();
+        Method[] targetMethods = tc.getMethods();
 
-        Map<String, Method> targetMethodMap = Maps.newHashMap();
+        Map<String, Method> targetMethodMap = new HashMap<>();
         for (Method method : targetMethods) {
             targetMethodMap.put(method.getName(), method);
         }
 
-        Method[] sourceMethods = source.getClass().getMethods();
-        Map<String, Method> sourceMethodMap = Maps.newHashMap();
+        Class<?> sc = source.getClass();
+        Method[] sourceMethods = sc.getMethods();
+        Map<String, Method> sourceMethodMap = new HashMap<>();
         for (Method method : sourceMethods) {
             sourceMethodMap.put(method.getName(), method);
         }
         for (Method method : targetMethods) {
             String methodName = method.getName();
             if (methodName.startsWith("set")) {
-                String getMethodName = "get" + methodName.substring(3);
-                if (!sourceMethodMap.containsKey(getMethodName) &&
-                        (method.getReturnType().isAssignableFrom(boolean.class) || method.getReturnType().isAssignableFrom(Boolean.class))) {
-                    getMethodName = "is" + methodName.substring(2);
-                }
+                // boolean 的 get 方法是 isXxx(), 其他(包括 Boolean)都是 getXxx()
+                String getMethodName = method.getReturnType().getName().equals(boolean.class.getName())
+                        ? ("is" + methodName.substring(2)) : ("get" + methodName.substring(3));
                 if (sourceMethodMap.containsKey(getMethodName)) {
                     if (ignoreAlready) {
                         try {
@@ -891,21 +1054,30 @@ public final class U {
                             if (oldResult != null) {
                                 continue;
                             }
-                        } catch (IllegalAccessException | InvocationTargetException ignore) {
+                        } catch (Exception e) {
+                            if (LogUtil.ROOT_LOG.isErrorEnabled()) {
+                                LogUtil.ROOT_LOG.error("call({}) method({}) exception", tc.getName(), getMethodName, e);
+                            }
                             continue;
                         }
                     }
 
-                    Object dataResult;
+                    Object targetObj;
                     try {
-                        dataResult = sourceMethodMap.get(getMethodName).invoke(source);
-                    } catch (IllegalAccessException | InvocationTargetException ignore) {
+                        targetObj = sourceMethodMap.get(getMethodName).invoke(source);
+                    } catch (Exception e) {
+                        if (LogUtil.ROOT_LOG.isErrorEnabled()) {
+                            LogUtil.ROOT_LOG.error("call({}) method({}) exception", sc.getName(), getMethodName, e);
+                        }
                         continue;
                     }
-                    if (dataResult != null) {
+                    if (targetObj != null) {
                         try {
-                            method.invoke(target, dataResult);
-                        } catch (IllegalAccessException | InvocationTargetException ignore) {
+                            method.invoke(target, targetObj);
+                        } catch (Exception e) {
+                            if (LogUtil.ROOT_LOG.isErrorEnabled()) {
+                                LogUtil.ROOT_LOG.error("call({}) method({}) exception", tc.getName(), getMethodName, e);
+                            }
                         }
                     }
                 }
@@ -913,120 +1085,49 @@ public final class U {
         }
     }
 
-    /** 将长字符串进行 gzip 压缩后再转成 base64 编码返回 */
-    public static String compress(final String str) {
-        if (str == null) {
-            return null;
-        }
-        String trim = str.trim();
-        if (EMPTY.equals(trim) || trim.length() < COMPRESS_MIN_LEN) {
-            return trim;
-        }
-
-        try (
-                ByteArrayOutputStream output = new ByteArrayOutputStream();
-                GZIPOutputStream gzip = new GZIPOutputStream(output)
-        ) {
-            gzip.write(trim.getBytes(StandardCharsets.UTF_8));
-            gzip.finish();
-            return new String(Base64.getEncoder().encode(output.toByteArray()), StandardCharsets.UTF_8);
-        } catch (Exception e) {
-            if (LogUtil.ROOT_LOG.isErrorEnabled()) {
-                LogUtil.ROOT_LOG.error("压缩字符串异常", e);
-            }
-            return trim;
-        }
-    }
-
-    /** 将压缩的字符串用 base64 解码再进行 gzip 解压 */
-    public static String decompress(String str) {
-        if (isNull(str)) {
-            return null;
-        }
-        String trim = str.trim();
-        if (EMPTY.equals(trim)) {
-            return trim;
-        }
-        // 如果字符串以 { 开头且以 } 结尾, 或者以 [ 开头以 ] 结尾(json)则不解压, 直接返回
-        if ((str.startsWith("{") && str.endsWith("}")) || (str.startsWith("[") && str.endsWith("]"))) {
-            return trim;
-        }
-
-        byte[] bytes;
-        try {
-            bytes = Base64.getDecoder().decode(str.getBytes(StandardCharsets.UTF_8));
-        } catch (Exception e) {
-            if (LogUtil.ROOT_LOG.isDebugEnabled()) {
-                LogUtil.ROOT_LOG.debug("字符串解码异常", e);
-            }
-            return trim;
-        }
-        if (bytes.length == 0) {
-            return trim;
-        }
-
-        try (
-                ByteArrayInputStream input = new ByteArrayInputStream(bytes);
-                GZIPInputStream gis = new GZIPInputStream(input);
-
-                InputStreamReader in = new InputStreamReader(gis, StandardCharsets.UTF_8);
-                final BufferedReader bufferedReader = new BufferedReader(in)
-        ) {
-            StringBuilder sbd = new StringBuilder();
-            String line;
-            while ((line = bufferedReader.readLine()) != null) {
-                sbd.append(line);
-            }
-            return sbd.toString();
-        } catch (Exception e) {
-            if (LogUtil.ROOT_LOG.isErrorEnabled()) {
-                LogUtil.ROOT_LOG.error("解压字符串异常", e);
-            }
-            return trim;
-        }
-    }
-
     /** 调用对象的公有方法. 异常将被忽略并返回 null */
-    public static Object getMethod(Object obj, String method, Object... param) {
-        if (isNotBlank(method)) {
+    public static Object invokeMethod(Object obj, String method, Object... param) {
+        if (isNotNull(obj) && isNotBlank(method)) {
+            Class<?> clazz = obj.getClass();
             try {
-                return obj.getClass().getDeclaredMethod(method).invoke(obj, param);
-            } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException ignore) {
+                return clazz.getDeclaredMethod(method).invoke(obj, param);
+            } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                if (LogUtil.ROOT_LOG.isErrorEnabled()) {
+                    LogUtil.ROOT_LOG.error("call({}) method({}) exception", clazz.getName(), method, e);
+                }
             }
             // getMethod 会将从父类继承过来的 public 方法也查询出来
             try {
-                return obj.getClass().getMethod(method).invoke(obj, param);
-            } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException ignore) {
+                return clazz.getMethod(method).invoke(obj, param);
+            } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                if (LogUtil.ROOT_LOG.isErrorEnabled()) {
+                    LogUtil.ROOT_LOG.error("call({}) method({}) exception", clazz.getName(), method, e);
+                }
             }
         }
         return null;
     }
 
-    public static Class<?> getFieldType(Object obj, String field) {
-        if (isNotBlank(field)) {
-            Class<?> clazz = obj.getClass();
-            try {
-                Field f = clazz.getDeclaredField(field);
-                if (isNotBlank(f)) {
-                    return f.getType();
-                }
-            } catch (NoSuchFieldException ignore) {
-            }
-            try {
-                Field f = clazz.getField(field);
-                if (isNotBlank(f)) {
-                    return f.getType();
-                }
-            } catch (NoSuchFieldException ignore) {
-            }
-
-            Class<?> superclass = clazz.getSuperclass();
-            if (superclass == Object.class) {
-                return null;
-            }
-            return getFieldType(superclass, field);
+    public static Class<?> getFieldType(Object obj, String field, int depth) {
+        if (isBlank(field)) {
+            return null;
         }
-        return null;
+
+        Class<?> clazz = obj.getClass();
+        try {
+            return clazz.getDeclaredField(field).getType();
+        } catch (NoSuchFieldException ignore) {
+        }
+        try {
+            return clazz.getField(field).getType();
+        } catch (NoSuchFieldException ignore) {
+        }
+
+        Class<?> superclass = clazz.getSuperclass();
+        if (superclass == Object.class) {
+            return null;
+        }
+        return (depth <= MAX_DEPTH) ? getFieldType(superclass, field, depth + 1) : null;
     }
 
     /** 转换成 id=123&name=xyz&name=opq */
@@ -1040,7 +1141,7 @@ public final class U {
         for (Map.Entry<String, ?> entry : params.entrySet()) {
             String key = entry.getKey();
             Object value = entry.getValue();
-            if (isNotBlank(key) && isNotBlank(value)) {
+            if (isNotBlank(key) && isNotNull(value)) {
                 if (i > 0) {
                     sbd.append("&");
                 }
@@ -1054,13 +1155,13 @@ public final class U {
 
     /** 获取指定类所在 jar 包的地址 */
     public static String getClassInFile(Class<?> clazz) {
-        if (isNotBlank(clazz)) {
+        if (isNotNull(clazz)) {
             ProtectionDomain domain = clazz.getProtectionDomain();
-            if (isNotBlank(domain)) {
+            if (isNotNull(domain)) {
                 CodeSource source = domain.getCodeSource();
-                if (isNotBlank(source)) {
+                if (isNotNull(source)) {
                     URL location = source.getLocation();
-                    if (isNotBlank(location)) {
+                    if (isNotNull(location)) {
                         return location.getFile();
                     }
                 }
@@ -1083,14 +1184,16 @@ public final class U {
         try {
             // guava
             // ByteStreams.copy(inputStream, outputStream);
+
             // jdk-8
-            byte[] buf = new byte[8192];
-            int length;
-            while ((length = input.read(buf)) != -1) {
-                output.write(buf, 0, length);
-            }
+            // byte[] buf = new byte[8192];
+            // int length;
+            // while ((length = input.read(buf)) != -1) {
+            //     output.write(buf, 0, length);
+            // }
+
             // jdk-9
-            // inputStream.transferTo(outputStream);
+            input.transferTo(output);
         } catch (IOException e) {
             throw new RuntimeException("input to output exception", e);
         }
@@ -1102,30 +1205,109 @@ public final class U {
      *         InputStream inputStream = ...;
      *         OutputStream outputStream = ...;
      *
-     *         ReadableByteChannel input = Channels.newChannel(inputStream);
-     *         WritableByteChannel output = Channels.newChannel(outputStream);
+     *         ReadableByteChannel readChannel = Channels.newChannel(inputStream);
+     *         WritableByteChannel writeChannel = Channels.newChannel(outputStream);
      * ) {
-     *     inputToOutputWithChannel(input, output);
+     *     inputToOutputWithChannel(readChannel, writeChannel);
      * }
      * </pre>
      */
-    public static void inputToOutputWithChannel(ReadableByteChannel input, WritableByteChannel output) {
+    public static void inputToOutputWithChannel(ReadableByteChannel readChannel, WritableByteChannel writeChannel) {
         try {
             ByteBuffer buffer = ByteBuffer.allocateDirect(8192);
-            while (input.read(buffer) != -1) {
+            while (readChannel.read(buffer) != -1) {
                 buffer.flip();
-                output.write(buffer);
+                writeChannel.write(buffer);
                 buffer.clear();
             }
         } catch (IOException e) {
-            throw new RuntimeException("input to output with channel exception", e);
+            throw new RuntimeException("read to output with channel exception", e);
+        }
+    }
+
+    /** 将长字符串进行 gzip 压缩, 再转成 base64 编码返回 */
+    public static String compress(final String str) {
+        if (isNull(str)) {
+            return null;
+        }
+
+        String trim = str.trim();
+        if (EMPTY.equals(trim) || trim.length() < COMPRESS_MIN_LEN) {
+            return trim;
+        }
+
+        try (
+                ByteArrayOutputStream output = new ByteArrayOutputStream();
+                GZIPOutputStream gzip = new GZIPOutputStream(output)
+        ) {
+            gzip.write(trim.getBytes(StandardCharsets.UTF_8));
+            gzip.finish();
+            return new String(Encrypt.base64Encode(output.toByteArray()), StandardCharsets.UTF_8);
+        } catch (Exception e) {
+            if (LogUtil.ROOT_LOG.isErrorEnabled()) {
+                LogUtil.ROOT_LOG.error("压缩字符串异常", e);
+            }
+            return trim;
+        }
+    }
+    /** 将压缩的字符串用 base64 解码, 再进行 gzip 解压 */
+    public static String decompress(String str) {
+        if (isNull(str)) {
+            return null;
+        }
+        String trim = str.trim();
+        if (EMPTY.equals(trim)) {
+            return trim;
+        }
+        // 如果字符串以 { 开头且以 } 结尾, 或者以 [ 开头以 ] 结尾(json)则不解压, 直接返回
+        if ((str.startsWith("{") && str.endsWith("}")) || (str.startsWith("[") && str.endsWith("]"))) {
+            return trim;
+        }
+
+        byte[] bytes;
+        try {
+            bytes = Encrypt.base64Decode(str.getBytes(StandardCharsets.UTF_8));
+            if (bytes.length == 0) {
+                return trim;
+            }
+        } catch (Exception e) {
+            if (LogUtil.ROOT_LOG.isErrorEnabled()) {
+                LogUtil.ROOT_LOG.error("字符串解码异常", e);
+            }
+            return trim;
+        }
+        try (
+                ByteArrayInputStream input = new ByteArrayInputStream(bytes);
+                GZIPInputStream gis = new GZIPInputStream(input);
+
+                InputStreamReader in = new InputStreamReader(gis, StandardCharsets.UTF_8);
+                BufferedReader reader = new BufferedReader(in)
+        ) {
+            StringBuilder sbd = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                sbd.append(line);
+            }
+            return sbd.toString();
+        } catch (Exception e) {
+            if (LogUtil.ROOT_LOG.isErrorEnabled()) {
+                LogUtil.ROOT_LOG.error("解压字符串异常", e);
+            }
+            return trim;
         }
     }
 
 
-    /** 对象为 null、空白符、"null" 字符串时, 则抛出异常 */
+    /** 对象为 null 时抛出异常 */
     public static void assertNil(Object obj, String msg) {
-        if (isBlank(obj)) {
+        if (isNull(obj)) {
+            assertException(msg);
+        }
+    }
+
+    /** 空白符、null、undefined、nil 时抛出异常 */
+    public static void assertBlank(String str, String msg) {
+        if (isBlank(str)) {
             assertException(msg);
         }
     }

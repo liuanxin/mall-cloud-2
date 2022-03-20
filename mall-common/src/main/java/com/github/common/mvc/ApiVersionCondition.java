@@ -24,7 +24,7 @@ public class ApiVersionCondition implements RequestCondition<ApiVersionCondition
     public ApiVersionCondition getMatchingCondition(HttpServletRequest request) {
         // 从请求中获取版本信息
         String version = request.getHeader(Const.VERSION);
-        if (U.isBlank(version)) {
+        if (U.isNull(version)) {
             version = request.getParameter(Const.VERSION);
         }
         AppVersion appVersion = U.toEnum(AppVersion.class, version);

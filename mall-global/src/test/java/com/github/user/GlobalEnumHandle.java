@@ -3,7 +3,7 @@ package com.github.user;
 import com.github.common.Const;
 import com.github.common.util.GenerateEnumHandler;
 import com.github.global.constant.GlobalConst;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class GlobalEnumHandle {
 

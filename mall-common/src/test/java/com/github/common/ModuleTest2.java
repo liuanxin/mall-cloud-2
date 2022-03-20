@@ -589,6 +589,7 @@ class Server {
             "import org.springframework.context.annotation.Configuration;\n" +
             "import org.springframework.format.FormatterRegistry;\n" +
             "import org.springframework.http.converter.HttpMessageConverter;\n" +
+            "import org.springframework.http.converter.StringHttpMessageConverter;\n" +
             "import org.springframework.web.method.support.HandlerMethodArgumentResolver;\n" +
             "import org.springframework.web.servlet.config.annotation.InterceptorRegistry;\n" +
             "import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;\n" +
@@ -622,7 +623,8 @@ class Server {
             "\n" +
             "    @Override\n" +
             "    public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {\n" +
-            "        SpringMvc.handlerConvert(converters);\n" +
+            "        StringHttpMessageConverter messageConverter = new StringHttpMessageConverter(StandardCharsets.UTF_8);\n" +
+            "        SpringMvc.handlerConvert(converters, StringHttpMessageConverter.class, messageConverter);\n" +
             "    }\n" +
             "\n" +
             "    @Override\n" +
@@ -991,7 +993,7 @@ class Server {
             "import " + PACKAGE + ".common.Const;\n" +
             "import " + PACKAGE + ".common.util.GenerateEnumHandler;\n" +
             "import " + PACKAGE + ".%s.constant.%sConst;\n" +
-            "import org.junit.Test;\n" +
+            "import org.junit.jupiter.api.Test;\n" +
             "\n" +
             "/**\n" +
             " * %s模块生成 enumHandle 的工具类\n" +

@@ -5,7 +5,7 @@ import com.github.common.encrypt.Encrypt;
 import com.github.common.exception.NotLoginException;
 import com.github.common.json.JsonUtil;
 import com.github.common.util.A;
-import com.github.common.util.RequestUtils;
+import com.github.common.util.RequestUtil;
 import com.github.common.util.U;
 
 import java.util.Map;
@@ -26,7 +26,7 @@ public final class AppTokenHandler {
     /** 基于存进 session 的数据(设置过期时间)生成 token 返回, 登录后调用返回给 app 由其保存下来 */
     @SuppressWarnings("unchecked")
     public static <T> String generateToken(T session, long expireDay) {
-        if (U.isNotBlank(session)) {
+        if (U.isNotNull(session)) {
             Map<String, Object> jwt = JsonUtil.convert(session, Map.class);
             if (A.isNotEmpty(jwt)) {
                 return Encrypt.jwtEncode(jwt, expireDay, TOKEN_EXPIRE_TIME_UNIT);
@@ -42,7 +42,7 @@ public final class AppTokenHandler {
     /** 每次打开时都应该调用此方法: 重置 token 的过期时间, 如果登录已过期或解密失败将抛出 NotLoginException */
     public static String resetTokenExpireTime(long expireDay) {
         String token = getToken();
-        if (U.isNotBlank(token)) {
+        if (U.isNotNull(token)) {
             Map<String, Object> session;
             try {
                 session = Encrypt.jwtDecode(token);
@@ -58,13 +58,13 @@ public final class AppTokenHandler {
 
     /** 从请求中获取 token 数据 */
     private static String getToken() {
-        return RequestUtils.getHeaderOrParam(Const.TOKEN);
+        return RequestUtil.getHeaderOrParam(Const.TOKEN);
     }
 
     /** 从 token 中读 session 信息, 如果登录已过期或解密失败将返回 null */
     public static <T> T getSessionInfoWithToken(Class<T> clazz) {
         String token = getToken();
-        if (U.isNotBlank(token)) {
+        if (U.isNotNull(token)) {
             Map<String, Object> session = null;
             try {
                 session = Encrypt.jwtDecode(token);

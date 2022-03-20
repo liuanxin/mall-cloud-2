@@ -47,7 +47,7 @@ public final class Const {
     public static final String REDIRECT_PREFIX = "redirect:";
 
     /** pc 端传过来的 token 的 key */
-    public static final String TOKEN = "X-Token";
+    public static final String TOKEN = "X-Token"; // Authorization
     /** pc 端放在 cookie 中的跟踪号 */
     public static final String TRACE = "X-Trace";
     /** pc 端传过来的 version 的 key */
@@ -55,4 +55,5 @@ public final class Const {
 
     /** @see org.springframework.http.HttpMethod */
     public static final String[] SUPPORT_METHODS = new String[] { "GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "TRACE" };
+    public static final String[] ALLOW_HEADERS = new String[] { "Accept-Language", "Cookie", "User-Agent", "Content-Type", TOKEN, TRACE, VERSION };
 }

@@ -82,7 +82,7 @@ public class MqReceiverHandler {
         String desc = ("(" + data.getMqInfo().getDesc() + ")");
         long start = System.currentTimeMillis();
         try {
-            LogUtil.bindTraceId(message.getMessageProperties().getCorrelationId());
+            LogUtil.bindBasicInfo(message.getMessageProperties().getCorrelationId());
             if (log.isInfoEnabled()) {
                 log.info("开始消费 mq{}, 消息发送时间({})", desc, DateUtil.formatDateTimeMs(data.getSendTime()));
             }

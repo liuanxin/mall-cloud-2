@@ -1,7 +1,8 @@
 package com.github.search.config;
 
+import com.github.common.Const;
 import com.github.common.util.LogUtil;
-import com.github.common.util.RequestUtils;
+import com.github.common.util.RequestUtil;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -16,7 +17,10 @@ public class SearchInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response,
                              Object handler) throws Exception {
-        LogUtil.bind(RequestUtils.logContextInfo());
+        
+        String traceId = RequestUtil.getCookieOrHeaderOrParam(Const.TRACE);
+        LogUtil.putContext(traceId, RequestUtil.logContextInfo());
+        LogUtil.putIp(RequestUtil.getRealIp());
         return true;
     }
 

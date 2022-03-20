@@ -5,12 +5,14 @@ import com.github.common.mvc.VersionRequestMappingHandlerMapping;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 /**
@@ -36,7 +38,8 @@ public class CommonWebConfig extends WebMvcConfigurationSupport {
 
     @Override
     public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
-        SpringMvc.handlerConvert(converters);
+        StringHttpMessageConverter messageConverter = new StringHttpMessageConverter(StandardCharsets.UTF_8);
+        SpringMvc.handlerConvert(converters, StringHttpMessageConverter.class, messageConverter);
     }
 
     @Override

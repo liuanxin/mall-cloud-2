@@ -9,9 +9,10 @@ public class ForbiddenException extends RuntimeException implements Serializable
     public ForbiddenException(String msg) {
         super(msg);
     }
+    public ForbiddenException(String msg, Throwable cause) {
+        super(msg, cause);
+    }
 
     @Override
-    public Throwable fillInStackTrace() {
-        return this;
-    }
+    public Throwable fillInStackTrace() { return this; }
 }

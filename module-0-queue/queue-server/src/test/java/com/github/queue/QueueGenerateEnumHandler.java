@@ -3,7 +3,7 @@ package com.github.queue;
 import com.github.common.Const;
 import com.github.common.util.GenerateEnumHandler;
 import com.github.queue.constant.QueueConst;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * 消息队列模块生成 enumHandle 的工具类

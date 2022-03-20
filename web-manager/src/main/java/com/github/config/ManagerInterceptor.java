@@ -1,9 +1,10 @@
 package com.github.config;
 
+import com.github.common.Const;
 import com.github.common.annotation.NotNeedLogin;
 import com.github.common.annotation.NotNeedPermission;
 import com.github.common.util.LogUtil;
-import com.github.common.util.RequestUtils;
+import com.github.common.util.RequestUtil;
 import com.github.util.ManagerSessionUtil;
 import com.google.common.collect.Lists;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -52,8 +53,10 @@ public class ManagerInterceptor implements HandlerInterceptor {
     }
 
     private void bindParam() {
-        // 打印日志上下文中的数据
-        LogUtil.bind(RequestUtils.logContextInfo().setUser(ManagerSessionUtil.getUserInfo()));
+        String traceId = RequestUtil.getCookieOrHeaderOrParam(Const.TRACE);
+        LogUtil.putContext(traceId, RequestUtil.logContextInfo());
+        LogUtil.putIp(RequestUtil.getRealIp());
+        LogUtil.putUser(ManagerSessionUtil.getUserInfo());
     }
 
     private void unbindParam() {
@@ -66,7 +69,7 @@ public class ManagerInterceptor implements HandlerInterceptor {
         if (!online) {
             return;
         }
-        String uri = RequestUtils.getRequest().getRequestURI();
+        String uri = RequestUtil.getRequest().getRequestURI();
         for (String letItGo : LET_IT_GO) {
             if (letItGo.equals(uri)) {
                 return;

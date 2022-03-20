@@ -109,7 +109,7 @@ class ManagerSessionModel implements Serializable {
 
     static <T, P> ManagerSessionModel assemblyData(T account, List<P> permissions) {
         ManagerSessionModel sessionModel = JsonUtil.convert(account, ManagerSessionModel.class);
-        if (U.isNotBlank(sessionModel)) {
+        if (U.isNotNull(sessionModel)) {
             List<Permission> permissionList = JsonUtil.convertList(permissions, Permission.class);
             if (A.isNotEmpty(permissionList)) {
                 sessionModel.setPermissionList(permissionList);

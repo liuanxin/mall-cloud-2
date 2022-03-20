@@ -1,10 +1,7 @@
 package com.github.global.config;
 
 import com.github.common.Const;
-import com.github.common.util.A;
-import com.github.common.util.AsyncUti;
-import com.github.common.util.LogUtil;
-import com.github.common.util.U;
+import com.github.common.util.*;
 import com.google.common.collect.Sets;
 import com.google.common.io.ByteStreams;
 import com.google.common.io.CharStreams;
@@ -138,7 +135,7 @@ public class FeignConfig {
                 if (LogUtil.ROOT_LOG.isInfoEnabled()) {
                     StringBuilder sbd = new StringBuilder("response:[");
                     sbd.append("time(").append(useTime).append(" ms), status(").append(response.status()).append(")");
-                    if (U.isNotBlank(response.reason())) {
+                    if (U.isNotNull(response.reason())) {
                         sbd.append(", reason(").append(response.reason()).append(")");
                     }
                     collectHeader(sbd, response.headers());
@@ -183,7 +180,9 @@ public class FeignConfig {
             private void collectHeader(StringBuilder sbd, Map<String, Collection<String>> headers) {
                 sbd.append("header(");
                 for (Map.Entry<String, Collection<String>> entry : headers.entrySet()) {
-                    sbd.append("<").append(entry.getKey()).append(" : ").append(entry.getValue()).append(">");
+                    sbd.append("<");
+                    sbd.append(entry.getKey()).append(" : ").append(DesensitizationUtil.des(entry.getKey(), A.toStr(entry.getValue())));
+                    sbd.append(">");
                 }
                 sbd.append(")");
             }

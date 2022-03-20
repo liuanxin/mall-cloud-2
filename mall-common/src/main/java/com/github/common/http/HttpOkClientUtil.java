@@ -1,26 +1,32 @@
 package com.github.common.http;
 
+import com.github.common.Const;
 import com.github.common.date.DateUtil;
 import com.github.common.util.A;
 import com.github.common.util.LogUtil;
 import com.github.common.util.U;
-import com.google.common.io.Files;
 import okhttp3.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-@SuppressWarnings("ConstantConditions")
 public class HttpOkClientUtil {
 
     // MIME 说明: http://www.w3school.com.cn/media/media_mimeref.asp
 
     private static final String USER_AGENT = "Mozilla/5.0 (okhttp3; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36";
 
-    private static final int TIME_OUT = 30;
+    /** 建立连接的超时时间, 单位: 秒 */
+    private static final int CONNECT_TIME_OUT = 5;
+    /** 数据交互的时间, 单位: 秒 */
+    private static final int READ_TIME_OUT = 60;
+
+    /** 连接池最大数量 */
+    private static final int MAX_CONNECTIONS = 200;
 
     private static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 
@@ -28,18 +34,17 @@ public class HttpOkClientUtil {
     static {
         HTTP_CLIENT = new OkHttpClient().newBuilder()
                 // 连接超时时间
-                .connectTimeout(TIME_OUT, TimeUnit.SECONDS)
+                .connectTimeout(CONNECT_TIME_OUT, TimeUnit.SECONDS)
                 // 响应超时时间
-                .readTimeout(TIME_OUT, TimeUnit.SECONDS)
-                // 连接池中的最大连接数默认是 5 且每个连接保持 5 分钟
-                // .connectionPool(new ConnectionPool(20, 5, TimeUnit.MINUTES));
-                .connectionPool(new ConnectionPool())
+                .readTimeout(READ_TIME_OUT, TimeUnit.SECONDS)
+                // 连接池中的最大连接数(默认是 5 且每个连接保持 5 分钟)
+                .connectionPool(new ConnectionPool(MAX_CONNECTIONS, 5, TimeUnit.MINUTES))
                 .build();
     }
 
     /** 向指定 url 进行 get 请求 */
     public static String get(String url) {
-        if (U.isBlank(url)) {
+        if (U.isNull(url)) {
             return null;
         }
 
@@ -47,7 +52,7 @@ public class HttpOkClientUtil {
     }
     /** 向指定 url 进行 get 请求. 有参数 */
     public static String get(String url, Map<String, Object> params) {
-        if (U.isBlank(url)) {
+        if (U.isNull(url)) {
             return null;
         }
 
@@ -56,7 +61,7 @@ public class HttpOkClientUtil {
     }
     /** 向指定 url 进行 get 请求. 有参数和头 */
     public static String getWithHeader(String url, Map<String, Object> params, Map<String, Object> headerMap) {
-        if (U.isBlank(url)) {
+        if (U.isNull(url)) {
             return null;
         }
 
@@ -69,7 +74,7 @@ public class HttpOkClientUtil {
 
     /** 向指定的 url 进行 post 请求. 有参数 */
     public static String post(String url, Map<String, Object> params) {
-        if (U.isBlank(url)) {
+        if (U.isNull(url)) {
             return null;
         }
 
@@ -78,7 +83,7 @@ public class HttpOkClientUtil {
     }
     /** 向指定的 url 进行 post 请求. 参数以 json 的方式一次传递 */
     public static String post(String url, String json) {
-        if (U.isBlank(url)) {
+        if (U.isNull(url)) {
             return null;
         }
 
@@ -88,7 +93,7 @@ public class HttpOkClientUtil {
     }
     /** 向指定的 url 进行 post 请求. 有参数和头 */
     public static String postWithHeader(String url, Map<String, Object> params, Map<String, Object> headers) {
-        if (U.isBlank(url)) {
+        if (U.isNull(url)) {
             return null;
         }
 
@@ -100,26 +105,26 @@ public class HttpOkClientUtil {
 
     /** 向指定 url 上传 png 图片文件 */
     public static String postFile(String url, Map<String, Object> params, Map<String, File> files) {
-        if (U.isBlank(url)) {
+        if (U.isNull(url)) {
             return null;
         }
 
         MultipartBody.Builder builder = new MultipartBody.Builder().setType(MultipartBody.FORM);
         for (Map.Entry<String, Object> entry : params.entrySet()) {
             Object value = entry.getValue();
-            if (U.isNotBlank(value)) {
+            if (U.isNotNull(value)) {
                 builder.addFormDataPart(entry.getKey(), value.toString());
             }
         }
         for (Map.Entry<String, File> entry : files.entrySet()) {
             File file = entry.getValue();
-            if (U.isNotBlank(file)) {
+            if (U.isNotNull(file)) {
                 try {
-                    MediaType type = MediaType.parse(java.nio.file.Files.probeContentType(file.toPath()));
+                    MediaType type = MediaType.parse(Files.probeContentType(file.toPath()));
                     builder.addFormDataPart(entry.getKey(), null, RequestBody.create(type, file));
                 } catch (IOException e) {
                     if (LogUtil.ROOT_LOG.isErrorEnabled()) {
-                        LogUtil.ROOT_LOG.error(String.format("add file (%s) to post exception", file.getName()), e);
+                        LogUtil.ROOT_LOG.error("add file({}) to post exception", file.getName(), e);
                     }
                 }
             }
@@ -153,7 +158,7 @@ public class HttpOkClientUtil {
             for (Map.Entry<String, Object> entry : headers.entrySet()) {
                 String key = entry.getKey();
                 Object value = entry.getValue();
-                if (U.isNotBlank(value)) {
+                if (U.isNotNull(value)) {
                     request.addHeader(key, value.toString());
                 }
             }
@@ -166,13 +171,11 @@ public class HttpOkClientUtil {
         sbd.append("OkHttp3 => (")
                 .append(DateUtil.formatDateTimeMs(start)).append(" -> ").append(DateUtil.nowDateTimeMs())
                 .append("] (").append(method).append(" ").append(url).append(")");
-        // 太长就只输出前后, 不全部输出
-        int maxLen = 1000, headTail = 200;
 
-        if (U.isNotBlank(params)) {
-            sbd.append(" params(").append(U.toStr(params, maxLen, headTail)).append(")");
+        if (U.isNotNull(params)) {
+            sbd.append(" params(").append(U.compress(params)).append(")");
         }
-        if (U.isNotBlank(requestHeaders)) {
+        if (U.isNotNull(requestHeaders)) {
             sbd.append(" request headers(");
             for (String name : requestHeaders.names()) {
                 sbd.append("<").append(name).append(": ").append(requestHeaders.get(name)).append(">");
@@ -182,14 +185,14 @@ public class HttpOkClientUtil {
 
         sbd.append(",");
 
-        if (U.isNotBlank(responseHeaders)) {
+        if (U.isNotNull(responseHeaders)) {
             sbd.append(" response headers(");
             for (String name : responseHeaders.names()) {
-                sbd.append("<").append(name).append(": ").append(responseHeaders.get(name)).append(">");
+                sbd.append("<").append(name).append(":").append(responseHeaders.get(name)).append(">");
             }
             sbd.append(")");
         }
-        sbd.append(" return(").append(U.toStr(U.replaceBlank(result), maxLen, headTail)).append(")");
+        sbd.append(" return(").append(U.compress(result)).append(")");
         return sbd.toString();
     }
     /** 发起 http 请求 */
@@ -212,13 +215,17 @@ public class HttpOkClientUtil {
             }
         } catch (IOException e) {
             if (LogUtil.ROOT_LOG.isInfoEnabled()) {
-                LogUtil.ROOT_LOG.info(String.format("(%s %s) exception", method, url), e);
+                LogUtil.ROOT_LOG.info("{} => {} exception", method, url, e);
             }
         }
         return null;
     }
 
     private static Request wrapperRequest(Request.Builder builder, String url) {
+        String traceId = LogUtil.getTraceId();
+        if (U.isNotNull(traceId)) {
+            builder.addHeader(Const.TRACE, traceId);
+        }
         return builder.header("User-Agent", USER_AGENT).url(url).build();
     }
 
@@ -242,10 +249,10 @@ public class HttpOkClientUtil {
 
             File f = new File(file);
             f.getParentFile().mkdirs();
-            Files.write(bytes, f);
+            Files.write(f.toPath(), bytes);
         } catch (IOException e) {
             if (LogUtil.ROOT_LOG.isInfoEnabled()) {
-                LogUtil.ROOT_LOG.info(String.format("download (%s) to file(%s) exception", url, file), e);
+                LogUtil.ROOT_LOG.info("download ({}) to file({}) exception", url, file, e);
             }
             U.assertException("下载文件异常");
         }
@@ -272,10 +279,10 @@ public class HttpOkClientUtil {
 
             File f = new File(file);
             f.getParentFile().mkdirs();
-            Files.write(bytes, f);
+            Files.write(f.toPath(), bytes);
         } catch (IOException e) {
             if (LogUtil.ROOT_LOG.isErrorEnabled()) {
-                LogUtil.ROOT_LOG.error(String.format("post download (%s) to file(%s) exception", url, file), e);
+                LogUtil.ROOT_LOG.error("post download ({}) to file({}) exception", url, file, e);
             }
             U.assertException("下载文件异常");
         }

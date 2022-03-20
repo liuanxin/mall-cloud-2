@@ -59,7 +59,7 @@
         </dependency>
     </dependencies>
 
-    <build>
+    <!--<build>
         <finalName>message-consume</finalName>
         <plugins>
             <plugin>
@@ -67,5 +67,5 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
         </plugins>
-    </build>
+    </build>-->
 </project>

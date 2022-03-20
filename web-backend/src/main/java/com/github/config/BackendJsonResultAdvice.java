@@ -23,7 +23,7 @@ public class BackendJsonResultAdvice implements ResponseBodyAdvice<JsonResult> {
                                       ServerHttpRequest request, ServerHttpResponse response) {
         // 刷新一下 JsonResult 中 token 对应的超时时间
         /*String token = AppTokenHandler.resetTokenExpireTime();
-        if (U.isNotBlank(token)) {
+        if (U.isNotNull(token)) {
             body.setToken(token);
         }*/
         return body;

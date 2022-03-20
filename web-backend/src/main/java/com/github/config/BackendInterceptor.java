@@ -3,11 +3,9 @@ package com.github.config;
 import com.github.common.Const;
 import com.github.common.annotation.NeedLogin;
 import com.github.common.util.LogUtil;
-import com.github.common.util.RequestUtils;
-import com.github.common.util.U;
+import com.github.common.util.RequestUtil;
 import com.github.util.BackendSessionUtil;
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
@@ -22,12 +20,7 @@ public class BackendInterceptor implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response,
                              Object handler) throws Exception {
         // 跟子线程共享请求上下文, 这样之后 FeignInterceptor 中调用 RequestContextHolder.getRequestAttributes() 才不是 null
-        RequestContextHolder.setRequestAttributes(RequestContextHolder.getRequestAttributes(), true);
-
-        String requestTraceId = request.getHeader(Const.TRACE);
-        String traceId = U.isBlank(requestTraceId) ? U.uuid16() : requestTraceId;
-        LogUtil.bindTraceId(traceId);
-
+        // RequestContextHolder.setRequestAttributes(RequestContextHolder.getRequestAttributes(), true);
         bindParam();
 
         checkLoginAndPermission(handler);
@@ -51,8 +44,10 @@ public class BackendInterceptor implements HandlerInterceptor {
     }
 
     private void bindParam() {
-        // 打印日志上下文中的数据
-        LogUtil.bind(RequestUtils.logContextInfo().setUser(BackendSessionUtil.getUserInfo()));
+        String traceId = RequestUtil.getCookieOrHeaderOrParam(Const.TRACE);
+        LogUtil.putContext(traceId, RequestUtil.logContextInfo());
+        LogUtil.putIp(RequestUtil.getRealIp());
+        LogUtil.putUser(BackendSessionUtil.getUserInfo());
     }
 
     private void unbindParam() {

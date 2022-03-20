@@ -2,8 +2,8 @@ package com.github.common.encrypt;
 
 import com.github.common.util.A;
 import com.github.common.util.U;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -16,11 +16,11 @@ public class EncryptTest {
     public void aesCheck() {
         String encode = Encrypt.aesEncode(SOURCE);
         System.out.println(encode);
-        Assert.assertTrue(encode.length() > 0);
+        Assertions.assertTrue(encode.length() > 0);
 
         String decode = Encrypt.aesDecode(encode);
         System.out.println(decode);
-        Assert.assertEquals(SOURCE, decode);
+        Assertions.assertEquals(SOURCE, decode);
     }
 
     @Test
@@ -33,19 +33,19 @@ public class EncryptTest {
 
         String encode = Encrypt.desEncode(SOURCE);
         System.out.println("des: " + encode);
-        Assert.assertTrue(encode.length() > 0);
+        Assertions.assertTrue(encode.length() > 0);
 
         String decode = Encrypt.desDecode(encode);
         System.out.println("des: " + decode);
-        Assert.assertEquals(SOURCE, decode);
+        Assertions.assertEquals(SOURCE, decode);
 
         encode = Encrypt.desCbcEncode(SOURCE);
         System.out.println("des/cbc: " + encode);
-        Assert.assertTrue(encode.length() > 0);
+        Assertions.assertTrue(encode.length() > 0);
 
         decode = Encrypt.desCbcDecode(encode);
         System.out.println("des/cbc: " + decode);
-        Assert.assertEquals(SOURCE, decode);
+        Assertions.assertEquals(SOURCE, decode);
     }
 
     @Test
@@ -76,22 +76,22 @@ public class EncryptTest {
                 "name", System.currentTimeMillis()
         ));
         System.out.println(encode);
-        Assert.assertTrue(encode.length() > 0);
+        Assertions.assertTrue(encode.length() > 0);
 
         Map<String, Object> decode = Encrypt.jwtDecode(encode);
-        Assert.assertEquals(123, decode.get("id"));
-        Assert.assertTrue(System.currentTimeMillis() > U.toLong(decode.get("name").toString()));
+        Assertions.assertEquals(123, decode.get("id"));
+        Assertions.assertTrue(System.currentTimeMillis() > U.toLong(decode.get("name").toString()));
 
 
         encode = Encrypt.jwtEncode(A.maps("id", 123), 2L, TimeUnit.SECONDS);
-        Assert.assertTrue(encode.length() > 0);
+        Assertions.assertTrue(encode.length() > 0);
 
         decode = Encrypt.jwtDecode(encode);
-        Assert.assertEquals(123, decode.get("id"));
+        Assertions.assertEquals(123, decode.get("id"));
 
 
         encode = Encrypt.jwtEncode(A.maps("id", 123), 10L, TimeUnit.MILLISECONDS);
-        Assert.assertTrue(encode.length() > 0);
+        Assertions.assertTrue(encode.length() > 0);
 
         try {
             Thread.sleep(11L);
@@ -99,32 +99,32 @@ public class EncryptTest {
         }
 
         decode = Encrypt.jwtDecode(encode);
-        Assert.assertTrue(A.isEmpty(decode));
+        Assertions.assertTrue(A.isEmpty(decode));
     }
 
     @Test
     public void base64Test() {
         String encode = Encrypt.base64Encode(SOURCE);
-        Assert.assertTrue(encode.length() > 0);
+        Assertions.assertTrue(encode.length() > 0);
 
         String decode = Encrypt.base64Decode(encode);
-        Assert.assertEquals(SOURCE, decode);
+        Assertions.assertEquals(SOURCE, decode);
     }
 
     @Test
     public void bcryptTest() {
         String encode = Encrypt.bcryptEncode(SOURCE);
-        Assert.assertTrue(encode.length() > 0);
+        Assertions.assertTrue(encode.length() > 0);
 
         String encode2 = Encrypt.bcryptEncode(SOURCE);
         // 两次密码的值不同
-        Assert.assertNotEquals(encode, encode2);
+        Assertions.assertNotEquals(encode, encode2);
 
         // 加一个空格, 密码就不同了
-        Assert.assertTrue(Encrypt.checkNotBcrypt(SOURCE + " ", encode));
+        Assertions.assertTrue(Encrypt.checkNotBcrypt(SOURCE + " ", encode));
 
-        Assert.assertTrue(Encrypt.checkBcrypt(SOURCE, encode));
-        Assert.assertTrue(Encrypt.checkBcrypt(SOURCE, encode2));
+        Assertions.assertTrue(Encrypt.checkBcrypt(SOURCE, encode));
+        Assertions.assertTrue(Encrypt.checkBcrypt(SOURCE, encode2));
     }
 
     @Test
@@ -134,31 +134,31 @@ public class EncryptTest {
 
         String decode = Encrypt.rc4Decode(encode);
         System.out.println(decode);
-        Assert.assertTrue(SOURCE.equals(decode));
+        Assertions.assertTrue(SOURCE.equals(decode));
     }
 
     @Test
     public void digestTest() {
         String encode = Encrypt.to16Md5(SOURCE);
-        Assert.assertTrue(encode.length() == 16);
+        Assertions.assertTrue(encode.length() == 16);
 
         encode = Encrypt.toMd5(SOURCE);
-        Assert.assertTrue(encode.length() == 32);
+        Assertions.assertTrue(encode.length() == 32);
 
         encode = Encrypt.toSha1(SOURCE);
-        Assert.assertTrue(encode.length() == 40);
+        Assertions.assertTrue(encode.length() == 40);
 
         encode = Encrypt.toSha224(SOURCE);
-        Assert.assertTrue(encode.length() == 56);
+        Assertions.assertTrue(encode.length() == 56);
 
         encode = Encrypt.toSha256(SOURCE);
-        Assert.assertTrue(encode.length() == 64);
+        Assertions.assertTrue(encode.length() == 64);
 
         encode = Encrypt.toSha384(SOURCE);
-        Assert.assertTrue(encode.length() == 96);
+        Assertions.assertTrue(encode.length() == 96);
 
         encode = Encrypt.toSha512(SOURCE);
-        Assert.assertTrue(encode.length() == 128);
+        Assertions.assertTrue(encode.length() == 128);
     }
 
     @Test
@@ -168,21 +168,21 @@ public class EncryptTest {
         String str = p + "&key=" + k;
 
         String encode = Encrypt.toHmacMd5(str, k);
-        Assert.assertTrue(encode.length() == 32);
+        Assertions.assertTrue(encode.length() == 32);
 
         encode = Encrypt.toHmacSha1(str, k);
-        Assert.assertTrue(encode.length() == 40);
+        Assertions.assertTrue(encode.length() == 40);
 
         encode = Encrypt.toHmacSha224(str, k);
-        Assert.assertTrue(encode.length() == 56);
+        Assertions.assertTrue(encode.length() == 56);
 
         encode = Encrypt.toHmacSha256(str, k);
-        Assert.assertTrue(encode.length() == 64);
+        Assertions.assertTrue(encode.length() == 64);
 
         encode = Encrypt.toHmacSha384(str, k);
-        Assert.assertTrue(encode.length() == 96);
+        Assertions.assertTrue(encode.length() == 96);
 
         encode = Encrypt.toHmacSha512(str, k);
-        Assert.assertTrue(encode.length() == 128);
+        Assertions.assertTrue(encode.length() == 128);
     }
 }

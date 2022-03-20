@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.github.common.date.DateUtil;
+import com.github.common.util.DesensitizationUtil;
 import com.github.common.util.U;
 
 import java.io.IOException;
@@ -15,69 +16,71 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Date;
 
-public class JsonModule {
+public final class JsonModule {
 
-    private static final int DES_MAX = 1000;
-    private static final int DES_LEN = 200;
+    /** 全局序列化反序列化模块 */
+    public static final SimpleModule GLOBAL_MODULE = new SimpleModule()
+            .addSerializer(BigDecimal.class, BigDecimalSerializer.instance)
+
+            .addDeserializer(BigDecimal.class, BigDecimalDeserializer.instance)
+            .addDeserializer(Date.class, DateDeserializer.instance);
+
+
+    /** 脱敏用到的序列化模块 */
+    public static final SimpleModule DES_MODULE = new SimpleModule()
+            .addSerializer(String.class, StringDesensitization.instance);
+
 
     /** 字符串脱敏 */
-    public static SimpleModule stringDesensitization() {
-        return new SimpleModule().addSerializer(String.class, new JsonSerializer<String>() {
-            @Override
-            public void serialize(String value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
-                if (U.isNull(value)) {
-                    gen.writeString(U.EMPTY);
-                    return;
-                }
-                String key = gen.getOutputContext().getCurrentName();
-                if (U.isBlank(key)) {
-                    gen.writeString(value);
-                    return;
-                }
+    public static class StringDesensitization extends JsonSerializer<String> {
+        public static final StringDesensitization instance = new StringDesensitization();
 
-                String data;
-                if ("password".equalsIgnoreCase(key)) {
-                    data = "***";
-                } else {
-                    int length = value.length();
-                    data = (length <= DES_MAX) ? value : (value.substring(0, DES_LEN) + " *** " + value.substring(length - DES_LEN));
-                }
-                gen.writeString(data);
-            }
-        });
+        @Override
+        public void serialize(String value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+            String key = gen.getOutputContext().getCurrentName();
+            gen.writeString(DesensitizationUtil.des(key, value));
+        }
     }
 
     /** 序列化 BigDecimal 小数位不足 2 位的返回 2 位 */
-    public static SimpleModule bigDecimalSerializer() {
-        return new SimpleModule().addSerializer(BigDecimal.class, new JsonSerializer<BigDecimal>() {
-            @Override
-            public void serialize(BigDecimal value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
-                if (U.isNull(value)) {
-                    gen.writeString(U.EMPTY);
-                    return;
-                }
+    public static class BigDecimalSerializer extends JsonSerializer<BigDecimal> {
+        public static final BigDecimalSerializer instance = new BigDecimalSerializer();
 
-                // 不足 2 位则输出 2 位小数
-                if (value.scale() < 2) {
-                    gen.writeString(value.setScale(2, RoundingMode.UNNECESSARY).toString());
-                } else {
-                    gen.writeString(value.toString());
-                }
+        @Override
+        public void serialize(BigDecimal value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+            int minScale = 2;
+            if (U.isNull(value)) {
+                gen.writeString(U.EMPTY);
+            } else if (value.scale() < minScale) {
+                // 忽略小数位后的值, 有值就进 1 则使用 RoundingMode.UP
+                gen.writeString(value.setScale(minScale, RoundingMode.DOWN).toString());
+            } else {
+                gen.writeString(value.toString());
             }
-        });
+        }
     }
 
-
-    // ======================================== 上面是序列化, 下面是反序列化 ========================================
-
+    // ================= 上面是序列化, 下面是反序列化 =================
 
     /** 反序列化 Date, 序列化使用全局配置, 或者属性上的 @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8") 注解 */
-    public static SimpleModule dateDeserializer() {
-        return new SimpleModule().addDeserializer(Date.class, new JsonDeserializer<Date>() {
-            @Override
-            public Date deserialize(JsonParser p, DeserializationContext ctx) throws IOException {
-                return DateUtil.parse(p.getText().trim());
-            }
-        });
+    public static class DateDeserializer extends JsonDeserializer<Date> {
+        public static final DateDeserializer instance = new DateDeserializer();
+
+        @Override
+        public Date deserialize(JsonParser p, DeserializationContext ctx) throws IOException {
+            Date date = DateUtil.parse(p.getText().trim());
+            return (U.isNotNull(date) && date.getTime() == 0) ? null : date;
+        }
+    }
+
+    /** 反序列化 BigDecimal */
+    public static class BigDecimalDeserializer extends JsonDeserializer<BigDecimal> {
+        public static final BigDecimalDeserializer instance = new BigDecimalDeserializer();
+
+        @Override
+        public BigDecimal deserialize(JsonParser p, DeserializationContext ctx) throws IOException {
+            String text = p.getText();
+            return U.isNull(text) ? null : new BigDecimal(text.trim());
+        }
     }
 }

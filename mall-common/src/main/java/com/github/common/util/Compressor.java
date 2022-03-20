@@ -99,7 +99,7 @@ public final class Compressor {
 
     /** 压缩 html 代码成一行 */
     public static String html(String html) {
-        if (U.isBlank(html)) {
+        if (U.isNull(html)) {
             return U.EMPTY;
         }
 
@@ -164,11 +164,11 @@ public final class Compressor {
         return content;
     }
     private static String receiveJs(String html, List<String> ignoreList) {
-        if (U.isNotBlank(html) && A.isNotEmpty(ignoreList)) {
+        if (U.isNotNull(html) && A.isNotEmpty(ignoreList)) {
             String place;
             while (html.contains(SCRIPT_PLACE)) {
                 place = ignoreList.remove(0);
-                if (U.isNotBlank(place)) {
+                if (U.isNotNull(place)) {
                     // 把 js 字符串中 // 或 /* */ 替换掉
                     place = replaceComment(SCRIPT_STR_SINGLE_REGEX, SCRIPT_STR_SINGLE_PLACE, place);
                     place = replaceComment(SCRIPT_STR_SINGLE_APOSTROPHE_REGEX, SCRIPT_STR_SINGLE_PLACE, place);

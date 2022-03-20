@@ -39,7 +39,7 @@ public final class ManagerDataCollectUtil {
     public static Map<String, Map<String, Object>> singleEnumInfo(String type) {
         Map<String, Map<String, Object>> returnMap = Maps.newHashMap();
         for (String anEnum : type.split(",")) {
-            if (U.isNotBlank(anEnum)) {
+            if (U.isNotNull(anEnum)) {
                 anEnum = anEnum.trim();
                 String name;
                 if (anEnum.contains("-")) {

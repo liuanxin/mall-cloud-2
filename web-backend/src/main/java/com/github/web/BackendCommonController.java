@@ -25,7 +25,7 @@ public class BackendCommonController {
     @GetMapping("/enum")
     public JsonResult<Map<String, Map<String, Object>>> enumList(
             @ApiParam("枚举类型. 不传则返回所有列表, 多个以逗号分隔") String type) {
-        return U.isBlank(type) ?
+        return U.isNull(type) ?
                 JsonResult.success("枚举列表", BackendDataCollectUtil.ALL_ENUM_INFO) :
                 JsonResult.success("枚举信息", BackendDataCollectUtil.singleEnumInfo(type));
     }

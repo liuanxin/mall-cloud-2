@@ -79,9 +79,9 @@ public class DemoServiceImpl implements DemoService {
     @Override
     public PageReturn<Demo> pageList(Demo param, PageParam page) {
         DemoExample example = new DemoExample();
-        if (U.isNotBlank(param)) {
+        if (U.isNotNull(param)) {
             DemoExample.Criteria criteria = example.or();
-            if (U.isNotBlank(param.getName())) {
+            if (U.isNotNull(param.getName())) {
                 criteria.andNameLike(name);
             }
             // 如果有其他的属性 -> 动态拼接

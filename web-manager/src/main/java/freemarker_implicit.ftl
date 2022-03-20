@@ -9,6 +9,6 @@
 [#-- @ftlvariable name="U" type="com.github.common.util.U.static" --]
 [#-- @ftlvariable name="Render" type="com.github.common.util.Render.static" --]
 [#-- @ftlvariable name="DateUtil" type="com.github.common.date.DateUtil.static" --]
-[#-- @ftlvariable name="RequestUtils" type="com.github.common.util.RequestUtils.static" --]
+[#-- @ftlvariable name="RequestUtils" type="com.github.common.util.RequestUtil.static" --]
 
 [#-- @ftlvariable name="CentralPlatformSessionUtil" type="com.github.util.ManagerSessionUtil.static" --]
