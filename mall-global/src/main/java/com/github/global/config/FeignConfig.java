@@ -19,7 +19,10 @@ import com.netflix.hystrix.strategy.properties.HystrixProperty;
 import feign.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.cloud.netflix.ribbon.SpringClientFactory;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.cloud.openfeign.ribbon.CachingSpringLoadBalancerFactory;
+import org.springframework.cloud.openfeign.ribbon.LoadBalancerFeignClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.context.request.RequestAttributes;
@@ -95,6 +98,21 @@ public class FeignConfig {
         };
     }
 
+    /** @see org.springframework.cloud.openfeign.ribbon.HttpClientFeignLoadBalancedConfiguration */
+    @Bean("feignClient")
+    @SuppressWarnings("JavadocReference")
+    public Client loadBalancerClient(CachingSpringLoadBalancerFactory cachingFactory, SpringClientFactory clientFactory) {
+        return new LoadBalancerFeignClient(new Client.Default(null, null) {
+            @Override
+            public Response execute(Request request, Request.Options options) throws IOException {
+                if (LogUtil.ROOT_LOG.isInfoEnabled()) {
+                    LogUtil.ROOT_LOG.info("feignClient ribbon real url --> {} {}", request.httpMethod().name(), request.url());
+                }
+                return super.execute(request, options);
+            }
+        }, cachingFactory, clientFactory);
+    }
+
     /**
      * 处理日志打印: 需要配置 feign.client.config.default.loggerLevel 的值才能进入下面的日志打印,
      * 这个值默认是 NONE, 只要不是 NONE 就行(可以设置为 BASIC、HEADERS、FULL),
@@ -110,7 +128,7 @@ public class FeignConfig {
             protected void logRequest(String configKey, Level logLevel, Request request) {
                 if (LogUtil.ROOT_LOG.isInfoEnabled()) {
                     StringBuilder sbd = new StringBuilder("request:[");
-                    sbd.append("url(").append(request.url()).append(")");
+                    sbd.append(request.httpMethod().name()).append(" ").append(request.url());
                     collectHeader(sbd, request.headers());
 
                     byte[] body = request.body();
