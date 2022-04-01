@@ -178,13 +178,15 @@ public class FeignConfig {
             }
 
             private void collectHeader(StringBuilder sbd, Map<String, Collection<String>> headers) {
-                sbd.append("header(");
-                for (Map.Entry<String, Collection<String>> entry : headers.entrySet()) {
-                    sbd.append("<");
-                    sbd.append(entry.getKey()).append(" : ").append(DesensitizationUtil.des(entry.getKey(), A.toStr(entry.getValue())));
-                    sbd.append(">");
+                if (A.isNotEmpty(headers)) {
+                    sbd.append("header(");
+                    for (Map.Entry<String, Collection<String>> entry : headers.entrySet()) {
+                        sbd.append("<");
+                        sbd.append(entry.getKey()).append(" : ").append(DesensitizationUtil.des(entry.getKey(), A.toStr(entry.getValue())));
+                        sbd.append(">");
+                    }
+                    sbd.append(")");
                 }
-                sbd.append(")");
             }
         };
     }
