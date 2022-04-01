@@ -98,7 +98,11 @@ public class FeignConfig {
         };
     }
 
-    /** @see org.springframework.cloud.openfeign.ribbon.HttpClientFeignLoadBalancedConfiguration */
+    /**
+     * 使用 feign 调用如果用的是 name 而不是 url 时, 日志只能输出在注册中心中用到的服务名, 负载均衡后将可以获取到具体的 ip:port
+     *
+     * @see org.springframework.cloud.openfeign.ribbon.HttpClientFeignLoadBalancedConfiguration
+     */
     @Bean("feignClient")
     @SuppressWarnings("JavadocReference")
     public Client loadBalancerClient(CachingSpringLoadBalancerFactory cachingFactory, SpringClientFactory clientFactory) {
@@ -106,7 +110,7 @@ public class FeignConfig {
             @Override
             public Response execute(Request request, Request.Options options) throws IOException {
                 if (LogUtil.ROOT_LOG.isInfoEnabled()) {
-                    LogUtil.ROOT_LOG.info("feignClient ribbon real url --> {} {}", request.httpMethod().name(), request.url());
+                    LogUtil.ROOT_LOG.info("feignClient load-balancer real url:({})", request.url());
                 }
                 return super.execute(request, options);
             }
