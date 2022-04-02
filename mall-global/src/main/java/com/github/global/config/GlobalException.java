@@ -105,6 +105,10 @@ public class GlobalException {
         int status = returnStatusCode ? JsonCode.BAD_REQUEST.getCode() : JsonCode.SUCCESS.getCode();
         return ResponseEntity.status(status).body(JsonResult.badRequest(e.getMessage()));
     }
+    @ExceptionHandler(ForceReturnException.class)
+    public ResponseEntity<?> forceReturn(ForceReturnException e) {
+        return e.getResponse();
+    }
 
 
     // 以下是 spring 的内部异常

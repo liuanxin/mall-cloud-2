@@ -1,6 +1,10 @@
 package com.github.global.config;
 
 import com.github.common.Const;
+import com.github.common.exception.ForceReturnException;
+import com.github.common.json.JsonCode;
+import com.github.common.json.JsonResult;
+import com.github.common.json.JsonUtil;
 import com.github.common.util.*;
 import com.google.common.collect.Sets;
 import com.google.common.io.ByteStreams;
@@ -17,14 +21,22 @@ import com.netflix.hystrix.strategy.metrics.HystrixMetricsPublisher;
 import com.netflix.hystrix.strategy.properties.HystrixPropertiesStrategy;
 import com.netflix.hystrix.strategy.properties.HystrixProperty;
 import feign.*;
+import feign.codec.Decoder;
+import feign.optionals.OptionalDecoder;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
 import org.springframework.cloud.netflix.ribbon.SpringClientFactory;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.cloud.openfeign.ribbon.CachingSpringLoadBalancerFactory;
 import org.springframework.cloud.openfeign.ribbon.LoadBalancerFeignClient;
+import org.springframework.cloud.openfeign.support.ResponseEntityDecoder;
+import org.springframework.cloud.openfeign.support.SpringDecoder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -33,6 +45,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
+import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.BlockingQueue;
@@ -98,9 +111,56 @@ public class FeignConfig {
         };
     }
 
+    /** @see org.springframework.cloud.openfeign.FeignClientsConfiguration#feignDecoder() */
+    @Bean("feignDecoder")
+    public Decoder selfDecoder(ObjectFactory<HttpMessageConverters> messageConverters) {
+        return new OptionalDecoder(new ResponseEntityDecoder(new SpringDecoder(messageConverters) {
+            @SuppressWarnings("rawtypes")
+            @Override
+            public Object decode(Response res, Type type) throws IOException, FeignException {
+                if (res.status() != HttpStatus.OK.value()) {
+                    if (LogUtil.ROOT_LOG.isInfoEnabled()) {
+                        LogUtil.ROOT_LOG.info("feignClient return({}) not success", JsonUtil.toJson(res));
+                    }
+                    throw new ForceReturnException(ResponseEntity.status(res.status()).body(res.reason()));
+                }
+
+                try {
+                    return super.decode(res, type);
+                } catch (IOException | FeignException e) {
+                    String json = null;
+                    if (res.body().isRepeatable()) {
+                        try (Reader reader = res.body().asReader(StandardCharsets.UTF_8)) {
+                            json = CharStreams.toString(reader);
+                        } catch (Exception ignore) {
+                        }
+                    } else {
+                        try (InputStream inputStream = res.body().asInputStream()) {
+                            json = new String(ByteStreams.toByteArray(inputStream), StandardCharsets.UTF_8);
+                        } catch (Exception ignore) {
+                        }
+                    }
+                    if (U.isNotBlank(json)) {
+                        JsonResult result = null;
+                        try {
+                            result = JsonUtil.toObject(json, JsonResult.class);
+                        } catch (Exception ignore) {
+                        }
+                        if (U.isNotNull(result) && U.isNotNull(result.getCode()) && result.getCode() != JsonCode.SUCCESS) {
+                            throw new ForceReturnException(ResponseEntity.ok().body(result));
+                        }
+                    }
+                    throw e;
+                }
+            }
+        }));
+    }
+
     /**
-     * 使用 feign 调用如果用的是 name 而不是 url 时, 日志只能输出在注册中心中用到的服务名, 负载均衡后将可以获取到具体的 ip:port
+     * 使用 feign 调用如果用的是 name 而不是 url 时, 日志只能输出在注册中心中用到的服务名.
+     * 负载均衡后将可以获取到具体的 ip:port, 要注意: 负载均衡用的是 ribbon 还是 loadbalancer
      *
+     * @see org.springframework.cloud.openfeign.loadbalancer.HttpClientFeignLoadBalancerConfiguration
      * @see org.springframework.cloud.openfeign.ribbon.HttpClientFeignLoadBalancedConfiguration
      */
     @Bean("feignClient")
