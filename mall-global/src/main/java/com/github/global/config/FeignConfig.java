@@ -119,8 +119,8 @@ public class FeignConfig {
             @Override
             public Object decode(Response res, Type type) throws IOException, FeignException {
                 if (res.status() != HttpStatus.OK.value()) {
-                    if (LogUtil.ROOT_LOG.isInfoEnabled()) {
-                        LogUtil.ROOT_LOG.info("feignClient return({}) not success", JsonUtil.toJson(res));
+                    if (LogUtil.ROOT_LOG.isErrorEnabled()) {
+                        LogUtil.ROOT_LOG.error("feignClient return({}) not success", JsonUtil.toJson(res));
                     }
                     throw new ForceReturnException(ResponseEntity.status(res.status()).body(res.reason()));
                 }
