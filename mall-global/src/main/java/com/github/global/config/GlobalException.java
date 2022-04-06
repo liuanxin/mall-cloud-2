@@ -35,6 +35,7 @@ import java.util.Map;
  * @see org.springframework.boot.autoconfigure.web.ErrorProperties
  * @see org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration
  */
+@SuppressWarnings("rawtypes")
 @ConditionalOnClass({ HttpServletRequest.class, ResponseEntity.class })
 @RestControllerAdvice
 public class GlobalException {
@@ -53,7 +54,7 @@ public class GlobalException {
 
     /** 业务异常 */
     @ExceptionHandler(ServiceException.class)
-    public ResponseEntity<JsonResult<Void>> service(ServiceException e) {
+    public ResponseEntity<JsonResult> service(ServiceException e) {
         if (LogUtil.ROOT_LOG.isDebugEnabled()) {
             LogUtil.ROOT_LOG.debug("业务异常", e);
         }
@@ -62,7 +63,7 @@ public class GlobalException {
     }
     /** 未登录 */
     @ExceptionHandler(NotLoginException.class)
-    public ResponseEntity<JsonResult<Void>> notLogin(NotLoginException e) {
+    public ResponseEntity<JsonResult> notLogin(NotLoginException e) {
         if (LogUtil.ROOT_LOG.isDebugEnabled()) {
             LogUtil.ROOT_LOG.debug("没登录", e);
         }
@@ -71,7 +72,7 @@ public class GlobalException {
     }
     /** 无权限 */
     @ExceptionHandler(ForbiddenException.class)
-    public ResponseEntity<JsonResult<Void>> forbidden(ForbiddenException e) {
+    public ResponseEntity<JsonResult> forbidden(ForbiddenException e) {
         if (LogUtil.ROOT_LOG.isDebugEnabled()) {
             LogUtil.ROOT_LOG.debug("没权限", e);
         }
@@ -80,7 +81,7 @@ public class GlobalException {
     }
     /** 404 */
     @ExceptionHandler(NotFoundException.class)
-    public ResponseEntity<JsonResult<Void>> notFound(NotFoundException e) {
+    public ResponseEntity<JsonResult> notFound(NotFoundException e) {
         if (LogUtil.ROOT_LOG.isDebugEnabled()) {
             LogUtil.ROOT_LOG.debug("404", e);
         }
@@ -89,7 +90,7 @@ public class GlobalException {
     }
     /** 参数验证 */
     @ExceptionHandler(ParamException.class)
-    public ResponseEntity<JsonResult<Void>> param(ParamException e) {
+    public ResponseEntity<JsonResult> param(ParamException e) {
         if (LogUtil.ROOT_LOG.isDebugEnabled()) {
             LogUtil.ROOT_LOG.debug("参数验证不过", e);
         }
@@ -98,7 +99,7 @@ public class GlobalException {
     }
     /** 错误的请求 */
     @ExceptionHandler(BadRequestException.class)
-    public ResponseEntity<JsonResult<Void>> badRequest(BadRequestException e) {
+    public ResponseEntity<JsonResult> badRequest(BadRequestException e) {
         if (LogUtil.ROOT_LOG.isDebugEnabled()) {
             LogUtil.ROOT_LOG.debug("错误的请求", e);
         }
@@ -106,7 +107,7 @@ public class GlobalException {
         return ResponseEntity.status(status).body(JsonResult.badRequest(e.getMessage()));
     }
     @ExceptionHandler(ForceReturnException.class)
-    public ResponseEntity<?> forceReturn(ForceReturnException e) {
+    public ResponseEntity forceReturn(ForceReturnException e) {
         return e.getResponse();
     }
 
@@ -114,7 +115,7 @@ public class GlobalException {
     // 以下是 spring 的内部异常
 
     @ExceptionHandler(NoHandlerFoundException.class)
-    public ResponseEntity<JsonResult<Void>> noHandler(NoHandlerFoundException e) {
+    public ResponseEntity<JsonResult> noHandler(NoHandlerFoundException e) {
         String msg = online ? "404" : String.format("404(%s %s)", e.getHttpMethod(), e.getRequestURL());
 
         bindAndPrintLog(msg, e);
@@ -122,7 +123,7 @@ public class GlobalException {
         return ResponseEntity.status(status).body(JsonResult.notFound(msg));
     }
     @ExceptionHandler(MissingServletRequestParameterException.class)
-    public ResponseEntity<JsonResult<Void>> missParam(MissingServletRequestParameterException e) {
+    public ResponseEntity<JsonResult> missParam(MissingServletRequestParameterException e) {
         String msg = online ? "缺少必须的参数"
                 : String.format("缺少必须的参数(%s), 类型(%s)", e.getParameterName(), e.getParameterType());
 
@@ -131,7 +132,7 @@ public class GlobalException {
         return ResponseEntity.status(status).body(JsonResult.badRequest(msg));
     }
     @ExceptionHandler(MissingRequestHeaderException.class)
-    public ResponseEntity<JsonResult<Void>> missHeader(MissingRequestHeaderException e) {
+    public ResponseEntity<JsonResult> missHeader(MissingRequestHeaderException e) {
         String msg = online ? "缺少必须的信息" : String.format("缺少头(%s)", e.getHeaderName());
 
         bindAndPrintLog(msg, e);
@@ -146,7 +147,7 @@ public class GlobalException {
         return ResponseEntity.status(status).body(JsonResult.badRequest(Joiner.on(",").join(errorMap.values()), errorMap));
     }
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
-    public ResponseEntity<JsonResult<Void>> notSupported(HttpRequestMethodNotSupportedException e) {
+    public ResponseEntity<JsonResult> notSupported(HttpRequestMethodNotSupportedException e) {
         String msg = online ? "不支持此种方式"
                 : String.format("不支持此种方式: 当前(%s), 支持(%s)", e.getMethod(), A.toStr(e.getSupportedMethods()));
         bindAndPrintLog(msg, e);
@@ -154,7 +155,7 @@ public class GlobalException {
         return ResponseEntity.status(status).body(JsonResult.fail(msg));
     }
     @ExceptionHandler(MaxUploadSizeExceededException.class)
-    public ResponseEntity<JsonResult<Void>> uploadSizeExceeded(MaxUploadSizeExceededException e) {
+    public ResponseEntity<JsonResult> uploadSizeExceeded(MaxUploadSizeExceededException e) {
         // 右移 20 位相当于除以两次 1024, 正好表示从字节到 Mb
         String msg = String.format("上传文件太大! 请保持在 %sM 以内", (e.getMaxUploadSize() >> 20));
         bindAndPrintLog(msg, e);
@@ -167,32 +168,49 @@ public class GlobalException {
 
     /** 未知的所有其他异常 */
     @ExceptionHandler(Throwable.class)
-    public ResponseEntity<JsonResult<Void>> other(Throwable e) {
-        Throwable exception = ExceptionUtil.boxInnerException(e);
+    public ResponseEntity other(Throwable e) {
+        Throwable exception = innerException(1, e);
         if (exception instanceof BadRequestException) {
-            return badRequest((BadRequestException) e);
+            return badRequest((BadRequestException) exception);
         } else if (exception instanceof ForbiddenException) {
-            return forbidden((ForbiddenException) e);
+            return forbidden((ForbiddenException) exception);
+        } else if (exception instanceof ForceReturnException) {
+            return forceReturn((ForceReturnException) exception);
         } else if (exception instanceof NotFoundException) {
-            return notFound((NotFoundException) e);
+            return notFound((NotFoundException) exception);
         } else if (exception instanceof NotLoginException) {
-            return notLogin((NotLoginException) e);
+            return notLogin((NotLoginException) exception);
         } else if (exception instanceof ParamException) {
-            return param((ParamException) e);
+            return param((ParamException) exception);
         } else if (exception instanceof ServiceException) {
-            return service((ServiceException) e);
+            return service((ServiceException) exception);
         } else {
             if (LogUtil.ROOT_LOG.isErrorEnabled()) {
-                LogUtil.ROOT_LOG.error("有错误", e);
+                LogUtil.ROOT_LOG.error("有错误", exception);
             }
 
             String msg = U.returnMsg(exception, online);
             int status = returnStatusCode ? JsonCode.FAIL.getCode() : JsonCode.SUCCESS.getCode();
-            return ResponseEntity.status(status).body(JsonResult.fail(msg, errorTrack(e)));
+            return ResponseEntity.status(status).body(JsonResult.fail(msg, errorTrack(exception)));
         }
     }
 
     // ==================================================
+
+    private Throwable innerException(int depth, Throwable e) {
+        Throwable cause = e.getCause();
+        if (cause == null || depth > 3
+                || e instanceof BadRequestException
+                || e instanceof ForbiddenException
+                || e instanceof ForceReturnException
+                || e instanceof NotFoundException
+                || e instanceof NotLoginException
+                || e instanceof ParamException
+                || e instanceof ServiceException) {
+            return e;
+        }
+        return innerException(depth + 1, cause);
+    }
 
     private void bindAndPrintLog(String msg, Exception e) {
         if (LogUtil.ROOT_LOG.isDebugEnabled()) {
