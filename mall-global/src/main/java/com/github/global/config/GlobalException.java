@@ -168,14 +168,28 @@ public class GlobalException {
     /** 未知的所有其他异常 */
     @ExceptionHandler(Throwable.class)
     public ResponseEntity<JsonResult<Void>> other(Throwable e) {
-        if (LogUtil.ROOT_LOG.isErrorEnabled()) {
-            LogUtil.ROOT_LOG.error("有错误", e);
-        }
+        Throwable exception = ExceptionUtil.boxInnerException(e);
+        if (exception instanceof BadRequestException) {
+            return badRequest((BadRequestException) e);
+        } else if (exception instanceof ForbiddenException) {
+            return forbidden((ForbiddenException) e);
+        } else if (exception instanceof NotFoundException) {
+            return notFound((NotFoundException) e);
+        } else if (exception instanceof NotLoginException) {
+            return notLogin((NotLoginException) e);
+        } else if (exception instanceof ParamException) {
+            return param((ParamException) e);
+        } else if (exception instanceof ServiceException) {
+            return service((ServiceException) e);
+        } else {
+            if (LogUtil.ROOT_LOG.isErrorEnabled()) {
+                LogUtil.ROOT_LOG.error("有错误", e);
+            }
 
-        Throwable cause = e.getCause();
-        Throwable t = (cause == null ? e : cause);
-        int status = returnStatusCode ? JsonCode.FAIL.getCode() : JsonCode.SUCCESS.getCode();
-        return ResponseEntity.status(status).body(JsonResult.fail(U.returnMsg(t, online), errorTrack(e)));
+            String msg = U.returnMsg(exception, online);
+            int status = returnStatusCode ? JsonCode.FAIL.getCode() : JsonCode.SUCCESS.getCode();
+            return ResponseEntity.status(status).body(JsonResult.fail(msg, errorTrack(e)));
+        }
     }
 
     // ==================================================

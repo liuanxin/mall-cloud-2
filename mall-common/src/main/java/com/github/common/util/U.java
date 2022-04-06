@@ -1372,13 +1372,6 @@ public final class U {
         throw new ServiceException(msg);
     }
 
-    /** 条件为 true 则抛出必须处理的异常 */
-    public static void assertMustHandleException(Boolean flag, String msg) throws ServiceMustHandleException {
-        if (flag != null && flag) {
-            throw new ServiceMustHandleException(msg);
-        }
-    }
-
     public static String returnMsg(Throwable e, boolean online) {
         String msg;
         if (online) {
