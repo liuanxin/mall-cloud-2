@@ -122,24 +122,14 @@ public class FeignConfig {
                     if (LogUtil.ROOT_LOG.isErrorEnabled()) {
                         LogUtil.ROOT_LOG.error("feignClient return({}) not success", JsonUtil.toJson(res));
                     }
-                    throw new ForceReturnException(ResponseEntity.status(res.status()).body(res.reason()));
+                    String returnBody = U.toStr(U.defaultIfBlank(getBody(res), res.reason()));
+                    throw new ForceReturnException(ResponseEntity.status(res.status()).body(returnBody));
                 }
 
                 try {
                     return super.decode(res, type);
                 } catch (IOException | FeignException e) {
-                    String json = null;
-                    if (res.body().isRepeatable()) {
-                        try (Reader reader = res.body().asReader(StandardCharsets.UTF_8)) {
-                            json = CharStreams.toString(reader);
-                        } catch (Exception ignore) {
-                        }
-                    } else {
-                        try (InputStream inputStream = res.body().asInputStream()) {
-                            json = new String(ByteStreams.toByteArray(inputStream), StandardCharsets.UTF_8);
-                        } catch (Exception ignore) {
-                        }
-                    }
+                    String json = getBody(res);
                     if (U.isNotBlank(json)) {
                         JsonResult result = null;
                         try {
@@ -152,6 +142,21 @@ public class FeignConfig {
                     }
                     throw e;
                 }
+            }
+            private String getBody(Response res) {
+                String json = null;
+                if (res.body().isRepeatable()) {
+                    try (Reader reader = res.body().asReader(StandardCharsets.UTF_8)) {
+                        json = CharStreams.toString(reader);
+                    } catch (Exception ignore) {
+                    }
+                } else {
+                    try (InputStream inputStream = res.body().asInputStream()) {
+                        json = new String(ByteStreams.toByteArray(inputStream), StandardCharsets.UTF_8);
+                    } catch (Exception ignore) {
+                    }
+                }
+                return json;
             }
         }));
     }
@@ -216,29 +221,32 @@ public class FeignConfig {
             protected Response logAndRebufferResponse(String configKey, Level level, Response response, long useTime) {
                 if (LogUtil.ROOT_LOG.isInfoEnabled()) {
                     StringBuilder sbd = new StringBuilder("response:[");
-                    sbd.append("time(").append(useTime).append(" ms), status(").append(response.status()).append(")");
-                    if (U.isNotNull(response.reason())) {
-                        sbd.append(", reason(").append(response.reason()).append(")");
+                    int status = response.status();
+                    sbd.append("time(").append(useTime).append(" ms), status(").append(status).append(")");
+                    String reason = response.reason();
+                    if (U.isNotBlank(reason)) {
+                        sbd.append(", reason(").append(reason).append(")");
                     }
-                    collectHeader(sbd, response.headers());
+                    Map<String, Collection<String>> headers = response.headers();
+                    collectHeader(sbd, headers);
                     if (response.body() != null) {
                         if (response.body().isRepeatable()) {
                             try (Reader reader = response.body().asReader(StandardCharsets.UTF_8)) {
                                 sbd.append(", return(").append(jsonDesensitization.toJson(CharStreams.toString(reader))).append(")");
                             } catch (Exception e) {
                                 if (LogUtil.ROOT_LOG.isErrorEnabled()) {
-                                    LogUtil.ROOT_LOG.error(String.format("feignClient <--> %s <-> read body exception", methodTag(configKey)), e);
+                                    LogUtil.ROOT_LOG.error(String.format("feignClient <--> %s <-> body reader exception", methodTag(configKey)), e);
                                 }
                             }
                         } else {
                             try (InputStream inputStream = response.body().asInputStream()) {
                                 byte[] bytes = ByteStreams.toByteArray(inputStream);
                                 sbd.append(", return(").append(jsonDesensitization.toJson(new String(bytes))).append(")");
-                                response = Response.builder().status(response.status()).reason(response.reason())
-                                        .headers(response.headers()).request(response.request()).body(bytes).build();
+                                response = Response.builder().status(status).reason(reason)
+                                        .headers(headers).request(response.request()).body(bytes).build();
                             } catch (Exception e) {
                                 if (LogUtil.ROOT_LOG.isErrorEnabled()) {
-                                    LogUtil.ROOT_LOG.error(String.format("feignClient <--> %s <-> read data exception", methodTag(configKey)), e);
+                                    LogUtil.ROOT_LOG.error(String.format("feignClient <--> %s <-> body input-stream exception", methodTag(configKey)), e);
                                 }
                             }
                         }
