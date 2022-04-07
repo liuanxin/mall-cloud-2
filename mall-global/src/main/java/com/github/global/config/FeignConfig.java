@@ -59,7 +59,7 @@ import java.util.concurrent.TimeUnit;
 @ConditionalOnClass({ FeignClient.class, Feign.class })
 public class FeignConfig {
 
-    /** 要放到 feign 请求头里的键 */
+    /** 要放到 feign 请求头里的键, 如果将全部的请求头都放进 feign 请求头, 可能会覆盖 Content-Type 的值 */
     private static final Set<String> HEADER_SET = Sets.newHashSet(
             Const.TOKEN.toLowerCase(), "cookie", "user-agent", "accept-language"
     );
@@ -145,15 +145,18 @@ public class FeignConfig {
             }
             private String getBody(Response res) {
                 String json = null;
-                if (res.body().isRepeatable()) {
-                    try (Reader reader = res.body().asReader(StandardCharsets.UTF_8)) {
-                        json = CharStreams.toString(reader);
-                    } catch (Exception ignore) {
-                    }
-                } else {
-                    try (InputStream inputStream = res.body().asInputStream()) {
-                        json = new String(ByteStreams.toByteArray(inputStream), StandardCharsets.UTF_8);
-                    } catch (Exception ignore) {
+                Response.Body body = res.body();
+                if (U.isNotNull(body)) {
+                    if (body.isRepeatable()) {
+                        try (Reader reader = body.asReader(StandardCharsets.UTF_8)) {
+                            json = CharStreams.toString(reader);
+                        } catch (Exception ignore) {
+                        }
+                    } else {
+                        try (InputStream inputStream = body.asInputStream()) {
+                            json = new String(ByteStreams.toByteArray(inputStream), StandardCharsets.UTF_8);
+                        } catch (Exception ignore) {
+                        }
                     }
                 }
                 return json;
@@ -229,9 +232,10 @@ public class FeignConfig {
                     }
                     Map<String, Collection<String>> headers = response.headers();
                     collectHeader(sbd, headers);
-                    if (response.body() != null) {
-                        if (response.body().isRepeatable()) {
-                            try (Reader reader = response.body().asReader(StandardCharsets.UTF_8)) {
+                    Response.Body body = response.body();
+                    if (U.isNotNull(body)) {
+                        if (body.isRepeatable()) {
+                            try (Reader reader = body.asReader(StandardCharsets.UTF_8)) {
                                 sbd.append(", return(").append(jsonDesensitization.toJson(CharStreams.toString(reader))).append(")");
                             } catch (Exception e) {
                                 if (LogUtil.ROOT_LOG.isErrorEnabled()) {
@@ -239,7 +243,7 @@ public class FeignConfig {
                                 }
                             }
                         } else {
-                            try (InputStream inputStream = response.body().asInputStream()) {
+                            try (InputStream inputStream = body.asInputStream()) {
                                 byte[] bytes = ByteStreams.toByteArray(inputStream);
                                 sbd.append(", return(").append(jsonDesensitization.toJson(new String(bytes))).append(")");
                                 response = Response.builder().status(status).reason(reason)
