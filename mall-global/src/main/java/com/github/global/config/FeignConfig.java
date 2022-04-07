@@ -128,7 +128,7 @@ public class FeignConfig {
 
                 try {
                     return super.decode(res, type);
-                } catch (IOException | FeignException e) {
+                } catch (Exception e) {
                     String json = getBody(res);
                     if (U.isNotBlank(json)) {
                         JsonResult result = null;
