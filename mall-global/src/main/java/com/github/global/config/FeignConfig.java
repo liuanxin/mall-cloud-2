@@ -124,9 +124,9 @@ public class FeignConfig {
                 }
             }
             private void handleReturnDecode(Response res) {
-                String json = null;
                 Response.Body body = res.body();
                 if (U.isNotNull(body)) {
+                    String json = null;
                     if (body.isRepeatable()) {
                         try (Reader reader = body.asReader(StandardCharsets.UTF_8)) {
                             json = CharStreams.toString(reader);
