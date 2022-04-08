@@ -744,7 +744,7 @@ public final class U {
     public static boolean checkEmail(String email) {
         return checkRegexWithStrict(email, EMAIL);
     }
-    /** 是一个手机则返回 true. 可以使用 - 和空格. 131-1234-5678, 131 1234 5678 是正确的手机号, 131-1234 5678 不是 */
+    /** 是一个手机则返回 true */
     public static boolean checkPhone(String phone) {
         return checkRegexWithStrict(phone, PHONE);
     }

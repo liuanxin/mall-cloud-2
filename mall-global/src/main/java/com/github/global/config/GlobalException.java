@@ -199,7 +199,7 @@ public class GlobalException {
 
     private Throwable innerException(int depth, Throwable e) {
         Throwable cause = e.getCause();
-        if (cause == null || depth > 3
+        if (cause == null || depth > U.MAX_DEPTH
                 || e instanceof BadRequestException
                 || e instanceof ForbiddenException
                 || e instanceof ForceReturnException
