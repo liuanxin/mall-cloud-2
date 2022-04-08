@@ -1,14 +1,11 @@
 package com.github.common.exception;
 
-import com.github.common.util.A;
 import com.google.common.base.Joiner;
-import lombok.Getter;
 
 import java.util.Collections;
 import java.util.Map;
 
-/** 自定义参数校验异常 */
-@Getter
+/** 参数校验 */
 public class ParamException extends RuntimeException {
 	private static final long serialVersionUID = 1L;
 
@@ -19,14 +16,13 @@ public class ParamException extends RuntimeException {
 		this.errorMap = Collections.emptyMap();
 	}
 
-	public ParamException(String field, String message) {
-		super(message);
-		this.errorMap = A.maps(field, message);
-	}
-
 	public ParamException(Map<String, String> errorMap) {
 		super(Joiner.on(",").join(errorMap.values()));
 		this.errorMap = errorMap;
+	}
+
+	public Map<String, String> getErrorMap() {
+		return errorMap;
 	}
 
 	@Override

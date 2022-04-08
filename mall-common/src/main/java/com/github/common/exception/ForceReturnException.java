@@ -4,7 +4,7 @@ import org.springframework.http.ResponseEntity;
 
 import java.io.Serializable;
 
-/** 业务异常 */
+/** 直接返回响应 */
 public class ForceReturnException extends RuntimeException implements Serializable {
     private static final long serialVersionUID = 1L;
 

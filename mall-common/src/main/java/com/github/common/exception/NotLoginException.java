@@ -2,7 +2,7 @@ package com.github.common.exception;
 
 import java.io.Serializable;
 
-/** 用户未登录的异常 */
+/** 未登录 */
 public class NotLoginException extends RuntimeException implements Serializable {
     private static final long serialVersionUID = 1L;
 
