@@ -35,7 +35,6 @@ import org.springframework.cloud.openfeign.support.ResponseEntityDecoder;
 import org.springframework.cloud.openfeign.support.SpringDecoder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -115,35 +114,16 @@ public class FeignConfig {
     @Bean("feignDecoder")
     public Decoder selfDecoder(ObjectFactory<HttpMessageConverters> messageConverters) {
         return new OptionalDecoder(new ResponseEntityDecoder(new SpringDecoder(messageConverters) {
-            @SuppressWarnings("rawtypes")
             @Override
             public Object decode(Response res, Type type) throws IOException, FeignException {
-                if (res.status() != HttpStatus.OK.value()) {
-                    if (LogUtil.ROOT_LOG.isErrorEnabled()) {
-                        LogUtil.ROOT_LOG.error("feignClient return({}) not success", JsonUtil.toJson(res));
-                    }
-                    String returnBody = U.toStr(U.defaultIfBlank(getBody(res), res.reason()));
-                    throw new ForceReturnException(ResponseEntity.status(res.status()).body(returnBody));
-                }
-
                 try {
                     return super.decode(res, type);
                 } catch (Exception e) {
-                    String json = getBody(res);
-                    if (U.isNotBlank(json)) {
-                        JsonResult result = null;
-                        try {
-                            result = JsonUtil.toObject(json, JsonResult.class);
-                        } catch (Exception ignore) {
-                        }
-                        if (U.isNotNull(result) && U.isNotNull(result.getCode()) && result.getCode() != JsonCode.SUCCESS) {
-                            throw new ForceReturnException(ResponseEntity.ok().body(result));
-                        }
-                    }
+                    handleReturnDecode(res);
                     throw e;
                 }
             }
-            private String getBody(Response res) {
+            private void handleReturnDecode(Response res) {
                 String json = null;
                 Response.Body body = res.body();
                 if (U.isNotNull(body)) {
@@ -158,8 +138,20 @@ public class FeignConfig {
                         } catch (Exception ignore) {
                         }
                     }
+                    if (U.isNotBlank(json)) {
+                        JsonResult<?> result = null;
+                        try {
+                            result = JsonUtil.toObject(json, JsonResult.class);
+                        } catch (Exception ignore) {
+                        }
+                        if (U.isNotNull(result)) {
+                            JsonCode code = result.getCode();
+                            if (U.isNotNull(code) && code != JsonCode.SUCCESS) {
+                                throw new ForceReturnException(ResponseEntity.ok().body(result));
+                            }
+                        }
+                    }
                 }
-                return json;
             }
         }));
     }
