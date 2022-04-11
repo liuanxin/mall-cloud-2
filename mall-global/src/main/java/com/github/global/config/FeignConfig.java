@@ -231,9 +231,12 @@ public class FeignConfig {
 
             private void handleErrorReturn(Response res, String data) {
                 if (res.status() != HttpStatus.OK.value()) {
-                    String returnBody = U.defaultIfBlank(data, U.toStr(res.reason()));
-                    throw new ForceReturnException(ResponseEntity.status(res.status()).body(returnBody));
+                    String reason = U.toStr(res.reason());
+                    String str = U.toStr(data);
+                    String resBody = (U.isBlank(reason) || U.isBlank(str)) ? U.defaultIfBlank(reason, str) : (reason + " : " + str);
+                    throw new ForceReturnException(ResponseEntity.status(res.status()).body(resBody));
                 }
+
                 if (U.isNotBlank(data)) {
                     JsonResult<?> result;
                     try {
