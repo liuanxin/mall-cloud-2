@@ -53,4 +53,8 @@ public enum JsonCode {
         JsonCode code = U.enumDeserializer(obj, JsonCode.class);
         return U.isNull(code) ? SUCCESS : code;
     }
+
+    public boolean notSuccess() {
+        return this != SUCCESS;
+    }
 }

@@ -21,20 +21,15 @@ import com.netflix.hystrix.strategy.metrics.HystrixMetricsPublisher;
 import com.netflix.hystrix.strategy.properties.HystrixPropertiesStrategy;
 import com.netflix.hystrix.strategy.properties.HystrixProperty;
 import feign.*;
-import feign.codec.Decoder;
-import feign.optionals.OptionalDecoder;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
 import org.springframework.cloud.netflix.ribbon.SpringClientFactory;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.cloud.openfeign.ribbon.CachingSpringLoadBalancerFactory;
 import org.springframework.cloud.openfeign.ribbon.LoadBalancerFeignClient;
-import org.springframework.cloud.openfeign.support.ResponseEntityDecoder;
-import org.springframework.cloud.openfeign.support.SpringDecoder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -44,7 +39,6 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
-import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.BlockingQueue;
@@ -108,52 +102,6 @@ public class FeignConfig {
                 }
             }
         };
-    }
-
-    /** @see org.springframework.cloud.openfeign.FeignClientsConfiguration#feignDecoder() */
-    @Bean("feignDecoder")
-    public Decoder selfDecoder(ObjectFactory<HttpMessageConverters> messageConverters) {
-        return new OptionalDecoder(new ResponseEntityDecoder(new SpringDecoder(messageConverters) {
-            @Override
-            public Object decode(Response res, Type type) throws IOException, FeignException {
-                try {
-                    return super.decode(res, type);
-                } catch (Exception e) {
-                    handleReturnDecode(res);
-                    throw e;
-                }
-            }
-            private void handleReturnDecode(Response res) {
-                Response.Body body = res.body();
-                if (U.isNotNull(body)) {
-                    String json = null;
-                    if (body.isRepeatable()) {
-                        try (Reader reader = body.asReader(StandardCharsets.UTF_8)) {
-                            json = CharStreams.toString(reader);
-                        } catch (Exception ignore) {
-                        }
-                    } else {
-                        try (InputStream inputStream = body.asInputStream()) {
-                            json = new String(ByteStreams.toByteArray(inputStream), StandardCharsets.UTF_8);
-                        } catch (Exception ignore) {
-                        }
-                    }
-                    if (U.isNotBlank(json)) {
-                        JsonResult<?> result = null;
-                        try {
-                            result = JsonUtil.toObject(json, JsonResult.class);
-                        } catch (Exception ignore) {
-                        }
-                        if (U.isNotNull(result)) {
-                            JsonCode code = result.getCode();
-                            if (U.isNotNull(code) && code != JsonCode.SUCCESS) {
-                                throw new ForceReturnException(ResponseEntity.ok().body(result));
-                            }
-                        }
-                    }
-                }
-            }
-        }));
     }
 
     /**
@@ -224,11 +172,14 @@ public class FeignConfig {
                     }
                     Map<String, Collection<String>> headers = response.headers();
                     collectHeader(sbd, headers);
+
+                    String data = null;
                     Response.Body body = response.body();
                     if (U.isNotNull(body)) {
                         if (body.isRepeatable()) {
                             try (Reader reader = body.asReader(StandardCharsets.UTF_8)) {
-                                sbd.append(", return(").append(jsonDesensitization.toJson(CharStreams.toString(reader))).append(")");
+                                data = CharStreams.toString(reader);
+                                sbd.append(", return(").append(jsonDesensitization.toJson(data)).append(")");
                             } catch (Exception e) {
                                 if (LogUtil.ROOT_LOG.isErrorEnabled()) {
                                     LogUtil.ROOT_LOG.error(String.format("feignClient <--> %s <-> body reader exception", methodTag(configKey)), e);
@@ -237,7 +188,8 @@ public class FeignConfig {
                         } else {
                             try (InputStream inputStream = body.asInputStream()) {
                                 byte[] bytes = ByteStreams.toByteArray(inputStream);
-                                sbd.append(", return(").append(jsonDesensitization.toJson(new String(bytes))).append(")");
+                                data = new String(bytes);
+                                sbd.append(", return(").append(jsonDesensitization.toJson(data)).append(")");
                                 response = Response.builder().status(status).reason(reason)
                                         .headers(headers).request(response.request()).body(bytes).build();
                             } catch (Exception e) {
@@ -249,6 +201,8 @@ public class FeignConfig {
                     }
                     sbd.append("]");
                     LogUtil.ROOT_LOG.info("feignClient <-- {} <- {}", methodTag(configKey), sbd);
+
+                    handleErrorReturn(response, data);
                 }
                 return response;
             }
@@ -272,6 +226,27 @@ public class FeignConfig {
                         sbd.append(">");
                     }
                     sbd.append(")");
+                }
+            }
+
+            private void handleErrorReturn(Response res, String data) {
+                if (res.status() != HttpStatus.OK.value()) {
+                    String returnBody = U.defaultIfBlank(data, U.toStr(res.reason()));
+                    throw new ForceReturnException(ResponseEntity.status(res.status()).body(returnBody));
+                }
+                if (U.isNotBlank(data)) {
+                    JsonResult<?> result;
+                    try {
+                        result = JsonUtil.toObject(data, JsonResult.class);
+                    } catch (Exception ignore) {
+                        result = null;
+                    }
+                    if (U.isNotNull(result)) {
+                        JsonCode code = result.getCode();
+                        if (U.isNotNull(code) && code.notSuccess()) {
+                            throw new ForceReturnException(ResponseEntity.ok().body(result));
+                        }
+                    }
                 }
             }
         };
