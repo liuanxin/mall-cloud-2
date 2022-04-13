@@ -179,7 +179,6 @@ public class FeignConfig {
                         if (body.isRepeatable()) {
                             try (Reader reader = body.asReader(StandardCharsets.UTF_8)) {
                                 data = CharStreams.toString(reader);
-                                sbd.append(", return(").append(jsonDesensitization.toJson(data)).append(")");
                             } catch (Exception e) {
                                 if (LogUtil.ROOT_LOG.isErrorEnabled()) {
                                     LogUtil.ROOT_LOG.error(String.format("feignClient <--> %s <-> body reader exception", methodTag(configKey)), e);
@@ -189,7 +188,6 @@ public class FeignConfig {
                             try (InputStream inputStream = body.asInputStream()) {
                                 byte[] bytes = ByteStreams.toByteArray(inputStream);
                                 data = new String(bytes);
-                                sbd.append(", return(").append(jsonDesensitization.toJson(data)).append(")");
                                 response = Response.builder().status(status).reason(reason)
                                         .headers(headers).request(response.request()).body(bytes).build();
                             } catch (Exception e) {
@@ -197,6 +195,9 @@ public class FeignConfig {
                                     LogUtil.ROOT_LOG.error(String.format("feignClient <--> %s <-> body input-stream exception", methodTag(configKey)), e);
                                 }
                             }
+                        }
+                        if (U.isNotBlank(data)) {
+                            sbd.append(", return(").append(jsonDesensitization.toJson(data)).append(")");
                         }
                     }
                     sbd.append("]");
@@ -230,11 +231,17 @@ public class FeignConfig {
             }
 
             private void handleErrorReturn(Response res, String data) {
-                if (res.status() != HttpStatus.OK.value()) {
-                    String reason = U.toStr(res.reason());
-                    String str = U.toStr(data);
-                    String resBody = (U.isBlank(reason) || U.isBlank(str)) ? U.defaultIfBlank(reason, str) : (reason + " : " + str);
-                    throw new ForceReturnException(ResponseEntity.status(res.status()).body(resBody));
+                int status = res.status();
+                if (status != HttpStatus.OK.value()) {
+                    List<String> msgList = new ArrayList<>();
+                    String reason = res.reason();
+                    if (U.isNotBlank(reason)) {
+                        msgList.add(reason);
+                    }
+                    if (U.isNotBlank(data)) {
+                        msgList.add(data);
+                    }
+                    throw new ForceReturnException(ResponseEntity.status(status).body(A.toStr(msgList, " : ")));
                 }
 
                 if (U.isNotBlank(data)) {
