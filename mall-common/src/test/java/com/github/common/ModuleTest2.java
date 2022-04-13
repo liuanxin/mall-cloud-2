@@ -156,7 +156,7 @@ class Client {
     private static final String CLIENT = "package " + PACKAGE + ".%s.client;\n" +
             "\n" +
             "import " + PACKAGE + ".%s.constant.%sConst;\n" +
-            (fallback ? "import " + PACKAGE + ".%s.hystrix.%sClientFallback;\n" : "") +
+            (fallback ? "import " + PACKAGE + ".%s.callback.%sClientFallback;\n" : "") +
             "import " + PACKAGE + ".%s.service.%sService;\n" +
             "import org.springframework.cloud.openfeign.FeignClient;\n" +
             "\n" +
@@ -164,16 +164,17 @@ class Client {
             " * %s相关的调用接口\n" +
             AUTHOR +
             " */\n" +
-            "@FeignClient(value = %sConst.MODULE_NAME" + (fallback ? ", fallback = %sClientFallback.class" : "") + ")\n" +
+            "@FeignClient(value = %sConst.MODULE_NAME" + (fallback ? ", fallbackFactory = %sClientFallback.class" : "") + ")\n" +
             "public interface %sClient extends %sService {\n" +
             "}\n";
 
-    private static final String FALLBACK = "package " + PACKAGE + ".%s.hystrix;\n" +
+    private static final String FALLBACK = "package " + PACKAGE + ".%s.callback;\n" +
             "\n" +
             "import " + PACKAGE + ".common.page.PageReturn;\n" +
             "import " + PACKAGE + ".common.page.Pages;\n" +
             "import " + PACKAGE + ".common.util.LogUtil;\n" +
             "import " + PACKAGE + ".%s.client.%sClient;\n" +
+            "import feign.hystrix.FallbackFactory;\n" +
             "import org.springframework.stereotype.Component;\n" +
             "\n" +
             "/**\n" +
@@ -181,14 +182,19 @@ class Client {
             AUTHOR +
             " */\n" +
             "@Component\n" +
-            "public class %sClientFallback implements %sClient {\n" +
+            "public class %sClientFallback implements FallbackFactory<%sClient> {\n" +
             "\n" +
             "    @Override\n" +
-            "    public PageReturn demo(String xx, Integer page, Integer limit) {\n" +
-            "        if (LogUtil.ROOT_LOG.isDebugEnabled()) {\n" +
-            "            LogUtil.ROOT_LOG.debug(\"调用断路器\");\n" +
-            "        }\n" +
-            "        return null;\n" +
+            "    public %sClient create(Throwable e) {\n" +
+            "        return new %sClient() {\n" +
+            "            @Override\n" +
+            "            public PageReturn demo(String xx, Integer page, Integer limit) {\n" +
+            "                if (LogUtil.ROOT_LOG.isErrorEnabled()) {\n" +
+            "                    LogUtil.ROOT_LOG.error(\"熔断了\", e);\n" +
+            "                }\n" +
+            "                return null;\n" +
+            "            }\n" +
+            "        };\n" +
             "    }\n" +
             "}\n";
 
@@ -246,10 +252,10 @@ class Client {
                     parentPackageName, clazzName, comment, clazzName, clazzName,
                     clazzName, clazzName);
 
-            File modelHystrix = new File(modelSourcePath, "hystrix");
+            File modelHystrix = new File(modelSourcePath, "callback");
             modelHystrix.mkdirs();
             String interfaceModel = String.format(FALLBACK, parentPackageName,
-                    parentPackageName, clazzName, comment, clazzName, clazzName);
+                    parentPackageName, clazzName, comment, clazzName, clazzName, clazzName, clazzName);
             writeFile(new File(modelHystrix, clazzName + "ClientFallback.java"), interfaceModel);
         } else {
             constModel = String.format(CLIENT, parentPackageName,

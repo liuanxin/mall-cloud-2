@@ -1,20 +1,20 @@
-package com.github.order.hystrix;
+package com.github.search.callback;
 
 import com.github.common.page.PageReturn;
 import com.github.common.util.LogUtil;
-import com.github.order.client.OrderClient;
+import com.github.search.client.SearchClient;
 import feign.hystrix.FallbackFactory;
 import org.springframework.stereotype.Component;
 
 /**
- * 订单相关的断路器
+ * 搜索相关的断路器
  */
 @Component
-public class OrderClientFallback implements FallbackFactory<OrderClient> {
+public class SearchClientFallback implements FallbackFactory<SearchClient> {
 
     @Override
-    public OrderClient create(Throwable e) {
-        return new OrderClient() {
+    public SearchClient create(Throwable e) {
+        return new SearchClient() {
             @Override
             public PageReturn demo(String xx, Integer page, Integer limit) {
                 if (LogUtil.ROOT_LOG.isErrorEnabled()) {
