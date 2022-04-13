@@ -46,7 +46,12 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-/** 处理 feign 的请求头、日志打印、MDC 上下文 */
+/**
+ * 处理 feign 的请求头、日志打印、MDC 上下文
+ *
+ * 使用 @FeignClient 时, 用 fallbackFactory 属性, 实现类 implements {@link feign.hystrix.FallbackFactory} 并打印 Throwable,
+ * 不要用 fallback 属性, 这个实现类没有异常信息, 出错将无法输出日志
+ */
 @RequiredArgsConstructor
 @Configuration
 @ConditionalOnClass({ FeignClient.class, Feign.class })
