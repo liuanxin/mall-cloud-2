@@ -21,12 +21,18 @@ import com.netflix.hystrix.strategy.metrics.HystrixMetricsPublisher;
 import com.netflix.hystrix.strategy.properties.HystrixPropertiesStrategy;
 import com.netflix.hystrix.strategy.properties.HystrixProperty;
 import feign.*;
+import feign.codec.Decoder;
+import feign.optionals.OptionalDecoder;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
 import org.springframework.cloud.netflix.ribbon.SpringClientFactory;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.cloud.openfeign.ribbon.CachingSpringLoadBalancerFactory;
 import org.springframework.cloud.openfeign.ribbon.LoadBalancerFeignClient;
+import org.springframework.cloud.openfeign.support.ResponseEntityDecoder;
+import org.springframework.cloud.openfeign.support.SpringDecoder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
@@ -39,6 +45,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
+import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.BlockingQueue;
@@ -107,6 +114,24 @@ public class FeignConfig {
                 }
             }
         };
+    }
+
+    /** @see org.springframework.cloud.openfeign.FeignClientsConfiguration#feignDecoder() */
+    @Bean("feignDecoder")
+    public Decoder selfDecoder(ObjectFactory<HttpMessageConverters> messageConverters) {
+        return new OptionalDecoder(new ResponseEntityDecoder(new SpringDecoder(messageConverters) {
+            @Override
+            public Object decode(Response res, Type type) throws IOException, FeignException {
+                try {
+                    return super.decode(res, type);
+                } catch (IOException | FeignException e) {
+                    if (LogUtil.ROOT_LOG.isErrorEnabled()) {
+                        LogUtil.ROOT_LOG.error("feignClient decode exception", e);
+                    }
+                    throw e;
+                }
+            }
+        }));
     }
 
     /**
@@ -235,6 +260,7 @@ public class FeignConfig {
                 }
             }
 
+            /** 处理全局错误返回 */
             private void handleErrorReturn(Response res, String data) {
                 int status = res.status();
                 if (status != HttpStatus.OK.value()) {
