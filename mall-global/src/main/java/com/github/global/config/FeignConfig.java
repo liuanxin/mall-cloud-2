@@ -35,7 +35,6 @@ import org.springframework.cloud.openfeign.support.ResponseEntityDecoder;
 import org.springframework.cloud.openfeign.support.SpringDecoder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -128,6 +127,37 @@ public class FeignConfig {
                     if (LogUtil.ROOT_LOG.isErrorEnabled()) {
                         LogUtil.ROOT_LOG.error("feignClient decode exception", e);
                     }
+
+                    Response.Body body = res.body();
+                    if (U.isNotNull(body)) {
+                        String data = null;
+                        if (body.isRepeatable()) {
+                            try (Reader reader = body.asReader(StandardCharsets.UTF_8)) {
+                                data = CharStreams.toString(reader);
+                            } catch (Exception ignore) {
+                            }
+                        } else {
+                            try (InputStream inputStream = body.asInputStream()) {
+                                data = new String(ByteStreams.toByteArray(inputStream));
+                            } catch (Exception ignore) {
+                            }
+                        }
+
+                        if (U.isNotBlank(data)) {
+                            JsonResult<?> result;
+                            try {
+                                result = JsonUtil.toObject(data, JsonResult.class);
+                            } catch (Exception ignore) {
+                                result = null;
+                            }
+                            if (U.isNotNull(result)) {
+                                JsonCode code = result.getCode();
+                                if (U.isNotNull(code) && code.notSuccess()) {
+                                    throw new ForceReturnException(ResponseEntity.ok().body(result));
+                                }
+                            }
+                        }
+                    }
                     throw e;
                 }
             }
@@ -191,20 +221,20 @@ public class FeignConfig {
             }
 
             @Override
-            protected Response logAndRebufferResponse(String configKey, Level level, Response response, long useTime) {
+            protected Response logAndRebufferResponse(String configKey, Level level, Response res, long useTime) {
                 if (LogUtil.ROOT_LOG.isInfoEnabled()) {
                     StringBuilder sbd = new StringBuilder("response:[");
-                    int status = response.status();
+                    int status = res.status();
                     sbd.append("time(").append(useTime).append(" ms), status(").append(status).append(")");
-                    String reason = response.reason();
+                    String reason = res.reason();
                     if (U.isNotBlank(reason)) {
                         sbd.append(", reason(").append(reason).append(")");
                     }
-                    Map<String, Collection<String>> headers = response.headers();
+                    Map<String, Collection<String>> headers = res.headers();
                     collectHeader(sbd, headers);
 
                     String data = null;
-                    Response.Body body = response.body();
+                    Response.Body body = res.body();
                     if (U.isNotNull(body)) {
                         if (body.isRepeatable()) {
                             try (Reader reader = body.asReader(StandardCharsets.UTF_8)) {
@@ -218,8 +248,8 @@ public class FeignConfig {
                             try (InputStream inputStream = body.asInputStream()) {
                                 byte[] bytes = ByteStreams.toByteArray(inputStream);
                                 data = new String(bytes);
-                                response = Response.builder().status(status).reason(reason)
-                                        .headers(headers).request(response.request()).body(bytes).build();
+                                res = Response.builder().status(status).reason(reason)
+                                        .headers(headers).request(res.request()).body(bytes).build();
                             } catch (Exception e) {
                                 if (LogUtil.ROOT_LOG.isErrorEnabled()) {
                                     LogUtil.ROOT_LOG.error(String.format("feignClient <--> %s <-> body input-stream exception", methodTag(configKey)), e);
@@ -232,10 +262,8 @@ public class FeignConfig {
                     }
                     sbd.append("]");
                     LogUtil.ROOT_LOG.info("feignClient <-- {} <- {}", methodTag(configKey), sbd);
-
-                    handleErrorReturn(response, data);
                 }
-                return response;
+                return res;
             }
 
             @Override
@@ -257,37 +285,6 @@ public class FeignConfig {
                         sbd.append(">");
                     }
                     sbd.append(")");
-                }
-            }
-
-            /** 处理全局错误返回 */
-            private void handleErrorReturn(Response res, String data) {
-                int status = res.status();
-                if (status != HttpStatus.OK.value()) {
-                    List<String> msgList = new ArrayList<>();
-                    String reason = res.reason();
-                    if (U.isNotBlank(reason)) {
-                        msgList.add(reason);
-                    }
-                    if (U.isNotBlank(data)) {
-                        msgList.add(data);
-                    }
-                    throw new ForceReturnException(ResponseEntity.status(status).body(A.toStr(msgList, " : ")));
-                }
-
-                if (U.isNotBlank(data)) {
-                    JsonResult<?> result;
-                    try {
-                        result = JsonUtil.toObject(data, JsonResult.class);
-                    } catch (Exception ignore) {
-                        result = null;
-                    }
-                    if (U.isNotNull(result)) {
-                        JsonCode code = result.getCode();
-                        if (U.isNotNull(code) && code.notSuccess()) {
-                            throw new ForceReturnException(ResponseEntity.ok().body(result));
-                        }
-                    }
                 }
             }
         };
