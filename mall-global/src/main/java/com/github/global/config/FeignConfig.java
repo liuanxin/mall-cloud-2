@@ -147,11 +147,10 @@ public class FeignConfig {
                         }
 
                         if (U.isNotBlank(data)) {
-                            JsonResult<?> result;
+                            JsonResult<?> result = null;
                             try {
                                 result = JsonUtil.toObject(data, JsonResult.class);
                             } catch (Exception ignore) {
-                                result = null;
                             }
                             if (U.isNotNull(result)) {
                                 JsonCode code = result.getCode();
