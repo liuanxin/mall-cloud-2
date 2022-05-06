@@ -106,10 +106,6 @@ public class GlobalException {
         int status = returnStatusCode ? JsonCode.BAD_REQUEST.getCode() : JsonCode.SUCCESS.getCode();
         return ResponseEntity.status(status).body(JsonResult.badRequest(e.getMessage()));
     }
-    @ExceptionHandler(ForceReturnException.class)
-    public ResponseEntity forceReturn(ForceReturnException e) {
-        return e.getResponse();
-    }
 
 
     // 以下是 spring 的内部异常
@@ -174,8 +170,6 @@ public class GlobalException {
             return badRequest((BadRequestException) exception);
         } else if (exception instanceof ForbiddenException) {
             return forbidden((ForbiddenException) exception);
-        } else if (exception instanceof ForceReturnException) {
-            return forceReturn((ForceReturnException) exception);
         } else if (exception instanceof NotFoundException) {
             return notFound((NotFoundException) exception);
         } else if (exception instanceof NotLoginException) {
@@ -202,7 +196,6 @@ public class GlobalException {
         if (cause == null || depth > U.MAX_DEPTH
                 || e instanceof BadRequestException
                 || e instanceof ForbiddenException
-                || e instanceof ForceReturnException
                 || e instanceof NotFoundException
                 || e instanceof NotLoginException
                 || e instanceof ParamException

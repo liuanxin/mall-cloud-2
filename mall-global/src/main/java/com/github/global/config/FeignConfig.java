@@ -1,10 +1,6 @@
 package com.github.global.config;
 
 import com.github.common.Const;
-import com.github.common.exception.ForceReturnException;
-import com.github.common.json.JsonCode;
-import com.github.common.json.JsonResult;
-import com.github.common.json.JsonUtil;
 import com.github.common.util.*;
 import com.google.common.collect.Sets;
 import com.google.common.io.ByteStreams;
@@ -35,7 +31,6 @@ import org.springframework.cloud.openfeign.support.ResponseEntityDecoder;
 import org.springframework.cloud.openfeign.support.SpringDecoder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -129,36 +124,6 @@ public class FeignConfig {
                 } catch (IOException | FeignException e) {
                     if (LogUtil.ROOT_LOG.isErrorEnabled()) {
                         LogUtil.ROOT_LOG.error("feignClient decode exception", e);
-                    }
-
-                    Response.Body body = res.body();
-                    if (U.isNotNull(body)) {
-                        String data = null;
-                        if (body.isRepeatable()) {
-                            try (Reader reader = body.asReader(StandardCharsets.UTF_8)) {
-                                data = CharStreams.toString(reader);
-                            } catch (Exception ignore) {
-                            }
-                        } else {
-                            try (InputStream inputStream = body.asInputStream()) {
-                                data = new String(ByteStreams.toByteArray(inputStream));
-                            } catch (Exception ignore) {
-                            }
-                        }
-
-                        if (U.isNotBlank(data)) {
-                            JsonResult<?> result = null;
-                            try {
-                                result = JsonUtil.toObject(data, JsonResult.class);
-                            } catch (Exception ignore) {
-                            }
-                            if (U.isNotNull(result)) {
-                                JsonCode code = result.getCode();
-                                if (U.isNotNull(code) && code.notSuccess()) {
-                                    throw new ForceReturnException(ResponseEntity.ok().body(result));
-                                }
-                            }
-                        }
                     }
                     throw e;
                 }
