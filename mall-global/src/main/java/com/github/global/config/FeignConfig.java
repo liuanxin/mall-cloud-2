@@ -23,10 +23,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
-import org.springframework.cloud.netflix.ribbon.SpringClientFactory;
+import org.springframework.cloud.loadbalancer.blocking.client.BlockingLoadBalancerClient;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.cloud.openfeign.ribbon.CachingSpringLoadBalancerFactory;
-import org.springframework.cloud.openfeign.ribbon.LoadBalancerFeignClient;
+import org.springframework.cloud.openfeign.loadbalancer.FeignBlockingLoadBalancerClient;
 import org.springframework.cloud.openfeign.support.ResponseEntityDecoder;
 import org.springframework.cloud.openfeign.support.SpringDecoder;
 import org.springframework.context.annotation.Bean;
@@ -138,7 +137,7 @@ public class FeignConfig {
      * @see org.springframework.cloud.openfeign.loadbalancer.HttpClientFeignLoadBalancerConfiguration
      * @see org.springframework.cloud.openfeign.ribbon.HttpClientFeignLoadBalancedConfiguration
      */
-    @Bean("feignClient")
+    /*@Bean("feignClient")
     @SuppressWarnings("JavadocReference")
     public Client loadBalancerClient(CachingSpringLoadBalancerFactory cachingFactory, SpringClientFactory clientFactory) {
         return new LoadBalancerFeignClient(new Client.Default(null, null) {
@@ -150,6 +149,20 @@ public class FeignConfig {
                 return super.execute(request, options);
             }
         }, cachingFactory, clientFactory);
+    }*/
+
+    @Bean("feignClient")
+    @SuppressWarnings("JavadocReference")
+    public Client loadBalancerClient(BlockingLoadBalancerClient loadBalancerClient) {
+        return new FeignBlockingLoadBalancerClient(new Client.Default(null, null) {
+            @Override
+            public Response execute(Request request, Request.Options options) throws IOException {
+                if (LogUtil.ROOT_LOG.isInfoEnabled()) {
+                    LogUtil.ROOT_LOG.info("feignClient load-balancer real url:({})", request.url());
+                }
+                return super.execute(request, options);
+            }
+        }, loadBalancerClient);
     }
 
     /**
