@@ -140,9 +140,9 @@ public class FeignConfig {
      * @see org.springframework.cloud.openfeign.ribbon.DefaultFeignLoadBalancedConfiguration
      */
     @Bean("feignClient")
-    @SuppressWarnings("JavadocReference")
     @ConditionalOnBean(CachingSpringLoadBalancerFactory.class)
     @ConditionalOnProperty("spring.cloud.loadbalancer.ribbon.enabled")
+    @SuppressWarnings({ "JavadocReference", "SpringJavaInjectionPointsAutowiringInspection" })
     public Client ribbonClient(CachingSpringLoadBalancerFactory cachingFactory, SpringClientFactory clientFactory) {
         return new LoadBalancerFeignClient(new SelfClient(), cachingFactory, clientFactory);
     }
