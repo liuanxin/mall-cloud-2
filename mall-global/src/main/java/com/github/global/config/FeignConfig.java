@@ -21,11 +21,16 @@ import feign.codec.Decoder;
 import feign.optionals.OptionalDecoder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.ObjectFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
 import org.springframework.cloud.loadbalancer.blocking.client.BlockingLoadBalancerClient;
+import org.springframework.cloud.netflix.ribbon.SpringClientFactory;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.cloud.openfeign.loadbalancer.FeignBlockingLoadBalancerClient;
+import org.springframework.cloud.openfeign.ribbon.CachingSpringLoadBalancerFactory;
+import org.springframework.cloud.openfeign.ribbon.LoadBalancerFeignClient;
 import org.springframework.cloud.openfeign.support.ResponseEntityDecoder;
 import org.springframework.cloud.openfeign.support.SpringDecoder;
 import org.springframework.context.annotation.Bean;
@@ -131,38 +136,44 @@ public class FeignConfig {
     }
 
     /**
-     * 使用 feign 调用如果用的是 name 而不是 url 时, 日志只能输出在注册中心中用到的服务名.
-     * 负载均衡后将可以获取到具体的 ip:port, 要注意: 负载均衡用的是 ribbon 还是 loadbalancer
-     *
-     * @see org.springframework.cloud.openfeign.loadbalancer.HttpClientFeignLoadBalancerConfiguration
-     * @see org.springframework.cloud.openfeign.ribbon.HttpClientFeignLoadBalancedConfiguration
+     * 使用 ribbon 做负载均衡时用到
+     * @see org.springframework.cloud.openfeign.ribbon.DefaultFeignLoadBalancedConfiguration
      */
-    /*@Bean("feignClient")
-    @SuppressWarnings("JavadocReference")
-    public Client loadBalancerClient(CachingSpringLoadBalancerFactory cachingFactory, SpringClientFactory clientFactory) {
-        return new LoadBalancerFeignClient(new Client.Default(null, null) {
-            @Override
-            public Response execute(Request request, Request.Options options) throws IOException {
-                if (LogUtil.ROOT_LOG.isInfoEnabled()) {
-                    LogUtil.ROOT_LOG.info("feignClient load-balancer real url:({})", request.url());
-                }
-                return super.execute(request, options);
-            }
-        }, cachingFactory, clientFactory);
-    }*/
-
     @Bean("feignClient")
     @SuppressWarnings("JavadocReference")
-    public Client loadBalancerClient(BlockingLoadBalancerClient loadBalancerClient) {
-        return new FeignBlockingLoadBalancerClient(new Client.Default(null, null) {
-            @Override
-            public Response execute(Request request, Request.Options options) throws IOException {
-                if (LogUtil.ROOT_LOG.isInfoEnabled()) {
-                    LogUtil.ROOT_LOG.info("feignClient load-balancer real url:({})", request.url());
-                }
-                return super.execute(request, options);
+    @ConditionalOnBean(CachingSpringLoadBalancerFactory.class)
+    @ConditionalOnProperty("spring.cloud.loadbalancer.ribbon.enabled")
+    public Client ribbonClient(CachingSpringLoadBalancerFactory cachingFactory, SpringClientFactory clientFactory) {
+        return new LoadBalancerFeignClient(new SelfClient(), cachingFactory, clientFactory);
+    }
+
+    /**
+     * 使用 feign 调用如果用的是 name 而不是 url 时, 日志只能输出在注册中心中用到的服务名, 负载均衡后将可以获取到具体的 ip:port.
+     * 注意: 负载均衡, 如果用的是 ribbon 则用上面的配置, 如果用的是 loadbalancer 则用下面的配置
+     */
+    public static class SelfClient extends Client.Default {
+        public SelfClient() {
+            super(null, null);
+        }
+        @Override
+        public Response execute(Request request, Request.Options options) throws IOException {
+            if (LogUtil.ROOT_LOG.isInfoEnabled()) {
+                LogUtil.ROOT_LOG.info("feignClient method({}) url({})", request.httpMethod().name(), request.url());
             }
-        }, loadBalancerClient);
+            return super.execute(request, options);
+        }
+    }
+
+    /**
+     * 使用 loadbalancer 做负载均衡时用到
+     *
+     * @see org.springframework.cloud.openfeign.loadbalancer.DefaultFeignLoadBalancerConfiguration
+     */
+    @Bean("feignClient")
+    @SuppressWarnings("JavadocReference")
+    @ConditionalOnBean(BlockingLoadBalancerClient.class)
+    public Client loadbalancerClient(BlockingLoadBalancerClient loadBalancerClient) {
+        return new FeignBlockingLoadBalancerClient(new SelfClient(), loadBalancerClient);
     }
 
     /**
