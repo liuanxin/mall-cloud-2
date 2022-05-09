@@ -159,7 +159,7 @@ public class FeignConfig {
         @Override
         public Response execute(Request request, Request.Options options) throws IOException {
             if (LogUtil.ROOT_LOG.isInfoEnabled()) {
-                LogUtil.ROOT_LOG.info("feignClient method({}) url({})", request.httpMethod().name(), request.url());
+                LogUtil.ROOT_LOG.info("feignClient method({}) real-url({})", request.httpMethod().name(), request.url());
             }
             return super.execute(request, options);
         }
