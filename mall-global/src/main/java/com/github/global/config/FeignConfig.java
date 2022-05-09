@@ -137,6 +137,7 @@ public class FeignConfig {
 
     /**
      * 使用 ribbon 做负载均衡时用到
+     *
      * @see org.springframework.cloud.openfeign.ribbon.DefaultFeignLoadBalancedConfiguration
      */
     @Bean("feignClient")
