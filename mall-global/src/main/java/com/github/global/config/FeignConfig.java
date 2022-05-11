@@ -67,7 +67,7 @@ public class FeignConfig {
 
     /** 要放到 feign 请求头里的键, 如果将全部的请求头都放进 feign 请求头, 可能会覆盖 Content-Type 的值 */
     private static final Set<String> HEADER_SET = Sets.newHashSet(
-            Const.TOKEN.toLowerCase(), "cookie", "user-agent", "accept-language"
+            Const.TOKEN.toLowerCase(), "cookie", "user-agent", "accept-language", "x-real-ip"
     );
 
     private final JsonDesensitization jsonDesensitization;
