@@ -235,7 +235,7 @@ public class FeignConfig {
                                 data = CharStreams.toString(reader);
                             } catch (Exception e) {
                                 if (LogUtil.ROOT_LOG.isErrorEnabled()) {
-                                    LogUtil.ROOT_LOG.error(String.format("feignClient <--> %s <-> body reader exception", methodTag(configKey)), e);
+                                    LogUtil.ROOT_LOG.error("feignClient <--> {} <-> body reader exception", methodTag(configKey), e);
                                 }
                             }
                         } else {
@@ -246,7 +246,7 @@ public class FeignConfig {
                                         .headers(headers).request(res.request()).body(bytes).build();
                             } catch (Exception e) {
                                 if (LogUtil.ROOT_LOG.isErrorEnabled()) {
-                                    LogUtil.ROOT_LOG.error(String.format("feignClient <--> %s <-> body input-stream exception", methodTag(configKey)), e);
+                                    LogUtil.ROOT_LOG.error("feignClient <--> {} <-> body input-stream exception", methodTag(configKey), e);
                                 }
                             }
                         }
@@ -264,8 +264,8 @@ public class FeignConfig {
             protected IOException logIOException(String configKey, Level level, IOException e, long useTime) {
                 if (LogUtil.ROOT_LOG.isErrorEnabled()) {
                     String clazzName = e.getClass().getSimpleName();
-                    String sbd = String.format("exception:[time(%sms) %s: %s]", useTime, clazzName, e.getMessage());
-                    LogUtil.ROOT_LOG.error(String.format("feignClient <--> %s <-> %s", methodTag(configKey), sbd), e);
+                    String msg = String.format("exception:[time(%sms) %s: %s]", useTime, clazzName, e.getMessage());
+                    LogUtil.ROOT_LOG.error("feignClient <--> {} <-> {}", methodTag(configKey), msg, e);
                 }
                 return e;
             }
