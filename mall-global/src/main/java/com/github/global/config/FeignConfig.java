@@ -70,7 +70,7 @@ public class FeignConfig {
             Const.TOKEN.toLowerCase(), "cookie", "user-agent", "accept-language", "x-real-ip"
     );
 
-    private final JsonDesensitization jsonDesensitization;
+    private final GlobalLogHandler logHandler;
 
     /** 处理请求头: 把请求信息放到 Feign 的请求上下文中去(feign 默认会放 Content-Length : xxx 和 Content-Type : application/json 到请求头里去) */
     @Bean
@@ -200,7 +200,7 @@ public class FeignConfig {
                     byte[] body = request.body();
                     if (body != null && body.length > 0) {
                         String data = request.isBinary() ? "Binary data" : new String(body, request.charset());
-                        sbd.append(" body(").append(jsonDesensitization.toJson(data)).append(")");
+                        sbd.append(" body(").append(logHandler.toJson(data)).append(")");
                     }
                     sbd.append("]");
                     LogUtil.ROOT_LOG.info("feignClient --> {} -> {}", methodTag(configKey), sbd);
@@ -251,7 +251,7 @@ public class FeignConfig {
                             }
                         }
                         if (U.isNotBlank(data)) {
-                            sbd.append(", return(").append(jsonDesensitization.toJson(data)).append(")");
+                            sbd.append(", return(").append(logHandler.toJson(data)).append(")");
                         }
                     }
                     sbd.append("]");
@@ -275,7 +275,7 @@ public class FeignConfig {
                     sbd.append("header(");
                     for (Map.Entry<String, Collection<String>> entry : headers.entrySet()) {
                         sbd.append("<");
-                        sbd.append(entry.getKey()).append(" : ").append(DesensitizationUtil.des(entry.getKey(), A.toStr(entry.getValue())));
+                        sbd.append(entry.getKey()).append(" : ").append(DesensitizationUtil.desKey(entry.getKey(), A.toStr(entry.getValue())));
                         sbd.append(">");
                     }
                     sbd.append(")");
