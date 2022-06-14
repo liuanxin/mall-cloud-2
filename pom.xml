@@ -53,7 +53,7 @@
     </modules>
 
     <properties>
-        <java.version>11</java.version>
+        <java.version>17</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
@@ -69,25 +69,25 @@
         <spring-admin.version>2.2.2</spring-admin.version>
 
         <zipkin.version>2.12.9</zipkin.version>
-        <guava.version>31.0.1-jre</guava.version>
-        <joda.version>2.10.13</joda.version>
+        <guava.version>31.1-jre</guava.version>
+        <joda.version>2.10.14</joda.version>
         <okhttp.version>3.14.9</okhttp.version>
-        <commons-lang3.version>3.11</commons-lang3.version>
+        <commons-lang3.version>3.12.0</commons-lang3.version>
         <commons-fileupload.version>1.4</commons-fileupload.version>
-        <poi-ooxml.version>5.1.0</poi-ooxml.version>
-        <easyexcel.version>3.0.4</easyexcel.version>
+        <poi-ooxml.version>5.2.2</poi-ooxml.version>
+        <easyexcel.version>3.1.1</easyexcel.version>
 
         <elasticsearch.version>6.3.2</elasticsearch.version>
-        <redisson.version>3.15.6</redisson.version>
-        <hikaricp.version>3.4.5</hikaricp.version>
-        <mybatis.version>3.5.6</mybatis.version>
-        <mybatis-plus.version>3.4.3</mybatis-plus.version>
-        <mybatis-spring.version>2.0.5</mybatis-spring.version>
+        <redisson.version>3.17.3</redisson.version>
+        <hikaricp.version>5.0.1</hikaricp.version>
+        <mybatis.version>3.5.10</mybatis.version>
+        <mybatis-plus.version>3.5.2</mybatis-plus.version>
+        <mybatis-spring.version>2.0.7</mybatis-spring.version>
         <mybatis-page.version>1.2.8</mybatis-page.version>
         <mybatis-redis-cache.version>1.2.7</mybatis-redis-cache.version>
 
-        <api-document.version>0.8.1</api-document.version>
-        <google-jib.version>2.6.0</google-jib.version>
+        <api-document.version>0.8.2</api-document.version>
+        <google-jib.version>3.2.1</google-jib.version>
     </properties>
 
     <dependencyManagement>
