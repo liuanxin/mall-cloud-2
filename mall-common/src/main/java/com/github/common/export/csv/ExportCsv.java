@@ -92,7 +92,7 @@ public class ExportCsv {
         if (U.isNull(content)) {
             return U.EMPTY;
         }
-        if (U.isNotNull(content)) {
+        if (U.isNotBlank(content)) {
             if (content.contains(WIN_WRAP)) {
                 content = content.replace(WIN_WRAP, BLANK);
             }
