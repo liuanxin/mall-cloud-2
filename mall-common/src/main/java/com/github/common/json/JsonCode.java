@@ -27,10 +27,10 @@ public enum JsonCode {
     /** 401: 未登录(客户端错误) */
     NOT_LOGIN(401, "未登录"),
 
-    // /** 403: 无权限(客户端错误) */
+    /** 403: 无权限(客户端错误) */
     NOT_PERMISSION(403, "无权限"),
 
-    // /** 404: 不需要额外处理(客户端错误) */
+    /** 404 (客户端错误) */
     NOT_FOUND(404, "未找到相应处理"),
 
     /** 500: 内部错误、业务异常(服务端错误) */
@@ -52,9 +52,5 @@ public enum JsonCode {
     public static JsonCode deserializer(Object obj) {
         JsonCode code = U.enumDeserializer(obj, JsonCode.class);
         return U.isNull(code) ? SUCCESS : code;
-    }
-
-    public boolean notSuccess() {
-        return this != SUCCESS;
     }
 }

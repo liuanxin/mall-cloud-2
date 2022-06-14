@@ -21,6 +21,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.CodeSource;
 import java.security.ProtectionDomain;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
@@ -38,15 +39,15 @@ public final class U {
     public static final String BLANK = " ";
     private static final String LIKE = "%";
 
-    /** 递归时的最大深度, 如果数据本身有自己引用自己, 加一个深度避免无限递归 */
+    /** 递归时的最大深度, 避免无限递归 */
     public static final int MAX_DEPTH = 10;
 
-    /** 手机号. 见: https://zh.wikipedia.org/wiki/%E4%B8%AD%E5%9B%BD%E5%86%85%E5%9C%B0%E7%A7%BB%E5%8A%A8%E7%BB%88%E7%AB%AF%E9%80%9A%E8%AE%AF%E5%8F%B7%E6%AE%B5 */
+    /** 手机号. 见 <a href="https://zh.wikipedia.org/wiki/%E4%B8%AD%E5%9B%BD%E5%86%85%E5%9C%B0%E7%A7%BB%E5%8A%A8%E7%BB%88%E7%AB%AF%E9%80%9A%E8%AE%AF%E5%8F%B7%E6%AE%B5">https://zh.wikipedia.org/wiki/%E4%B8%AD%E5%9B%BD%E5%86%85%E5%9C%B0%E7%A7%BB%E5%8A%A8%E7%BB%88%E7%AB%AF%E9%80%9A%E8%AE%AF%E5%8F%B7%E6%AE%B5</a> */
     private static final String PHONE = "^1[3-9]\\d{9}$";
     /** _abc-def@123-hij.uvw_xyz.com 是正确的, -123@xyz.com 不是 */
     private static final String EMAIL = "^\\w[\\w\\-]*@([\\w\\-]+\\.\\w+)+$";
-    /** ico, jpeg, jpg, bmp, png 后缀 */
-    private static final String IMAGE = "(?i)^(.*)\\.(ico|jpeg|jpg|bmp|png)$";
+    /** ico, jpeg, jpg, bmp, png, svg 后缀 */
+    private static final String IMAGE = "(?i)^(.*)\\.(ico|jpeg|jpg|bmp|png|svg)$";
     /** IPv4 地址 */
     private static final String IPV4 = "^([01]?[0-9]{1,2}|2[0-4][0-9]|25[0-5])(\\.([01]?[0-9]{1,2}|2[0-4][0-9]|25[0-5])){3}$";
     /** 身份证号码 */
@@ -54,7 +55,7 @@ public final class U {
 
     /** 中文 */
     private static final String CHINESE = "[\\u4e00-\\u9fa5]";
-    /** 是否是移动端: https://gist.github.com/dalethedeveloper/1503252 */
+    /** 是否是移动端. 见 <a href="https://gist.github.com/dalethedeveloper/1503252">https://gist.github.com/dalethedeveloper/1503252</a> */
     private static final String MOBILE = "(?i)Mobile|iP(hone|od|ad)|Android|BlackBerry|Blazer|PSP|UCWEB|IEMobile|Kindle|NetFront|Silk-Accelerated|(hpw|web)OS|Fennec|Minimo|Opera M(obi|ini)|Dol(f|ph)in|Skyfire|Zune";
     /** 是否是 pc 端 */
     private static final String PC = "(?i)AppleWebKit|Mozilla|Chrome|Safari|MSIE|Windows NT";
@@ -70,6 +71,19 @@ public final class U {
     private static final int COMPRESS_MIN_LEN = 1000;
 
     private static final String TMP = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+    public static final Set<String> TRUES = new HashSet<>(4, 1);
+    static {
+        TRUES.add("true");
+        TRUES.add("1");
+        TRUES.add("on");
+        TRUES.add("yes");
+    }
+
+    private static final Map<String, List<Method>> METHODS_CACHE = new ConcurrentHashMap<>();
+    private static final Map<String, Method> METHOD_CACHE = new ConcurrentHashMap<>();
+    private static final Map<String, List<Field>> FIELDS_CACHE = new ConcurrentHashMap<>();
+    private static final Map<String, Field> FIELD_CACHE = new ConcurrentHashMap<>();
 
     /** 生成指定位数的随机数: 纯数字 */
     public static String random(int length) {
@@ -128,7 +142,7 @@ public final class U {
                     }
 
                     // 如果传递过来的值跟枚举的 ordinal(数字. 表示枚举所在的索引) 相同则返回
-                    // if (source.equalsIgnoreCase(String.valueOf(em.ordinal()))) return em;
+                    // if (source.equalsIgnoreCase(toStr(em.ordinal()))) return em;
                 }
             }
         }
@@ -427,9 +441,9 @@ public final class U {
 
         int length = str.length();
         if (length > maxLen) {
-            int returnLength = leftRightLen * 2 + 5;
-            if (maxLen > returnLength) {
-                return str.substring(0, leftRightLen) + " ... " + str.substring(length - leftRightLen, length);
+            String append = " ... ";
+            if (maxLen > leftRightLen * 2 + append.length()) {
+                return str.substring(0, leftRightLen) + append + str.substring(length - leftRightLen, length);
             }
         }
         return str;
@@ -580,26 +594,23 @@ public final class U {
         }
     }
     public static boolean isEquals(Object obj1, Object obj2) {
-        if (obj1 == obj2) {
-            return true;
-        } else if (obj1 != null && obj2 != null) {
-            return obj1.equals(obj2);
-        } else {
-            return false;
-        }
+        return Objects.equals(obj1, obj2);
     }
     public static boolean isNotEquals(Object obj1, Object obj2) {
         return !isEquals(obj1, obj2);
     }
     public static boolean isEqualsIgnoreCase(String str1, String str2) {
-        if (str1 != null && str2 != null) {
-            return str1.equalsIgnoreCase(str2);
-        } else {
-            return false;
-        }
+        return isNotNull(str1) && str1.equalsIgnoreCase(str2);
     }
     public static boolean isNotEqualsIgnoreCase(String str1, String str2) {
         return !isEqualsIgnoreCase(str1, str2);
+    }
+
+    public static Boolean getBoolean(Object obj) {
+        return U.isNull(obj) ? null : TRUES.contains(obj.toString().toLowerCase());
+    }
+    public static boolean getBool(Object obj) {
+        return U.isNotNull(obj) && TRUES.contains(obj.toString().toLowerCase());
     }
 
     public static boolean isTrue(Boolean flag) {
@@ -639,16 +650,16 @@ public final class U {
         }
 
         if (obj instanceof String) {
-            String str = ( (String) obj ).trim();
+            String str = ((String) obj).trim();
             return str.isEmpty() || str.equalsIgnoreCase("null") || str.equalsIgnoreCase("undefined");
         } else if (obj instanceof Optional) {
-            return ((Optional<?>) obj).isEmpty();
+            return (((Optional) obj)).isEmpty();
         } else if (obj.getClass().isArray()) {
             return Array.getLength(obj) == 0;
         } else if (obj instanceof Collection) {
-            return ((Collection<?>) obj).isEmpty();
+            return ((Collection) obj).isEmpty();
         } else if (obj instanceof Map) {
-            return ((Map<?, ?>) obj).isEmpty();
+            return ((Map) obj).isEmpty();
         } else {
             return false;
         }
@@ -880,27 +891,15 @@ public final class U {
         return src + "/";
     }
 
-    /** 属性转换成方法, 加上 get 并首字母大写 */
-    public static String fieldToMethod(String field) {
-        if (isBlank(field)) {
-            return EMPTY;
-        }
-        field = field.trim();
-        if (isBlank(field)) {
-            return EMPTY;
-        }
-        return  "get" + field.substring(0, 1).toUpperCase() + field.substring(1);
-    }
-
     /**
-     * 调用对象的属性对应的 get 方法
+     * 调用对象的属性对应的 get 方法并将返回值用 String 返回
      *
      * @param data  对象
      * @param field 属性名
      * @return 如果属性是枚举则调用枚举的 getValue 方法, 如果是日期则格式化, 否则返回此属性值的 toString 方法
      */
     @SuppressWarnings("rawtypes")
-    public static String getField(Object data, String field) {
+    public static String getFieldMethod(Object data, String field) {
         if (isNull(data) || isBlank(field)) {
             return EMPTY;
         }
@@ -934,16 +933,13 @@ public final class U {
         return getAllFieldWithDepth(clazz, 0);
     }
     private static Set<Field> getAllFieldWithDepth(Class<?> clazz, int depth) {
-        if (clazz.getName().equals(Object.class.getName())) {
+        if (clazz == Object.class) {
             return Collections.emptySet();
         }
 
-        Set<Field> fieldSet = new LinkedHashSet<>();
-        fieldSet.addAll(Arrays.asList(clazz.getDeclaredFields()));
-        fieldSet.addAll(Arrays.asList(clazz.getFields()));
-
+        Set<Field> fieldSet = new LinkedHashSet<>(Arrays.asList(clazz.getDeclaredFields()));
         Class<?> superclass = clazz.getSuperclass();
-        if (superclass.getName().equals(Object.class.getName())) {
+        if (superclass == Object.class) {
             return fieldSet;
         }
 
@@ -961,16 +957,13 @@ public final class U {
         return getAllMethodWithDepth(clazz, 0);
     }
     private static Set<Method> getAllMethodWithDepth(Class<?> clazz, int depth) {
-        if (clazz.getName().equals(Object.class.getName())) {
+        if (clazz == Object.class) {
             return Collections.emptySet();
         }
 
-        Set<Method> methodSet = new LinkedHashSet<>();
-        methodSet.addAll(Arrays.asList(clazz.getDeclaredMethods()));
-        methodSet.addAll(Arrays.asList(clazz.getMethods()));
-
+        Set<Method> methodSet = new LinkedHashSet<>(Arrays.asList(clazz.getDeclaredMethods()));
         Class<?> superclass = clazz.getSuperclass();
-        if (superclass.getName().equals(Object.class.getName())) {
+        if (superclass == Object.class) {
             return methodSet;
         }
 
@@ -983,143 +976,186 @@ public final class U {
         return methodSet;
     }
 
-    /**
-     * <pre>
-     * 将 source 中字段的值填充到 target 中, 如果已经有值了就忽略 set
-     *
-     * if (target.getXyz() != null) {
-     *     Object xyz = source.getXyz();
-     *     if (xyz != null) {
-     *         target.setXyz(xyz);
-     *     }
-     * }
-     *
-     * PS: 字段类型如果是基础数据类型, 会有默认值: boolean 是 false, int、long、float、double 是 0
-     * 因此这时候判断不是空(上面的 target.getXyz() != null)时将总是返回 true, 因此请使用包装类型
-     * </pre>
-     *
-     * @param source 源对象
-     * @param target 目标对象
-     */
-    public static <S,T> void fillData(S source, T target) {
-        fillData(source, target, true);
-    }
-
-    /**
-     * 将 source 中字段的值填充到 target 中
-     *
-     * if (ignoreAlready) {
-     *     if (target.getXyz() != null) {
-     *         Object xyz = source.getXyz();
-     *         if (xyz != null) {
-     *             target.setXyz(xyz);
-     *         }
-     *     }
-     * } else {
-     *     Object xyz = source.getXyz();
-     *     if (xyz != null) {
-     *         target.setXyz(xyz);
-     *     }
-     * }
-     *
-     * @param source 源对象
-     * @param target 目标对象
-     * @param ignoreAlready true: target 中的字段有值则不进行 set 操作
-     */
-    public static <S,T> void fillData(S source, T target, boolean ignoreAlready) {
-        Class<?> tc = target.getClass();
-        Method[] targetMethods = tc.getMethods();
-
-        Map<String, Method> targetMethodMap = new HashMap<>();
-        for (Method method : targetMethods) {
-            targetMethodMap.put(method.getName(), method);
-        }
-
-        Class<?> sc = source.getClass();
-        Method[] sourceMethods = sc.getMethods();
-        Map<String, Method> sourceMethodMap = new HashMap<>();
-        for (Method method : sourceMethods) {
-            sourceMethodMap.put(method.getName(), method);
-        }
-        for (Method method : targetMethods) {
-            String methodName = method.getName();
-            if (methodName.startsWith("set")) {
-                // boolean 的 get 方法是 isXxx(), 其他(包括 Boolean)都是 getXxx()
-                String getMethodName = method.getReturnType().getName().equals(boolean.class.getName())
-                        ? ("is" + methodName.substring(2)) : ("get" + methodName.substring(3));
-                if (sourceMethodMap.containsKey(getMethodName)) {
-                    if (ignoreAlready) {
-                        try {
-                            Object oldResult = targetMethodMap.get(getMethodName).invoke(target);
-                            if (oldResult != null) {
-                                continue;
-                            }
-                        } catch (Exception e) {
-                            if (LogUtil.ROOT_LOG.isErrorEnabled()) {
-                                LogUtil.ROOT_LOG.error("call({}) method({}) exception", tc.getName(), getMethodName, e);
-                            }
-                            continue;
-                        }
-                    }
-
-                    Object targetObj;
-                    try {
-                        targetObj = sourceMethodMap.get(getMethodName).invoke(source);
-                    } catch (Exception e) {
-                        if (LogUtil.ROOT_LOG.isErrorEnabled()) {
-                            LogUtil.ROOT_LOG.error("call({}) method({}) exception", sc.getName(), getMethodName, e);
-                        }
-                        continue;
-                    }
-                    if (targetObj != null) {
-                        try {
-                            method.invoke(target, targetObj);
-                        } catch (Exception e) {
-                            if (LogUtil.ROOT_LOG.isErrorEnabled()) {
-                                LogUtil.ROOT_LOG.error("call({}) method({}) exception", tc.getName(), getMethodName, e);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
     /** 调用对象的公有方法. 异常将被忽略并返回 null */
     public static Object invokeMethod(Object obj, String method, Object... param) {
-        if (isNotNull(obj) && isNotBlank(method)) {
-            Class<?> clazz = obj.getClass();
+        Method m = getMethod(obj, method);
+        if (isNotNull(m)) {
             try {
-                return clazz.getDeclaredMethod(method).invoke(obj, param);
-            } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                return m.invoke(obj, param);
+            } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
                 if (LogUtil.ROOT_LOG.isErrorEnabled()) {
-                    LogUtil.ROOT_LOG.error("call({}) method({}) exception", clazz.getName(), method, e);
-                }
-            }
-            // getMethod 会将从父类继承过来的 public 方法也查询出来
-            try {
-                return clazz.getMethod(method).invoke(obj, param);
-            } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-                if (LogUtil.ROOT_LOG.isErrorEnabled()) {
-                    LogUtil.ROOT_LOG.error("call({}) method({}) exception", clazz.getName(), method, e);
+                    LogUtil.ROOT_LOG.error("call({}) method({}) exception", obj.getClass().getName(), method, e);
                 }
             }
         }
         return null;
     }
 
-    public static Class<?> getFieldType(Object obj, String field, int depth) {
-        if (isBlank(field)) {
+    public static List<Method> getMethods(Object obj) {
+        return getMethods(obj, 0);
+    }
+    private static List<Method> getMethods(Object obj, int depth) {
+        // noinspection DuplicatedCode
+        if (isNull(obj)) {
+            return Collections.emptyList();
+        }
+
+        Class<?> clazz = (obj instanceof Class) ? ((Class<?>) obj) : obj.getClass();
+        if (clazz == Object.class) {
+            return Collections.emptyList();
+        }
+        String key = clazz.getName();
+        List<Method> list = METHODS_CACHE.get(key);
+        if (A.isNotEmpty(list)) {
+            return list;
+        }
+
+        Set<Method> methodSet = new LinkedHashSet<>();
+        Set<String> methodNameSet = new HashSet<>();
+        try {
+            for (Method method : clazz.getDeclaredMethods()) {
+                methodSet.add(method);
+                methodNameSet.add(method.getName());
+            }
+        } catch (SecurityException ignore) {
+        }
+        if (methodSet.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        List<Method> methods = new ArrayList<>(methodSet);
+        Class<?> superclass = clazz.getSuperclass();
+        if (superclass != Object.class && depth <= MAX_DEPTH) {
+            List<Method> methodList = getMethods(superclass, depth + 1);
+            if (A.isNotEmpty(methodList)) {
+                for (Method method : methodList) {
+                    if (!methodNameSet.contains(method.getName())) {
+                        methods.add(method);
+                    }
+                }
+            }
+        }
+        METHODS_CACHE.put(key, methods);
+        return methods;
+    }
+
+    public static Method getMethod(Object obj, String method) {
+        return getMethod(obj, method, 0);
+    }
+    private static Method getMethod(Object obj, String method, int depth) {
+        // noinspection DuplicatedCode
+        if (isNull(obj) || isBlank(method)) {
             return null;
         }
 
-        Class<?> clazz = obj.getClass();
+        Class<?> clazz = (obj instanceof Class) ? ((Class<?>) obj) : obj.getClass();
+        if (clazz == Object.class) {
+            return null;
+        }
+        String key = clazz.getName() + "->" + method;
+        Method m = METHOD_CACHE.get(key);
+        if (isNotNull(m)) {
+            return m;
+        }
+
         try {
-            return clazz.getDeclaredField(field).getType();
+            Method md = clazz.getDeclaredMethod(method);
+            METHOD_CACHE.put(key, md);
+            return md;
+        } catch (NoSuchMethodException ignore) {
+        }
+        try {
+            Method md = clazz.getMethod(method);
+            METHOD_CACHE.put(key, md);
+            return md;
+        } catch (NoSuchMethodException ignore) {
+        }
+
+        Class<?> superclass = clazz.getSuperclass();
+        if (superclass == Object.class) {
+            return null;
+        }
+        return (depth <= MAX_DEPTH) ? getMethod(superclass, method, depth + 1) : null;
+    }
+
+    public static List<Field> getFields(Object obj) {
+        return getFields(obj, 0);
+    }
+    private static List<Field> getFields(Object obj, int depth) {
+        // noinspection DuplicatedCode
+        if (isNull(obj)) {
+            return Collections.emptyList();
+        }
+
+        Class<?> clazz = (obj instanceof Class) ? ((Class<?>) obj) : obj.getClass();
+        if (clazz == Object.class) {
+            return Collections.emptyList();
+        }
+        String key = clazz.getName();
+        List<Field> fl = FIELDS_CACHE.get(key);
+        if (isNotNull(fl)) {
+            return fl;
+        }
+
+        Set<Field> fieldSet = new LinkedHashSet<>();
+        Set<String> fieldNameSet = new HashSet<>();
+        try {
+            for (Field field : clazz.getDeclaredFields()) {
+                fieldSet.add(field);
+                fieldNameSet.add(field.getName());
+            }
+        } catch (SecurityException ignore) {
+        }
+        if (fieldSet.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        List<Field> fields = new ArrayList<>(fieldSet);
+        Class<?> superclass = clazz.getSuperclass();
+        if (superclass != Object.class && depth <= MAX_DEPTH) {
+            List<Field> fieldList = getFields(superclass, depth + 1);
+            if (A.isNotEmpty(fieldList)) {
+                fields.addAll(fieldList);
+                for (Field field : fieldList) {
+                    if (!fieldNameSet.contains(field.getName())) {
+                        fields.add(field);
+                    }
+                }
+            }
+        }
+        FIELDS_CACHE.put(key, fields);
+        return fields;
+    }
+
+    public static Field getField(Object obj, String field) {
+        return getField(obj, field, 0);
+    }
+    private static Field getField(Object obj, String field, int depth) {
+        // noinspection DuplicatedCode
+        if (isNull(obj) || isBlank(field)) {
+            return null;
+        }
+
+        Class<?> clazz = (obj instanceof Class) ? ((Class<?>) obj) : obj.getClass();
+        if (clazz == Object.class) {
+            return null;
+        }
+        String key = clazz.getName() + "->" + field;
+        Field f = FIELD_CACHE.get(key);
+        if (isNotNull(f)) {
+            return f;
+        }
+
+        try {
+            Field fd = clazz.getDeclaredField(field);
+            FIELD_CACHE.put(key, fd);
+            return fd;
         } catch (NoSuchFieldException ignore) {
         }
         try {
-            return clazz.getField(field).getType();
+            Field fd = clazz.getField(field);
+            FIELD_CACHE.put(key, fd);
+            return fd;
         } catch (NoSuchFieldException ignore) {
         }
 
@@ -1127,7 +1163,7 @@ public final class U {
         if (superclass == Object.class) {
             return null;
         }
-        return (depth <= MAX_DEPTH) ? getFieldType(superclass, field, depth + 1) : null;
+        return (depth <= MAX_DEPTH) ? getField(superclass, field, depth + 1) : null;
     }
 
     /** 转换成 id=123&name=xyz&name=opq */
@@ -1136,21 +1172,16 @@ public final class U {
             return EMPTY;
         }
 
-        StringBuilder sbd = new StringBuilder();
-        int i = 0;
+        StringJoiner joiner = new StringJoiner("&");
         for (Map.Entry<String, ?> entry : params.entrySet()) {
             String key = entry.getKey();
             Object value = entry.getValue();
             if (isNotBlank(key) && isNotNull(value)) {
-                if (i > 0) {
-                    sbd.append("&");
-                }
                 String v = "password".equalsIgnoreCase(key) ? "***" : A.toString(value);
-                sbd.append(key).append("=").append(v);
-                i++;
+                joiner.add(key + "=" + v);
             }
         }
-        return sbd.toString();
+        return joiner.toString();
     }
 
     /** 获取指定类所在 jar 包的地址 */

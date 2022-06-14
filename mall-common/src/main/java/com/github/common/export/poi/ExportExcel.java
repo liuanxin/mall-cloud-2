@@ -188,7 +188,7 @@ public class ExportExcel {
                                 // 数据列
                                 cell = row.createCell(cellIndex);
 
-                                cellData = U.getField(data, titleMapEntry.getKey());
+                                cellData = U.getFieldMethod(data, titleMapEntry.getKey());
                                 if (U.isNumber(cellData)) {
                                     if (!hasBigData) {
                                         cell.setCellStyle(numberStyle);

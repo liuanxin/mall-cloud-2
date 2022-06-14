@@ -42,7 +42,7 @@ public class ExportCsv {
                     }
                     i = 0;
                     for (String title : titles) {
-                        sbd.append(handleCsvContent(U.getField(data, title)));
+                        sbd.append(handleCsvContent(U.getFieldMethod(data, title)));
                         i++;
                         if (i != titleMap.size()) {
                             sbd.append(SPLIT);
@@ -77,7 +77,7 @@ public class ExportCsv {
 
                 int i = 0;
                 for (String title : titles) {
-                    sbd.append(handleCsvContent(U.getField(data, title)));
+                    sbd.append(handleCsvContent(U.getFieldMethod(data, title)));
                     i++;
                     if (i != titles.size()) {
                         sbd.append(SPLIT);
