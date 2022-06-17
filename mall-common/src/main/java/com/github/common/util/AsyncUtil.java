@@ -14,9 +14,9 @@ import java.util.concurrent.ThreadFactory;
 public final class AsyncUtil {
 
     /**
-     * 直接用 Executors 的静态方法生成的线程池, 想要线程池里的线程共享主线程的上下文, 构造时使用此方法生成的 ThreadFactory<p/>
+     * 自定义生成的线程池, 想要线程池里的线程共享主线程的上下文, 构造时使用此方法生成的 ThreadFactory<p/>
      *
-     * 如 <code>Executors.newSingleThreadExecutor(AsyncUtil.wrapThreadFactory())</code>
+     * 如 <code>new ThreadPoolExecutor(corePoolSize, maxPoolSize, 5L, SECONDS, new LinkedBlockingQueue<>(queueSize), wrapThreadFactory())</code>
      */
     public static ThreadFactory wrapThreadFactory() {
         return runnable -> new Thread(wrapRunContext(runnable));
