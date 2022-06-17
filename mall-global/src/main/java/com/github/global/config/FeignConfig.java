@@ -315,7 +315,7 @@ public class FeignConfig {
 
         @Override
         public <T> Callable<T> wrapCallable(Callable<T> callable) {
-            return AsyncUti.wrapCall(callable);
+            return AsyncUtil.wrapCallContext(callable);
         }
 
 
