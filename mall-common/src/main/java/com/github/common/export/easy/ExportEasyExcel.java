@@ -44,11 +44,8 @@ public class ExportEasyExcel {
     public static void handle(boolean excel07, String sheetName, List<?> dataList, OutputStream outputStream) {
         // 每个 sheet 的最大行, 标题头也是一行
         int sheetMaxRow = getMaxRow(excel07) - 1;
-        ExcelWriter excelWriter = null;
-        try {
-            ExcelTypeEnum excelType = excel07 ? ExcelTypeEnum.XLSX : ExcelTypeEnum.XLS;
-            excelWriter = EasyExcel.write(outputStream).excelType(excelType).build();
-
+        ExcelTypeEnum excelType = excel07 ? ExcelTypeEnum.XLSX : ExcelTypeEnum.XLS;
+        try (ExcelWriter excelWriter = EasyExcel.write(outputStream).excelType(excelType).build()) {
             int size;
             Class<?> headClass;
             if (A.isEmpty(dataList)) {
@@ -90,10 +87,6 @@ public class ExportEasyExcel {
                     sheetBuilder.registerWriteHandler(handler);
                 }
                 excelWriter.write(realDataList, sheetBuilder.build());
-            }
-        } finally {
-            if (U.isNotNull(excelWriter)) {
-                excelWriter.finish();
             }
         }
     }
@@ -140,9 +133,8 @@ public class ExportEasyExcel {
 
         // 每个 sheet 的最大行, 标题头也是一行
         int sheetMaxRow = getMaxRow(excel07) - 1;
-        ExcelWriter excelWriter = null;
-        try {
-            excelWriter = EasyExcel.write(outputStream).excelType(excel07 ? ExcelTypeEnum.XLSX : ExcelTypeEnum.XLS).build();
+        ExcelTypeEnum excelType = excel07 ? ExcelTypeEnum.XLSX : ExcelTypeEnum.XLS;
+        try (ExcelWriter excelWriter = EasyExcel.write(outputStream).excelType(excelType).build()) {
             for (Map.Entry<String, LinkedHashMap<String, String>> entry : titleMap.entrySet()) {
                 String sheetName = entry.getKey();
                 LinkedHashMap<String, String> sheetTitleMap = entry.getValue();
@@ -151,7 +143,7 @@ public class ExportEasyExcel {
                 // 表头在导出时显示的名字
                 List<List<String>> titles = new ArrayList<>();
                 for (String value : sheetTitleMap.values()) {
-                    if (U.isNotNull(value)) {
+                    if (U.isNotBlank(value)) {
                         titles.add(Collections.singletonList(value));
                     }
                 }
@@ -186,7 +178,7 @@ public class ExportEasyExcel {
 
                     // 指定头, 并指定只输出指定头相关的列
                     ExcelWriterSheetBuilder sheetBuilder = EasyExcel.writerSheet(realSheetName)
-                            .useDefaultStyle(false).includeColumnFiledNames(fields);
+                            .useDefaultStyle(false).includeColumnFieldNames(fields);
                     if (A.isNotEmpty(titles)) {
                         sheetBuilder.head(titles);
                     }
@@ -195,10 +187,6 @@ public class ExportEasyExcel {
                     }
                     excelWriter.write(realDataList, sheetBuilder.build());
                 }
-            }
-        } finally {
-            if (U.isNotNull(excelWriter)) {
-                excelWriter.finish();
             }
         }
     }
@@ -209,7 +197,7 @@ public class ExportEasyExcel {
      * @see org.apache.poi.ss.util.WorkbookUtil#validateSheetName
      */
     private static String handleSheetName(String sheetName, int sheetCount, int sheetIndex) {
-        if (U.isNull(sheetName)) {
+        if (U.isBlank(sheetName)) {
             sheetName = "sheet";
         }
         String tmpSn = sheetName.replace("/", " ").replace("\\", " ").replace("?", " ")
