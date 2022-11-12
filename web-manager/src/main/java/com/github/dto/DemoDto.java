@@ -9,7 +9,7 @@ import lombok.Setter;
 @Getter
 public class DemoDto {
 
-    @ApiParam(value = "用户 id", must = true)
+    @ApiParam(value = "用户 id", required = true)
     private Long userId;
 
     @ApiParam(value = "性别", dataType = "int")
