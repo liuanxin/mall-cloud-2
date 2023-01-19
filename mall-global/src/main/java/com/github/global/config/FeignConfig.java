@@ -89,10 +89,12 @@ public class FeignConfig {
                     String headName = headers.nextElement();
                     if (HEADER_SET.contains(headName.toLowerCase())) {
                         String headerValue = request.getHeader(headName);
-                        // 原头里不包括请求头的值就放进去
-                        if (U.isNotEmpty(headerValue) && !currentHeaders.get(headName).contains(headerValue)) {
+                        if (U.isNotEmpty(headerValue)) {
+                            Collection<String> collection = currentHeaders.get(headName);
+                            Set<String> set = A.isEmpty(collection) ? new LinkedHashSet<>() : new LinkedHashSet<>(collection);
+                            set.add(headerValue);
                             // 先清空再设置
-                            template.header(headName, Collections.emptyList()).header(headName, headerValue);
+                            template.header(headName, Collections.emptyList()).header(headName, set);
                         }
                     }
                 }
