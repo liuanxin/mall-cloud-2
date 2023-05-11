@@ -52,8 +52,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
- * 处理 feign 的请求头、日志打印、MDC 上下文
- *
+ * 处理 feign 的请求头、日志打印、MDC 上下文.
  * 使用 @FeignClient 时, 用 fallbackFactory 属性, 实现 {@link feign.hystrix.FallbackFactory} 并打印 Throwable,
  * 如果用 fallback 属性, 实现类没有异常信息, 出错将无法输出日志
  *
@@ -205,14 +204,14 @@ public class FeignConfig {
                         sbd.append(" body(").append(logHandler.toJson(data)).append(")");
                     }
                     sbd.append("]");
-                    LogUtil.ROOT_LOG.info("feignClient --> {} -> {}", methodTag(configKey), sbd);
+                    LogUtil.ROOT_LOG.info("feignClient --> {}-> {}", methodTag(configKey), sbd);
                 }
             }
 
             @Override
             protected void logRetry(String configKey, Level logLevel) {
                 if (LogUtil.ROOT_LOG.isInfoEnabled()) {
-                    LogUtil.ROOT_LOG.info("feignClient --> {} -> retrying...", methodTag(configKey));
+                    LogUtil.ROOT_LOG.info("feignClient --> {}-> retrying...", methodTag(configKey));
                 }
             }
 
@@ -237,7 +236,7 @@ public class FeignConfig {
                                 data = CharStreams.toString(reader);
                             } catch (Exception e) {
                                 if (LogUtil.ROOT_LOG.isErrorEnabled()) {
-                                    LogUtil.ROOT_LOG.error("feignClient <--> {} <-> body reader exception", methodTag(configKey), e);
+                                    LogUtil.ROOT_LOG.error("feignClient <--> {}<-> body reader exception", methodTag(configKey), e);
                                 }
                             }
                         } else {
@@ -248,7 +247,7 @@ public class FeignConfig {
                                         .headers(headers).request(res.request()).body(bytes).build();
                             } catch (Exception e) {
                                 if (LogUtil.ROOT_LOG.isErrorEnabled()) {
-                                    LogUtil.ROOT_LOG.error("feignClient <--> {} <-> body input-stream exception", methodTag(configKey), e);
+                                    LogUtil.ROOT_LOG.error("feignClient <--> {}<-> body input-stream exception", methodTag(configKey), e);
                                 }
                             }
                         }
@@ -257,7 +256,7 @@ public class FeignConfig {
                         }
                     }
                     sbd.append("]");
-                    LogUtil.ROOT_LOG.info("feignClient <-- {} <- {}", methodTag(configKey), sbd);
+                    LogUtil.ROOT_LOG.info("feignClient <-- {}<- {}", methodTag(configKey), sbd);
                 }
                 return res;
             }
@@ -267,14 +266,14 @@ public class FeignConfig {
                 if (LogUtil.ROOT_LOG.isErrorEnabled()) {
                     String clazzName = e.getClass().getSimpleName();
                     String msg = String.format("exception:[time(%sms) %s: %s]", useTime, clazzName, e.getMessage());
-                    LogUtil.ROOT_LOG.error("feignClient <--> {} <-> {}", methodTag(configKey), msg, e);
+                    LogUtil.ROOT_LOG.error("feignClient <--> {}<-> {}", methodTag(configKey), msg, e);
                 }
                 return e;
             }
 
             private void collectHeader(StringBuilder sbd, Map<String, Collection<String>> headers) {
                 if (A.isNotEmpty(headers)) {
-                    sbd.append("header(");
+                    sbd.append(" header(");
                     for (Map.Entry<String, Collection<String>> entry : headers.entrySet()) {
                         sbd.append("<");
                         sbd.append(entry.getKey()).append(" : ").append(DesensitizationUtil.desKey(entry.getKey(), A.toStr(entry.getValue())));
