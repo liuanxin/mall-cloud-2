@@ -73,7 +73,7 @@
         <joda.version>2.10.14</joda.version>
         <okhttp.version>3.14.9</okhttp.version>
         <commons-lang3.version>3.12.0</commons-lang3.version>
-        <commons-fileupload.version>1.4</commons-fileupload.version>
+        <commons-fileupload.version>1.5</commons-fileupload.version>
         <poi-ooxml.version>5.2.2</poi-ooxml.version>
         <easyexcel.version>3.1.1</easyexcel.version>
 
